@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Escanear asistencia</title>
+    <th:block layout:fragment="estilos">
+        <meta name="_csrf" th:content="${_csrf.token}">
+        <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    </th:block>
+</head>
+<div layout:fragment="contenido">
+
+    <a th:href="@{/asistencias}" class="page-back">&laquo; Volver</a>
+
+    <div class="card" style="margin-top:14px">
+        <div class="card-head">
+            <div>
+                <h2 th:text="${horario.curso.nombre}">Curso</h2>
+                <p th:text="${horario.diaSemana.etiqueta} + ' · ' + ${horario.horaInicio} + ' - ' + ${horario.horaFin} + ' · ' + ${horario.turno.etiqueta} + (${horario.aula != null} ? ' · Aula ' + ${horario.aula} : '')">-</p>
+            </div>
+        </div>
+        <div style="padding:24px">
+            <div id="reader" style="width:100%;max-width:420px;margin:0 auto"></div>
+            <div id="scan-status" style="display:none;margin-top:16px"></div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+        <div class="card-head"><div><h2>Registrados hoy</h2></div></div>
+        <table>
+            <thead><tr><th>Alumno</th><th>Hora</th></tr></thead>
+            <tbody id="lista-registrados">
+            <tr th:each="a : ${registrosHoy}">
+                <td th:text="${a.alumno.nombreCompleto}">-</td>
+                <td th:text="${#temporals.format(a.horaRegistro, 'HH:mm')}">-</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(registrosHoy)}" id="empty-row">
+                <td colspan="2" class="empty">Aún no hay registros hoy.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script th:inline="javascript">
+        window.ASISTENCIA_HORARIO_ID = /*[[${horario.id}]]*/ 0;
+    </script>
+    <script th:src="@{/js/asistencia-scanner.js}"></script>
+</th:block>
+</html>

@@ -53,6 +53,7 @@
                 <td sec:authorize="hasAnyRole('ADMIN','CAJERO')">
                     <div class="rowact">
                         <a th:href="@{/alumnos/{id}/expediente(id=${alumno.id})}" class="btn btn-ghost btn-sm">Expediente</a>
+                        <a th:href="@{/alumnos/{id}/qr-view(id=${alumno.id})}" class="btn btn-ghost btn-sm">QR</a>
                         <a th:href="@{/alumnos/editar/{id}(id=${alumno.id})}" class="btn btn-ghost btn-sm">Editar</a>
                         <form class="tform" th:action="@{/alumnos/eliminar/{id}(id=${alumno.id})}" method="post">
                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar alumno?')">Eliminar</button>

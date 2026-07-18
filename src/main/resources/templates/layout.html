@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="es"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -22,7 +23,7 @@
                 <div class="crumb" id="crumb">Panel</div>
                 <h1 id="ptitle">Academia Horizonte</h1>
             </div>
-            <div class="top-actions">
+            <div class="top-actions" sec:authorize="hasAnyRole('ADMIN','CAJERO')">
                 <a th:href="@{/pagos}" class="btn btn-ghost btn-sm">Ver pagos</a>
                 <a th:href="@{/matriculas/nueva}" class="btn btn-primary btn-sm">
                     <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nueva matrícula</a>

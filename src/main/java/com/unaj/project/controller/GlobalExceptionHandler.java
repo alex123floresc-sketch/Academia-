@@ -34,7 +34,8 @@ public class GlobalExceptionHandler {
     private String rutaBaseDeModulo(HttpServletRequest request) {
         String uri = request.getRequestURI();
         String[] modulos = {"/alumnos", "/cursos", "/ciclos", "/profesores",
-                "/horarios", "/matriculas", "/pagos", "/usuarios"};
+                "/horarios", "/matriculas", "/pagos", "/usuarios",
+                "/reportes", "/asistencias"};
         for (String m : modulos) {
             if (uri.startsWith(m)) {
                 return m;

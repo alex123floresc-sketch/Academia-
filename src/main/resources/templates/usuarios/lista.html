@@ -16,7 +16,8 @@
             <tr th:each="u : ${usuarios}">
                 <td class="strong" th:text="${u.username}"></td>
                 <td th:text="${u.nombre}"></td>
-                <td><span class="pill pill-sage" th:each="r : ${u.roles}" th:text="${r.nombre}" style="margin-right:4px"></span></td>
+                <td><span class="pill pill-sage" th:each="r : ${u.roles}" style="margin-right:4px"
+                          th:text="${r.nombre == 'ROLE_ADMIN'} ? 'Administrador' : (${r.nombre == 'ROLE_CAJERO'} ? 'Secretaria' : (${r.nombre == 'ROLE_AUXILIAR'} ? 'Auxiliar' : ${r.nombre}))"></span></td>
                 <td>
                     <span th:if="${u.activo}" class="pill pill-sage">Activo</span>
                     <span th:unless="${u.activo}" class="pill pill-gray">Inactivo</span>

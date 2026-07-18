@@ -72,4 +72,12 @@ public class HorarioServiceImpl implements HorarioService {
         }
         return mapa;
     }
+
+    @Override
+    public List<Horario> listarPorCicloTurnoDia(Long cicloId, Turno turno, DiaSemana dia) {
+        if (cicloId == null || turno == null || dia == null) {
+            return List.of();
+        }
+        return horarioRepository.findByCicloIdAndTurnoAndDiaSemana(cicloId, turno, dia);
+    }
 }

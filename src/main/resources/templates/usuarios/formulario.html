@@ -32,7 +32,8 @@
                     <label>Rol</label>
                     <select th:field="*{rolId}">
                         <option value="">-- Seleccione --</option>
-                        <option th:each="r : ${roles}" th:value="${r.id}" th:text="${r.nombre}"></option>
+                        <option th:each="r : ${roles}" th:value="${r.id}"
+                                th:text="${r.nombre == 'ROLE_ADMIN'} ? 'Administrador' : (${r.nombre == 'ROLE_CAJERO'} ? 'Secretaria' : (${r.nombre == 'ROLE_AUXILIAR'} ? 'Auxiliar' : ${r.nombre}))"></option>
                     </select>
                     <span class="field-error" th:if="${#fields.hasErrors('rolId')}" th:errors="*{rolId}"></span>
                 </div>

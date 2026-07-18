@@ -7,10 +7,13 @@ import com.unaj.project.model.Pago;
 import com.unaj.project.repository.MatriculaRepository;
 import com.unaj.project.repository.PagoRepository;
 import com.unaj.project.service.AlumnoService;
+import com.unaj.project.service.QrCodeService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -28,12 +31,14 @@ public class AlumnoController {
     private final AlumnoService alumnoService;
     private final PagoRepository pagoRepository;
     private final MatriculaRepository matriculaRepository;
+    private final QrCodeService qrCodeService;
 
     public AlumnoController(AlumnoService alumnoService, PagoRepository pagoRepository,
-                            MatriculaRepository matriculaRepository) {
+                            MatriculaRepository matriculaRepository, QrCodeService qrCodeService) {
         this.alumnoService = alumnoService;
         this.pagoRepository = pagoRepository;
         this.matriculaRepository = matriculaRepository;
+        this.qrCodeService = qrCodeService;
     }
 
     @GetMapping
@@ -97,5 +102,19 @@ public class AlumnoController {
         model.addAttribute("matriculas", matriculas);
         model.addAttribute("pagosPorMatricula", pagosPorMatricula);
         return "alumnos/expediente";
+    }
+
+    @GetMapping(value = "/{id}/qr", produces = MediaType.IMAGE_PNG_VALUE)
+    @ResponseBody
+    public ResponseEntity<byte[]> qr(@PathVariable Long id) {
+        Alumno alumno = alumnoService.buscarPorId(id);
+        byte[] png = qrCodeService.generarPng("ALU-" + alumno.getId(), 320);
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(png);
+    }
+
+    @GetMapping("/{id}/qr-view")
+    public String qrView(@PathVariable Long id, Model model) {
+        model.addAttribute("alumno", alumnoService.buscarPorId(id));
+        return "alumnos/qr";
     }
 }

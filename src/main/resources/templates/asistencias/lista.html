@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Asistencia</title></head>
+<div layout:fragment="contenido">
+    <div class="card-head" style="border:none;padding:0 0 6px">
+        <div><h2 style="font-family:'Fraunces',serif;font-weight:500;font-size:20px">Asistencia</h2>
+            <p style="font-size:12px;color:var(--ink-faint)">Elige ciclo, turno y día para ver las sesiones y registrar asistencia</p></div>
+    </div>
+
+    <form th:action="@{/asistencias}" method="get" class="filters">
+        <select name="cicloId" onchange="this.form.submit()">
+            <option th:each="c : ${ciclos}" th:value="${c.id}" th:text="${c.nombre}"
+                    th:selected="${cicloSel != null and cicloSel.id == c.id}"></option>
+        </select>
+        <select name="turno" onchange="this.form.submit()">
+            <option th:each="t : ${turnos}" th:value="${t}" th:text="${t.etiqueta}"
+                    th:selected="${turnoSel == t}"></option>
+        </select>
+        <select name="dia" onchange="this.form.submit()">
+            <option th:each="d : ${dias}" th:value="${d}" th:text="${d.etiqueta}"
+                    th:selected="${diaSel == d}"></option>
+        </select>
+    </form>
+
+    <div th:if="${diaSel == null}" class="note">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+        <div>No hay clases programadas los domingos. Elige otro día arriba.</div>
+    </div>
+
+    <div class="metrics" style="grid-template-columns:repeat(3,1fr)">
+        <div class="metric" th:each="h : ${horarios}">
+            <div class="lbl"><span class="dot" style="background:var(--sage)"></span><span th:text="${h.curso.nombre}">Curso</span></div>
+            <div class="val" style="font-size:16px" th:text="${h.horaInicio} + ' - ' + ${h.horaFin}"></div>
+            <div class="delta" th:text="(${h.aula != null} ? 'Aula ' + ${h.aula} + ' · ' : '') + ${conteos.get(h.id)} + ' registrados hoy'"></div>
+            <div style="margin-top:12px">
+                <a th:href="@{/asistencias/escanear/{id}(id=${h.id})}" class="btn btn-primary btn-sm">Escanear asistencia</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" th:if="${#lists.isEmpty(horarios)}">
+        <div class="empty">No hay sesiones programadas para ese ciclo, turno y día.</div>
+    </div>
+</div>
+</html>

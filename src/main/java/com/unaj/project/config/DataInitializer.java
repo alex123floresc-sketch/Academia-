@@ -28,14 +28,18 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        Rol admin  = obtenerOCrearRol("ROLE_ADMIN");
-        Rol cajero = obtenerOCrearRol("ROLE_CAJERO");
+        Rol admin    = obtenerOCrearRol("ROLE_ADMIN");
+        Rol cajero   = obtenerOCrearRol("ROLE_CAJERO");
+        Rol auxiliar = obtenerOCrearRol("ROLE_AUXILIAR");
 
         if (usuarioRepository.findByUsername("admin") == null) {
             crearUsuario("admin", "admin123", "Administrador", Set.of(admin));
         }
         if (usuarioRepository.findByUsername("cajero") == null) {
             crearUsuario("cajero", "cajero123", "Cajero", Set.of(cajero));
+        }
+        if (usuarioRepository.findByUsername("auxiliar") == null) {
+            crearUsuario("auxiliar", "auxiliar123", "Auxiliar", Set.of(auxiliar));
         }
     }
 

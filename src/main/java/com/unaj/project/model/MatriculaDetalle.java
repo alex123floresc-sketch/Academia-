@@ -7,7 +7,7 @@ import jakarta.persistence.*;
         @UniqueConstraint(columnNames = {"matricula_id", "curso_id"})
 })
 public class MatriculaDetalle {
-
+it
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

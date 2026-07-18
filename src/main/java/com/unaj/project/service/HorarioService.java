@@ -15,4 +15,7 @@ public interface HorarioService {
 
     /** Horarios agrupados por día, listos para pintar la grilla. */
     Map<DiaSemana, List<Horario>> agruparPorDia(Long cicloId, Turno turno);
+
+    /** Sesiones de un ciclo+turno+día específico (curso ya cargado). */
+    List<Horario> listarPorCicloTurnoDia(Long cicloId, Turno turno, DiaSemana dia);
 }

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Código QR del alumno</title></head>
+<div layout:fragment="contenido">
+
+    <a th:href="@{/alumnos}" class="page-back">&laquo; Volver a alumnos</a>
+
+    <div class="card" style="margin-top:14px;text-align:center;padding:36px">
+        <h2 style="font-family:'Fraunces',serif;font-weight:500;font-size:20px" th:text="${alumno.nombreCompleto}">Alumno</h2>
+        <p style="color:var(--ink-faint);margin-top:4px;margin-bottom:24px" th:text="${alumno.email}">-</p>
+        <img th:src="@{/alumnos/{id}/qr(id=${alumno.id})}" alt="Código QR del alumno"
+             style="width:260px;height:260px;border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff">
+        <div style="margin-top:24px">
+            <button type="button" onclick="window.print()" class="btn btn-primary btn-sm">Imprimir</button>
+        </div>
+    </div>
+</div>
+</html>
