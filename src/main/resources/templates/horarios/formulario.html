@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Nueva sesión</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/horarios}" class="page-back">← Volver a la grilla</a>
+    <h2 class="page-title" th:text="${horario.id} ? 'Editar sesión' : 'Nueva sesión'"></h2>
+
+    <div class="form-card">
+        <div th:if="${error}" class="alert-error" th:text="${error}"></div>
+        <form th:action="@{/horarios/guardar}" method="post">
+            <input type="hidden" name="id" th:value="${horario.id}">
+            <div class="field">
+                <label>Curso</label>
+                <label>
+                    <select name="cursoId" required>
+                        <option value="">-- Seleccione --</option>
+                        <option th:each="c : ${cursos}" th:value="${c.id}" th:text="${c.codigo + ' - ' + c.nombre}"
+                                th:selected="${horario.curso != null and horario.curso.id == c.id}"></option>
+                    </select>
+                </label>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label>Ciclo</label>
+                    <select name="cicloId" required>
+                        <option th:each="c : ${ciclos}" th:value="${c.id}" th:text="${c.nombre}"
+                                th:selected="${horario.ciclo != null and horario.ciclo.id == c.id}"></option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Turno</label>
+                    <select name="turno" required>
+                        <option th:each="t : ${turnos}" th:value="${t}" th:text="${t.etiqueta}"
+                                th:selected="${horario.turno == t}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid-3">
+                <div class="field">
+                    <label>Día</label>
+                    <select name="diaSemana" required>
+                        <option th:each="d : ${dias}" th:value="${d}" th:text="${d.etiqueta}"
+                                th:selected="${horario.diaSemana == d}"></option>
+                    </select>
+                </div>
+                <div class="field"><label>Inicio</label><input type="time" name="horaInicio" required th:value="${horario.horaInicio}"></div>
+                <div class="field"><label>Fin</label><input type="time" name="horaFin" required th:value="${horario.horaFin}"></div>
+            </div>
+            <div class="field"><label>Aula</label><input type="text" name="aula" th:value="${horario.aula}" placeholder="Ej. 3"></div>
+            <div class="form-foot">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a th:href="@{/horarios}" class="btn btn-ghost">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</html>

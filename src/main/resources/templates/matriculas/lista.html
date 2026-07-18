@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head><title>Matrículas</title></head>
+<div layout:fragment="contenido">
+    <div class="card">
+        <div class="card-head">
+            <div><h2>Matrículas</h2><p>Matrículas registradas en la academia</p></div>
+            <a th:href="@{/matriculas/nueva}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="btn btn-primary btn-sm">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nueva matrícula</a>
+        </div>
+        <table>
+            <thead><tr><th>N°</th><th>Alumno</th><th>Ciclo · Turno</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="m : ${matriculas}">
+                <td class="mono" th:text="'M-' + ${m.id}"></td>
+                <td class="strong" th:text="${m.estudiante.nombre + ' ' + m.estudiante.apellido}"></td>
+                <td th:text="${m.semestre.nombre} + ' · ' + (${m.turno != null} ? ${m.turno.etiqueta} : '-')"></td>
+                <td>
+                    <span th:if="${m.estado == 'ACTIVA'}" class="pill pill-sage"><span class="d"></span>Activa</span>
+                    <span th:unless="${m.estado == 'ACTIVA'}" class="pill pill-gray" th:text="${m.estado}"></span>
+                </td>
+                <td>
+                    <div class="rowact">
+                        <a th:href="@{/matriculas/ficha/{id}(id=${m.id})}" class="btn btn-ghost btn-sm">Ver constancia</a>
+                        <a th:href="@{/matriculas/ficha/{id}/pdf(id=${m.id})}" class="btn btn-ghost btn-sm">PDF</a>
+                        <form class="tform" th:if="${m.estado == 'ACTIVA'}" th:action="@{/matriculas/anular/{id}(id=${m.id})}" method="post" sec:authorize="hasRole('ADMIN')">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Anular matrícula?')">Anular</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(matriculas)}"><td colspan="5" class="empty">No hay matrículas registradas aún.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</html>

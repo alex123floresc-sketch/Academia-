@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Profesor</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/profesores}" class="page-back">← Volver a la lista</a>
+    <h2 class="page-title" th:text="${profesorForm.id} ? 'Editar profesor' : 'Nuevo profesor'"></h2>
+
+    <div class="form-card">
+        <form th:action="@{/profesores/guardar}" th:object="${profesorForm}" method="post">
+            <input type="hidden" th:field="*{id}">
+            <div class="grid-2">
+                <div class="field">
+                    <label>Nombre</label>
+                    <input type="text" th:field="*{nombre}" placeholder="Nombre">
+                    <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+                </div>
+                <div class="field">
+                    <label>Apellido</label>
+                    <input type="text" th:field="*{apellido}" placeholder="Apellido">
+                    <span class="field-error" th:if="${#fields.hasErrors('apellido')}" th:errors="*{apellido}"></span>
+                </div>
+            </div>
+            <div class="field">
+                <label>Correo</label>
+                <input type="email" th:field="*{email}" placeholder="profesor@horizonte.edu.pe">
+                <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+            </div>
+            <div class="field">
+                <label>Especialidad</label>
+                <input type="text" th:field="*{especialidad}" placeholder="Curso que dicta">
+            </div>
+            <div class="form-foot">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a th:href="@{/profesores}" class="btn btn-ghost">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</html>

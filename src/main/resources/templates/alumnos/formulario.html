@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Alumno</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/alumnos}" class="page-back">← Volver a la lista</a>
+    <h2 class="page-title" th:text="${alumnoForm.id} ? 'Editar alumno' : 'Nuevo alumno'"></h2>
+
+    <div class="form-card">
+        <form th:action="@{/alumnos/guardar}" th:object="${alumnoForm}" method="post">
+            <input type="hidden" th:field="*{id}">
+            <div class="grid-2">
+                <div class="field">
+                    <label>Nombre</label>
+                    <input type="text" th:field="*{nombre}" placeholder="Nombre">
+                    <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+                </div>
+                <div class="field">
+                    <label>Apellido</label>
+                    <input type="text" th:field="*{apellido}" placeholder="Apellido">
+                    <span class="field-error" th:if="${#fields.hasErrors('apellido')}" th:errors="*{apellido}"></span>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label>Correo</label>
+                    <input type="email" th:field="*{email}" placeholder="correo@ejemplo.com">
+                    <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                </div>
+                <div class="field">
+                    <label>Celular</label>
+                    <input type="text" th:field="*{celular}" placeholder="9XXXXXXXX">
+                    <span class="field-error" th:if="${#fields.hasErrors('celular')}" th:errors="*{celular}"></span>
+                </div>
+            </div>
+            <div class="field">
+                <label>Área</label>
+                <select th:field="*{area}">
+                    <option value="">-- Seleccione --</option>
+                    <option value="Ingenierías">Ingenierías</option>
+                    <option value="Biomédicas">Biomédicas</option>
+                    <option value="Sociales">Sociales</option>
+                </select>
+                <span class="field-error" th:if="${#fields.hasErrors('area')}" th:errors="*{area}"></span>
+            </div>
+            <div class="form-foot">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a th:href="@{/alumnos}" class="btn btn-ghost">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</html>

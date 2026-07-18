@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Constancia de matrícula</title>
+    <style type="text/css">
+        @page { size: A4; margin: 2cm; }
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #222222; }
+        .header { text-align: center; margin-bottom: 16px; }
+        .header h1 { margin: 0; font-size: 16px; }
+        .header h2 { margin: 4px 0 0 0; font-size: 13px; font-weight: normal; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        th, td { border: 1px solid #333333; padding: 5px 8px; font-size: 10px; text-align: left; }
+        th { background-color: #e0e0e0; }
+        .info-table td.label { font-weight: bold; width: 160px; background-color: #f5f5f5; }
+        .section-title { margin-top: 14px; margin-bottom: 4px; font-size: 12px; font-weight: bold; }
+        .totales { margin-top: 8px; font-weight: bold; font-size: 11px; }
+        .footer { margin-top: 30px; font-size: 9px; color: #555555; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>ACADEMIA PREUNIVERSITARIA HORIZONTE</h1>
+    <h2>CONSTANCIA DE MATRÍCULA</h2>
+</div>
+
+<table class="info-table">
+    <tr>
+        <td class="label">N&#176; de Matrícula</td>
+        <td th:text="${matricula.id}">0</td>
+    </tr>
+    <tr>
+        <td class="label">Alumno</td>
+        <td th:text="${matricula.estudiante.nombre} + ' ' + ${matricula.estudiante.apellido}">-</td>
+    </tr>
+    <tr>
+        <td class="label">Correo</td>
+        <td th:text="${matricula.estudiante.email}">-</td>
+    </tr>
+    <tr>
+        <td class="label">Área</td>
+        <td th:text="${matricula.estudiante.area}">-</td>
+    </tr>
+    <tr>
+        <td class="label">Ciclo</td>
+        <td th:text="${matricula.semestre.nombre}">-</td>
+    </tr>
+    <tr>
+        <td class="label">Turno</td>
+        <td th:text="${matricula.turno != null} ? ${matricula.turno.etiqueta} : '-'">-</td>
+    </tr>
+    <tr>
+        <td class="label">Fecha de matrícula</td>
+        <td th:text="${matricula.fechaMatricula}">-</td>
+    </tr>
+    <tr>
+        <td class="label">Estado</td>
+        <td th:text="${matricula.estado}">-</td>
+    </tr>
+</table>
+
+<div class="section-title">Cursos matriculados</div>
+<table>
+    <thead>
+    <tr>
+        <th>Código</th>
+        <th>Curso</th>
+        <th>Horas</th>
+        <th>Profesor</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="detalle : ${matricula.detalles}">
+        <td th:text="${detalle.curso.codigo}">-</td>
+        <td th:text="${detalle.curso.nombre}">-</td>
+        <td th:text="${detalle.curso.horas}">0</td>
+        <td th:text="${detalle.curso.profesor != null} ? ${detalle.curso.profesor.nombreCompleto} : 'Sin asignar'">-</td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="totales">
+    Total de horas semanales: <span th:text="${matricula.totalHoras}">0</span>
+</div>
+
+<div class="section-title">Pagos</div>
+<table>
+    <thead>
+    <tr>
+        <th>Concepto</th>
+        <th>Vencimiento</th>
+        <th>Monto</th>
+        <th>Estado</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="pago : ${pagos}">
+        <td th:text="${pago.concepto}">-</td>
+        <td th:text="${pago.fechaVencimiento}">-</td>
+        <td th:text="'S/ ' + ${pago.monto}">-</td>
+        <td th:text="${pago.estado}">-</td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="footer">
+    Documento generado automáticamente por el Sistema de Matrículas · Academia Horizonte
+</div>
+
+</body>
+</html>

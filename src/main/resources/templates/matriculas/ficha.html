@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Constancia</title>
+    <th:block layout:fragment="estilos">
+        <style>@media print{.sidebar,.topbar,.no-print{display:none!important}}</style>
+    </th:block>
+</head>
+<div layout:fragment="contenido">
+    <div class="no-print" style="display:flex;gap:10px;margin-bottom:18px">
+        <a th:href="@{/matriculas}" class="btn btn-ghost btn-sm">← Volver</a>
+        <a th:href="@{/matriculas/ficha/{id}/pdf(id=${matricula.id})}" class="btn btn-primary btn-sm">Descargar PDF</a>
+        <button onclick="window.print()" class="btn btn-ghost btn-sm">Imprimir</button>
+    </div>
+
+    <div class="constancia">
+        <div class="cons-head">
+            <div class="cons-seal">H</div>
+            <h2>ACADEMIA PREUNIVERSITARIA HORIZONTE</h2>
+            <div class="sub">Constancia de matrícula</div>
+        </div>
+        <div class="cons-body">
+            <div class="cons-grid">
+                <div class="cons-cell"><div class="k">N° de matrícula</div><div class="v" th:text="'M-' + ${matricula.id}"></div></div>
+                <div class="cons-cell"><div class="k">Estado</div><div class="v" th:text="${matricula.estado}"></div></div>
+                <div class="cons-cell full"><div class="k">Alumno</div><div class="v" th:text="${matricula.estudiante.nombre + ' ' + matricula.estudiante.apellido}"></div></div>
+                <div class="cons-cell"><div class="k">Área</div><div class="v" th:text="${matricula.estudiante.area}"></div></div>
+                <div class="cons-cell"><div class="k">Turno</div><div class="v" th:text="${matricula.turno != null} ? ${matricula.turno.etiqueta} : '-'"></div></div>
+                <div class="cons-cell"><div class="k">Ciclo</div><div class="v" th:text="${matricula.semestre.nombre}"></div></div>
+                <div class="cons-cell"><div class="k">Fecha de matrícula</div><div class="v" th:text="${matricula.fechaMatricula}"></div></div>
+            </div>
+
+            <div class="cons-sec-title">Cursos matriculados</div>
+            <div class="cons-table">
+                <table>
+                    <thead><tr><th>Código</th><th>Curso</th><th>Horas</th><th>Profesor</th></tr></thead>
+                    <tbody>
+                    <tr th:each="d : ${matricula.detalles}">
+                        <td th:text="${d.curso.codigo}"></td>
+                        <td class="strong" th:text="${d.curso.nombre}"></td>
+                        <td th:text="${d.curso.horas} + ' h'"></td>
+                        <td th:text="${d.curso.profesor != null} ? ${d.curso.profesor.nombreCompleto} : 'Sin asignar'"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="cons-sec-title">Pagos</div>
+            <div class="cons-table">
+                <table>
+                    <thead><tr><th>Concepto</th><th>Vence</th><th>Monto</th><th>Estado</th></tr></thead>
+                    <tbody>
+                    <tr th:each="pago : ${pagos}">
+                        <td th:text="${pago.concepto}"></td>
+                        <td th:text="${pago.fechaVencimiento}"></td>
+                        <td th:text="'S/ ' + ${pago.monto}"></td>
+                        <td th:text="${pago.estado}"></td>
+                    </tr>
+                    <tr th:if="${pagos == null or #lists.isEmpty(pagos)}"><td colspan="4" style="text-align:center;color:var(--ink-faint)">Sin pagos.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="cons-total">
+                <span>Total horas / semana: <b th:text="${matricula.totalHoras}"></b></span>
+            </div>
+        </div>
+        <div class="cons-foot">Documento generado por el Sistema de Matrículas · Academia Horizonte</div>
+    </div>
+</div>
+</html>

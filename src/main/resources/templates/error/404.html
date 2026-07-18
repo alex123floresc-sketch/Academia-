@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Página no encontrada</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;text-align:center;padding:20px">
+    <h1 style="font-family:'Fraunces',serif;font-size:48px;color:var(--ink)">404</h1>
+    <p style="color:var(--ink-soft)">La página que buscas no existe.</p>
+    <a th:href="@{/inicio}" class="btn btn-primary">Volver al inicio</a>
+</div>
+</body>
+</html>

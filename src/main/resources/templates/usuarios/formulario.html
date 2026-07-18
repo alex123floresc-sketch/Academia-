@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Usuario</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/usuarios}" class="page-back">← Volver a la lista</a>
+    <h2 class="page-title" th:text="${usuarioForm.id} ? 'Editar usuario' : 'Nuevo usuario'"></h2>
+
+    <div class="form-card">
+        <form th:action="@{/usuarios/guardar}" th:object="${usuarioForm}" method="post">
+            <input type="hidden" th:field="*{id}">
+            <div class="grid-2">
+                <div class="field">
+                    <label>Usuario</label>
+                    <input type="text" th:field="*{username}" placeholder="usuario">
+                    <span class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></span>
+                </div>
+                <div class="field">
+                    <label>Nombre</label>
+                    <input type="text" th:field="*{nombre}" placeholder="Nombre completo">
+                    <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label>Contraseña <span class="hint" th:if="${usuarioForm.id}">(vacío = no cambiar)</span></label>
+                    <input type="password" th:field="*{passwordPlano}" placeholder="••••••••">
+                    <span class="field-error" th:if="${#fields.hasErrors('passwordPlano')}" th:errors="*{passwordPlano}"></span>
+                </div>
+                <div class="field">
+                    <label>Rol</label>
+                    <select th:field="*{rolId}">
+                        <option value="">-- Seleccione --</option>
+                        <option th:each="r : ${roles}" th:value="${r.id}" th:text="${r.nombre}"></option>
+                    </select>
+                    <span class="field-error" th:if="${#fields.hasErrors('rolId')}" th:errors="*{rolId}"></span>
+                </div>
+            </div>
+            <div class="field check-inline">
+                <input type="checkbox" th:field="*{activo}" id="activo">
+                <label for="activo">Usuario activo</label>
+            </div>
+            <div class="form-foot">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a th:href="@{/usuarios}" class="btn btn-ghost">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head><title>Cursos</title></head>
+<div layout:fragment="contenido">
+    <div class="note">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+        <div>Los cursos se miden en <b>horas semanales</b>, no en créditos.</div>
+    </div>
+    <div class="card">
+        <div class="card-head">
+            <div><h2>Cursos</h2><p>Catálogo de cursos y profesores asignados</p></div>
+            <a th:href="@{/cursos/nuevo}" sec:authorize="hasRole('ADMIN')" class="btn btn-primary btn-sm">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo curso</a>
+        </div>
+        <table>
+            <thead><tr><th>Código</th><th>Curso</th><th>Horas / sem.</th><th>Profesor</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="curso : ${cursos}">
+                <td><span class="pill pill-gray" th:text="${curso.codigo}"></span></td>
+                <td class="strong" th:text="${curso.nombre}"></td>
+                <td th:text="${curso.horas} + ' h'"></td>
+                <td th:text="${curso.profesor != null} ? ${curso.profesor.nombreCompleto} : 'Sin asignar'"></td>
+                <td sec:authorize="hasRole('ADMIN')">
+                    <div class="rowact">
+                        <a th:href="@{/cursos/editar/{id}(id=${curso.id})}" class="btn btn-ghost btn-sm">Editar</a>
+                        <form class="tform" th:action="@{/cursos/eliminar/{id}(id=${curso.id})}" method="post">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar curso?')">Eliminar</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(cursos)}"><td colspan="5" class="empty">No hay cursos registrados aún.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</html>

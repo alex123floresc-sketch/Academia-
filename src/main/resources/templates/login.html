@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Ingresar · Academia Horizonte</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <style>
+        .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+        .login-card{width:100%;max-width:360px}
+        .login-box{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:32px}
+        .login-head{text-align:center;margin-bottom:26px}
+        .login-head .seal{width:54px;height:54px;border-radius:15px;background:var(--sage-soft);color:var(--sage-strong);display:inline-flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:26px;border:1px solid #D7E5DF;margin-bottom:12px}
+        .login-head h1{font-family:'Fraunces',serif;font-weight:600;font-size:20px;color:var(--ink)}
+        .login-head p{font-size:12.5px;color:var(--ink-faint);margin-top:3px}
+        .login-box label{display:block;font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:6px}
+        .login-box input{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:14px;color:var(--ink);background:var(--surface);margin-bottom:16px}
+        .login-box input:focus{outline:none;border-color:var(--sage);box-shadow:0 0 0 3px var(--sage-soft)}
+        .login-box .btn{width:100%;justify-content:center;padding:12px}
+        .hintbox{font-size:11.5px;color:var(--ink-faint);text-align:center;margin-top:18px}
+    </style>
+</head>
+<body>
+<div class="login-wrap">
+    <div class="login-card">
+        <div class="login-head">
+            <div class="seal">H</div>
+            <h1>Academia Horizonte</h1>
+            <p>Sistema de matrículas</p>
+        </div>
+        <div class="login-box">
+            <div th:if="${param.error}" class="alert-error">Usuario o contraseña incorrectos.</div>
+            <div th:if="${param.logout}" class="note" style="margin-bottom:16px">Sesión cerrada correctamente.</div>
+            <form th:action="@{/login}" method="post">
+                <label>Usuario</label>
+                <input type="text" name="username" required autofocus>
+                <label>Contraseña</label>
+                <input type="password" name="password" required>
+                <button type="submit" class="btn btn-primary">Ingresar</button>
+            </form>
+            <p class="hintbox">Prueba: admin / admin123 · cajero / cajero123</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

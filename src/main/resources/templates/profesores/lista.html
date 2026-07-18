@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Profesores</title></head>
+<div layout:fragment="contenido">
+    <div class="card">
+        <div class="card-head">
+            <div><h2>Profesores</h2><p>Plana docente de la academia</p></div>
+            <a th:href="@{/profesores/nuevo}" class="btn btn-primary btn-sm">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo profesor</a>
+        </div>
+        <table>
+            <thead><tr><th>Profesor</th><th>Correo</th><th>Especialidad</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="profesor : ${profesores}">
+                <td class="strong" th:text="${profesor.nombre + ' ' + profesor.apellido}"></td>
+                <td th:text="${profesor.email}"></td>
+                <td><span class="pill pill-sage" th:text="${profesor.especialidad}"></span></td>
+                <td>
+                    <div class="rowact">
+                        <a th:href="@{/profesores/editar/{id}(id=${profesor.id})}" class="btn btn-ghost btn-sm">Editar</a>
+                        <form class="tform" th:action="@{/profesores/eliminar/{id}(id=${profesor.id})}" method="post">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar profesor?')">Eliminar</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(profesores)}"><td colspan="4" class="empty">No hay profesores registrados aún.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</html>

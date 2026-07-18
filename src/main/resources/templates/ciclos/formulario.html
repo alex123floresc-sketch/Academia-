@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Ciclo</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/ciclos}" class="page-back">← Volver a la lista</a>
+    <h2 class="page-title" th:text="${cicloForm.id} ? 'Editar ciclo' : 'Nuevo ciclo'"></h2>
+
+    <div class="form-card">
+        <form th:action="@{/ciclos/guardar}" th:object="${cicloForm}" method="post">
+            <input type="hidden" th:field="*{id}">
+            <div class="field">
+                <label>Nombre</label>
+                <input type="text" th:field="*{nombre}" placeholder="Ej. Verano 2026">
+                <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label>Fecha inicio</label>
+                    <input type="date" th:field="*{fechaInicio}">
+                    <span class="field-error" th:if="${#fields.hasErrors('fechaInicio')}" th:errors="*{fechaInicio}"></span>
+                </div>
+                <div class="field">
+                    <label>Fecha fin</label>
+                    <input type="date" th:field="*{fechaFin}">
+                    <span class="field-error" th:if="${#fields.hasErrors('fechaFin')}" th:errors="*{fechaFin}"></span>
+                </div>
+            </div>
+            <div class="field check-inline">
+                <input type="checkbox" th:field="*{activo}" id="activo">
+                <label for="activo">Ciclo activo</label>
+            </div>
+            <div class="form-foot">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a th:href="@{/ciclos}" class="btn btn-ghost">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</html>

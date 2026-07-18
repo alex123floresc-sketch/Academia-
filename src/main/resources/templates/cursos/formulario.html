@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Curso</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/cursos}" class="page-back">← Volver a la lista</a>
+    <h2 class="page-title" th:text="${cursoForm.id} ? 'Editar curso' : 'Nuevo curso'"></h2>
+
+    <div class="form-card">
+        <form th:action="@{/cursos/guardar}" th:object="${cursoForm}" method="post">
+            <input type="hidden" th:field="*{id}">
+            <div class="grid-2">
+                <div class="field">
+                    <label>Código</label>
+                    <input type="text" th:field="*{codigo}" placeholder="Ej. MAT-ARI">
+                    <span class="field-error" th:if="${#fields.hasErrors('codigo')}" th:errors="*{codigo}"></span>
+                </div>
+                <div class="field">
+                    <label>Horas semanales</label>
+                    <input type="number" min="1" th:field="*{horas}" placeholder="Ej. 6">
+                    <span class="field-error" th:if="${#fields.hasErrors('horas')}" th:errors="*{horas}"></span>
+                </div>
+            </div>
+            <div class="field">
+                <label>Nombre</label>
+                <input type="text" th:field="*{nombre}" placeholder="Ej. Aritmética">
+                <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+            </div>
+            <div class="field">
+                <label>Profesor</label>
+                <select th:field="*{profesorId}">
+                    <option value="">-- Sin asignar --</option>
+                    <option th:each="p : ${profesores}" th:value="${p.id}" th:text="${p.nombreCompleto}"></option>
+                </select>
+            </div>
+            <div class="form-foot">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a th:href="@{/cursos}" class="btn btn-ghost">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</html>

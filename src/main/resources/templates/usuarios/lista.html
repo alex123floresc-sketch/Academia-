@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Usuarios</title></head>
+<div layout:fragment="contenido">
+    <div class="card">
+        <div class="card-head">
+            <div><h2>Usuarios</h2><p>Cuentas de acceso al sistema</p></div>
+            <a th:href="@{/usuarios/nuevo}" class="btn btn-primary btn-sm">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo usuario</a>
+        </div>
+        <table>
+            <thead><tr><th>Usuario</th><th>Nombre</th><th>Roles</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="u : ${usuarios}">
+                <td class="strong" th:text="${u.username}"></td>
+                <td th:text="${u.nombre}"></td>
+                <td><span class="pill pill-sage" th:each="r : ${u.roles}" th:text="${r.nombre}" style="margin-right:4px"></span></td>
+                <td>
+                    <span th:if="${u.activo}" class="pill pill-sage">Activo</span>
+                    <span th:unless="${u.activo}" class="pill pill-gray">Inactivo</span>
+                </td>
+                <td>
+                    <div class="rowact">
+                        <a th:href="@{/usuarios/editar/{id}(id=${u.id})}" class="btn btn-ghost btn-sm">Editar</a>
+                        <form class="tform" th:action="@{/usuarios/eliminar/{id}(id=${u.id})}" method="post">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar usuario?')">Eliminar</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(usuarios)}"><td colspan="5" class="empty">No hay usuarios registrados aún.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</html>

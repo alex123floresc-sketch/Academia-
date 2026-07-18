@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head><title>Pagos</title></head>
+<div layout:fragment="contenido">
+
+    <div class="metrics" style="grid-template-columns:repeat(3,1fr)">
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Cobrado</div>
+            <div class="val" th:text="'S/ ' + ${cobrado}">S/ 0</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--amber)"></span>Por cobrar</div>
+            <div class="val" th:text="'S/ ' + ${porCobrar}">S/ 0</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--rose)"></span>Vencido</div>
+            <div class="val" th:text="'S/ ' + ${vencido}">S/ 0</div>
+        </div>
+    </div>
+
+    <div class="note">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 8v8m-3-5h6M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"/></svg>
+        <div>Control de <b>matrícula, pensiones y deuda</b> de la academia.</div>
+    </div>
+
+    <div class="card">
+        <div class="card-head"><div><h2>Cuotas y pensiones</h2><p>Seguimiento de pagos por alumno</p></div></div>
+        <table>
+            <thead><tr><th>Alumno</th><th>Concepto</th><th>Vence</th><th>Monto</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="pago : ${pagos}">
+                <td class="strong" th:text="${pago.matricula.estudiante.nombre + ' ' + pago.matricula.estudiante.apellido}"></td>
+                <td th:text="${pago.concepto}"></td>
+                <td th:text="${pago.fechaVencimiento}"></td>
+                <td class="strong" th:text="'S/ ' + ${pago.monto}"></td>
+                <td>
+                    <span th:if="${pago.estado == 'PAGADO'}" class="pill pill-sage">Pagado</span>
+                    <span th:if="${pago.estado == 'PENDIENTE'}" class="pill pill-amber">Pendiente</span>
+                    <span th:if="${pago.estado == 'VENCIDO'}" class="pill pill-rose">Vencido</span>
+                </td>
+                <td>
+                    <form class="tform" th:if="${pago.estado != 'PAGADO'}"
+                          th:action="@{/pagos/registrar/{id}(id=${pago.id})}" method="post"
+                          sec:authorize="hasAnyRole('ADMIN','CAJERO')"
+                          style="display:flex;gap:6px;align-items:center">
+                        <select name="metodo" style="padding:5px 8px;border:1px solid var(--line);border-radius:7px;font-size:12px;font-family:inherit">
+                            <option value="EFECTIVO">Efectivo</option>
+                            <option value="YAPE">Yape</option>
+                            <option value="TRANSFERENCIA">Transferencia</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-sm">Cobrar</button>
+                    </form>
+                    <span th:if="${pago.estado == 'PAGADO'}" class="pill pill-sage" th:text="${pago.metodo}">—</span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(pagos)}"><td colspan="6" class="empty">No hay pagos registrados aún.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</html>

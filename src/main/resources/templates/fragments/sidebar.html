@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head><meta charset="UTF-8"/><title>Fragmentos</title></head>
+<body>
+<aside th:fragment="sidebar" class="sidebar">
+    <a th:href="@{/}" class="brand">
+        <div class="seal">H</div>
+        <div>
+            <div class="name">Academia Horizonte</div>
+            <div class="sub">Preuniversitaria</div>
+        </div>
+    </a>
+
+    <div>
+        <div class="nav-group-label">Gestión</div>
+        <nav class="nav">
+            <a th:href="@{/inicio}" data-group="Panel" data-title="Resumen general">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6V11h-6v9Zm0-16v5h6V4h-6Z"/></svg>Resumen</a>
+            <a th:href="@{/alumnos}" data-group="Gestión" data-title="Alumnos">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg>Alumnos</a>
+            <a th:href="@{/profesores}" sec:authorize="hasRole('ADMIN')" data-group="Gestión" data-title="Profesores">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M12 14 2 9l10-5 10 5-10 5Zm0 0v7M6 10.6V16c0 1 2.7 3 6 3s6-2 6-3v-5.4"/></svg>Profesores</a>
+            <a th:href="@{/cursos}" data-group="Gestión" data-title="Cursos">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>Cursos</a>
+            <a th:href="@{/ciclos}" sec:authorize="hasRole('ADMIN')" data-group="Gestión" data-title="Ciclos">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/></svg>Ciclos</a>
+            <a th:href="@{/horarios}" data-group="Gestión" data-title="Horarios">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M12 6v6l4 2M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20Z"/></svg>Horarios</a>
+        </nav>
+    </div>
+
+    <div>
+        <div class="nav-group-label">Operación</div>
+        <nav class="nav">
+            <a th:href="@{/matriculas}" data-group="Operación" data-title="Matrículas">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm0 0v6h6M9 15l2 2 4-4"/></svg>Matrículas</a>
+            <a th:href="@{/pagos}" data-group="Operación" data-title="Pagos">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M2 7h20v12H2zM2 11h20M6 15h4"/></svg>Pagos</a>
+            <a th:href="@{/usuarios}" sec:authorize="hasRole('ADMIN')" data-group="Operación" data-title="Usuarios">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg>Usuarios</a>
+        </nav>
+    </div>
+
+    <div class="side-foot">
+        <div class="userchip">
+            <div class="av" id="av" th:attr="data-name=${#authentication?.name}">U</div>
+            <div>
+                <div class="un" sec:authentication="name">usuario</div>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="logout-btn">Cerrar sesión</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</aside>
+</body>
+</html>
