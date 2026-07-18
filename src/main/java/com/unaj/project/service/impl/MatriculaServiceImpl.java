@@ -87,6 +87,13 @@ public class MatriculaServiceImpl implements MatriculaService {
             throw new IllegalArgumentException("La lista de cursos contiene duplicados.");
         }
 
+        if (montoMatricula != null && montoMatricula.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("El monto de matrícula debe ser mayor a 0.");
+        }
+        if (montoPension != null && montoPension.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("El monto de pensión no puede ser negativo.");
+        }
+
         Alumno alumno = alumnoRepository.findById(estudianteId)
                 .orElseThrow(() -> new IllegalArgumentException("Alumno no encontrado: " + estudianteId));
 

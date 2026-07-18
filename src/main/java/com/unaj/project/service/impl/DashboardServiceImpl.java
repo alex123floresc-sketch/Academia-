@@ -1,5 +1,6 @@
 package com.unaj.project.service.impl;
 
+import com.unaj.project.dto.IngresoMensualDTO;
 import com.unaj.project.model.Matricula;
 import com.unaj.project.model.Pago;
 import com.unaj.project.service.*;
@@ -20,17 +21,20 @@ public class DashboardServiceImpl implements DashboardService {
     private final MatriculaService matriculaService;
     private final PagoService pagoService;
     private final CicloService cicloService;
+    private final ReporteService reporteService;
 
     public DashboardServiceImpl(AlumnoService alumnoService,
                                 CursoService cursoService,
                                 MatriculaService matriculaService,
                                 PagoService pagoService,
-                                CicloService cicloService) {
+                                CicloService cicloService,
+                                ReporteService reporteService) {
         this.alumnoService = alumnoService;
         this.cursoService = cursoService;
         this.matriculaService = matriculaService;
         this.pagoService = pagoService;
         this.cicloService = cicloService;
+        this.reporteService = reporteService;
     }
 
     @Override
@@ -57,6 +61,10 @@ public class DashboardServiceImpl implements DashboardService {
             }
         }
 
+        List<IngresoMensualDTO> ingresosPorMes = reporteService.ingresosPorMes();
+        List<String> mesesLabels = ingresosPorMes.stream().map(IngresoMensualDTO::mes).toList();
+        List<BigDecimal> mesesValores = ingresosPorMes.stream().map(IngresoMensualDTO::total).toList();
+
         Map<String, Object> datos = new LinkedHashMap<>();
         datos.put("totalAlumnos", alumnoService.listarTodos().size());
         datos.put("totalCursos", cursoService.listarTodos().size());
@@ -68,6 +76,8 @@ public class DashboardServiceImpl implements DashboardService {
         datos.put("ultimas", matriculas.stream().limit(5).toList());
         datos.put("aforo", aforo);
         datos.put("cupoPorTurno", CUPO_POR_TURNO);
+        datos.put("mesesLabels", mesesLabels);
+        datos.put("mesesValores", mesesValores);
         return datos;
     }
 }

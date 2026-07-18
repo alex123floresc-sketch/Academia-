@@ -49,3 +49,24 @@ Classic layered Spring MVC + Thymeleaf app, no REST/JSON API — controllers ret
 ## Stray items
 
 - A top-level `org/springframework/boot/diagnostics/annotations.xml` directory exists at the repo root (outside `src/`) — this is not part of the Maven source layout; don't treat it as an active source location.
+## Roadmap: potential improvements
+
+Forward-looking suggestions to move the app from "working" to production-quality, ordered by impact. Not yet implemented, or only partially — **verify current state before starting**, since some scaffolding already exists (Bean Validation `dto/*Form`, `GlobalExceptionHandler` with error flash, `Alumno` soft delete) and should be extended, not duplicated.
+
+### Robustness & UX (highest impact)
+
+- **Success/confirmation flash messages.** Error flash (`mensajeError`) already exists via `GlobalExceptionHandler`; add a parallel success channel (e.g. `mensajeExito`) set with `RedirectAttributes` after every guardar/eliminar, and render it once in the shared layout so all modules show "Guardado correctamente" / "Eliminado correctamente".
+- **Dedicated error page.** Current handling redirects back to the module list with a flash message; add a friendly `templates/error.html` (Spring Boot resolves it automatically) so uncaught errors and 404/500 never surface a raw stacktrace to the user.
+- **Complete Bean Validation coverage.** `@Valid` on `dto/*Form` exists for some forms; ensure every create/edit form has field constraints (`@NotBlank`, `@Email`, `@Positive` for `Curso.horas` and `Pago.monto`, uniqueness checks for `Alumno`/`Profesor` email) and that each template renders `th:errors` next to the field.
+- **Pagination & search on list views.** List controllers load whole tables today; switch to Spring Data `Pageable` and add simple filters (`findByNombreContainingIgnoreCase`, etc.), starting with `alumnos` and `pagos` where row counts grow fastest.
+
+### Domain features
+
+- **Reports & export.** Reuse the existing `flying-saucer-pdf` pipeline (already used for the enrollment receipt in `MatriculaController.fichaPdf`) to generate: alumnos por ciclo/turno, ingresos por mes, and alumnos morosos. Apache POI can add Excel export of the same datasets.
+- **Dashboard chart.** `InicioController` already computes metrics (totals, aforo por turno); add a Chart.js chart to `inicio.html` (e.g. ingresos por mes or matrículas por turno) for a stronger at-a-glance overview.
+- **Automatic overdue payments.** A `Pago` currently becomes `VENCIDO` only when edited by hand. Add an `@EnableScheduling` + `@Scheduled` daily job that flips `PENDIENTE` -> `VENCIDO` for pagos whose `fechaVencimiento` has passed.
+- **Student history / expediente view.** A per-`Alumno` detail page listing all of the student's `Matricula` across ciclos plus full `Pago` history — the natural front-desk lookup screen.
+
+### Explicitly NOT recommended
+
+- **Do not rename tables/columns to match Java names** (`estudiantes` -> `alumnos`, `semestres` -> `ciclos`, `docentes` -> `profesores`, `carrera` -> `area`). This physical-name drift is intentional and documented under `model/` above. Under `spring.jpa.hibernate.ddl-auto: update`, renaming would create new empty tables/columns and orphan existing data. Keep `@Table(name=...)` / `@Column(name=...)` mappings as they are.

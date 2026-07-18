@@ -4,10 +4,13 @@ import com.unaj.project.exception.RecursoNoEncontradoException;
 import com.unaj.project.model.Pago;
 import com.unaj.project.repository.PagoRepository;
 import com.unaj.project.service.PagoService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,6 +26,11 @@ public class PagoServiceImpl implements PagoService {
     @Override
     public List<Pago> listarTodos() {
         return pagoRepository.findAllConAlumno();
+    }
+
+    @Override
+    public Page<Pago> buscarPagina(String q, Pageable pageable) {
+        return pagoRepository.buscar(q, pageable);
     }
 
     @Override
@@ -57,5 +65,11 @@ public class PagoServiceImpl implements PagoService {
                 .filter(p -> estado.equals(p.getEstado()))
                 .map(Pago::getMonto)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    @Override
+    @Transactional
+    public int marcarVencidos() {
+        return pagoRepository.marcarVencidos(LocalDate.now());
     }
 }

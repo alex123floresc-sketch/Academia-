@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Expediente del alumno</title></head>
+<div layout:fragment="contenido">
+
+    <a th:href="@{/alumnos}" class="page-back">&laquo; Volver a alumnos</a>
+
+    <div class="card" style="margin-top:14px">
+        <div class="card-head">
+            <div>
+                <h2 th:text="${alumno.nombre + ' ' + alumno.apellido}">Alumno</h2>
+                <p th:text="${alumno.email} + ' · ' + ${alumno.area}">-</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:20px" th:each="m : ${matriculas}">
+        <div class="card-head">
+            <div>
+                <h2 th:text="${m.semestre.nombre}">Ciclo</h2>
+                <p th:text="'Turno: ' + (${m.turno != null} ? ${m.turno.etiqueta} : '-') + ' · Estado: ' + ${m.estado}">-</p>
+            </div>
+            <a th:href="@{/matriculas/ficha/{id}(id=${m.id})}" class="btn btn-ghost btn-sm">Ver ficha</a>
+        </div>
+
+        <table>
+            <thead><tr><th>Curso</th><th>Horas</th></tr></thead>
+            <tbody>
+            <tr th:each="d : ${m.detalles}">
+                <td th:text="${d.curso.nombre}">-</td>
+                <td th:text="${d.curso.horas}">0</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(m.detalles)}"><td colspan="2" class="empty">Sin cursos.</td></tr>
+            </tbody>
+        </table>
+
+        <table>
+            <thead><tr><th>Concepto</th><th>Vence</th><th>Monto</th><th>Estado</th></tr></thead>
+            <tbody>
+            <tr th:each="p : ${pagosPorMatricula.get(m.id)}">
+                <td th:text="${p.concepto}">-</td>
+                <td th:text="${p.fechaVencimiento}">-</td>
+                <td th:text="'S/ ' + ${p.monto}">0</td>
+                <td>
+                    <span th:if="${p.estado == 'PAGADO'}" class="pill pill-sage">Pagado</span>
+                    <span th:if="${p.estado == 'PENDIENTE'}" class="pill pill-amber">Pendiente</span>
+                    <span th:if="${p.estado == 'VENCIDO'}" class="pill pill-rose">Vencido</span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(pagosPorMatricula.get(m.id))}"><td colspan="4" class="empty">Sin pagos registrados.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card" th:if="${#lists.isEmpty(matriculas)}" style="margin-top:20px">
+        <div class="empty">Este alumno no tiene matrículas registradas.</div>
+    </div>
+</div>
+</html>

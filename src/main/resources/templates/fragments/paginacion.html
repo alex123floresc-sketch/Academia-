@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title>Fragmentos</title></head>
+<body>
+<div th:fragment="paginacion(pagina, baseUrl, q)" th:if="${pagina.totalPages > 1}" class="paginacion">
+    <a th:if="${pagina.hasPrevious()}" th:href="@{${baseUrl}(page=${pagina.number - 1}, q=${q})}" class="btn btn-ghost btn-sm">&laquo; Anterior</a>
+    <span th:text="'Página ' + ${pagina.number + 1} + ' de ' + ${pagina.totalPages}"></span>
+    <a th:if="${pagina.hasNext()}" th:href="@{${baseUrl}(page=${pagina.number + 1}, q=${q})}" class="btn btn-ghost btn-sm">Siguiente &raquo;</a>
+</div>
+</body>
+</html>

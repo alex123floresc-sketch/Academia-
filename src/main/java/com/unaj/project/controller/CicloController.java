@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/ciclos")
@@ -32,7 +33,8 @@ public class CicloController {
 
     @PostMapping("/guardar")
     public String guardar(@Valid @ModelAttribute("cicloForm") CicloForm cicloForm,
-                          BindingResult result) {
+                          BindingResult result,
+                          RedirectAttributes ra) {
         // Validación cruzada: la fecha de fin debe ser posterior a la de inicio
         if (cicloForm.getFechaInicio() != null && cicloForm.getFechaFin() != null
                 && !cicloForm.getFechaFin().isAfter(cicloForm.getFechaInicio())) {
@@ -43,6 +45,7 @@ public class CicloController {
             return "ciclos/formulario";
         }
         cicloService.guardar(cicloForm);
+        ra.addFlashAttribute("mensajeExito", "Ciclo guardado correctamente.");
         return "redirect:/ciclos";
     }
 
@@ -53,8 +56,9 @@ public class CicloController {
     }
 
     @PostMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Long id) {
+    public String eliminar(@PathVariable Long id, RedirectAttributes ra) {
         cicloService.eliminar(id);
+        ra.addFlashAttribute("mensajeExito", "Ciclo eliminado correctamente.");
         return "redirect:/ciclos";
     }
 }

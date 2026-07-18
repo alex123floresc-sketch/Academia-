@@ -39,6 +39,14 @@ public class ProfesorServiceImpl implements ProfesorService {
     @Transactional
     public void guardar(ProfesorForm form) {
         Profesor profesor = (form.getId() != null) ? buscarPorId(form.getId()) : new Profesor();
+
+        boolean emailDuplicado = (form.getId() != null)
+                ? profesorRepository.existsByEmailIgnoreCaseAndIdNot(form.getEmail(), form.getId())
+                : profesorRepository.existsByEmailIgnoreCase(form.getEmail());
+        if (emailDuplicado) {
+            throw new IllegalArgumentException("Ya existe un profesor registrado con ese correo.");
+        }
+
         profesor.setNombre(form.getNombre());
         profesor.setApellido(form.getApellido());
         profesor.setEmail(form.getEmail());

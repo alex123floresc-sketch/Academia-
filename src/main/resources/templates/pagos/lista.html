@@ -28,6 +28,12 @@
 
     <div class="card">
         <div class="card-head"><div><h2>Cuotas y pensiones</h2><p>Seguimiento de pagos por alumno</p></div></div>
+        <div class="searchbar">
+            <form method="get" th:action="@{/pagos}" style="display:flex;gap:8px;flex:1">
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar por alumno o concepto...">
+                <button type="submit" class="btn btn-ghost btn-sm">Buscar</button>
+            </form>
+        </div>
         <table>
             <thead><tr><th>Alumno</th><th>Concepto</th><th>Vence</th><th>Monto</th><th>Estado</th><th></th></tr></thead>
             <tbody>
@@ -59,6 +65,7 @@
             <tr th:if="${#lists.isEmpty(pagos)}"><td colspan="6" class="empty">No hay pagos registrados aún.</td></tr>
             </tbody>
         </table>
+        <div th:replace="~{fragments/paginacion :: paginacion(${pagina}, '/pagos', ${q})}"></div>
     </div>
 </div>
 </html>

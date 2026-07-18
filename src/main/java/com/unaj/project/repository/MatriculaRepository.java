@@ -33,4 +33,20 @@ public interface MatriculaRepository extends JpaRepository<Matricula, Long> {
            "LEFT JOIN FETCH m.detalles d " +
            "LEFT JOIN FETCH d.curso")
     List<Matricula> findAllConEstudianteYSemestre();
+
+    // Reporte: cantidad de alumnos matriculados (activos) por ciclo y turno
+    @Query("SELECT m.semestre.nombre, m.turno, COUNT(DISTINCT m.estudiante.id) " +
+           "FROM Matricula m WHERE m.estado = 'ACTIVA' " +
+           "GROUP BY m.semestre.nombre, m.turno " +
+           "ORDER BY m.semestre.nombre, m.turno")
+    List<Object[]> contarAlumnosPorCicloYTurno();
+
+    // Expediente del alumno: todas sus matrículas con ciclo, detalles y curso (evita LazyInitializationException)
+    @Query("SELECT DISTINCT m FROM Matricula m " +
+           "JOIN FETCH m.semestre " +
+           "LEFT JOIN FETCH m.detalles d " +
+           "LEFT JOIN FETCH d.curso " +
+           "WHERE m.estudiante.id = :estudianteId " +
+           "ORDER BY m.fechaMatricula DESC")
+    List<Matricula> findByEstudianteIdConDetalle(Long estudianteId);
 }

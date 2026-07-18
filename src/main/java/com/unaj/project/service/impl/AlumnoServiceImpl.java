@@ -5,6 +5,8 @@ import com.unaj.project.exception.RecursoNoEncontradoException;
 import com.unaj.project.model.Alumno;
 import com.unaj.project.repository.AlumnoRepository;
 import com.unaj.project.service.AlumnoService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,11 @@ public class AlumnoServiceImpl implements AlumnoService {
     @Override
     public List<Alumno> listarTodos() {
         return alumnoRepository.findByEliminadoFalse();
+    }
+
+    @Override
+    public Page<Alumno> buscarPagina(String q, Pageable pageable) {
+        return alumnoRepository.buscar(q, pageable);
     }
 
     @Override
@@ -46,6 +53,14 @@ public class AlumnoServiceImpl implements AlumnoService {
         } else {
             alumno = new Alumno();                // crea uno nuevo
         }
+
+        boolean emailDuplicado = (form.getId() != null)
+                ? alumnoRepository.existsByEmailIgnoreCaseAndIdNot(form.getEmail(), form.getId())
+                : alumnoRepository.existsByEmailIgnoreCase(form.getEmail());
+        if (emailDuplicado) {
+            throw new IllegalArgumentException("Ya existe un alumno registrado con ese correo.");
+        }
+
         // Mapeo DTO -> entidad
         alumno.setNombre(form.getNombre());
         alumno.setApellido(form.getApellido());

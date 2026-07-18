@@ -115,10 +115,15 @@ td .strong,td.strong{color:var(--ink);font-weight:500}
 .pay-row.total{border-top:1px dashed #BCD3CB;margin-top:9px;padding-top:11px;font-family:'Fraunces',serif;font-size:18px;font-weight:600}
 .form-foot{display:flex;gap:11px;margin-top:24px;padding-top:20px;border-top:1px solid var(--line-soft)}
 .alert-error{background:var(--rose-soft);border:1px solid #EBD3D3;color:var(--rose-strong);border-radius:var(--radius-sm);padding:11px 15px;font-size:12.5px;margin-bottom:18px}
+.alert-success{background:var(--sage-soft);border:1px solid #D7E5DF;color:var(--sage-strong);border-radius:var(--radius-sm);padding:11px 15px;font-size:12.5px;margin-bottom:18px}
 .page-back{font-size:13px;color:var(--sage-strong);text-decoration:none}
 .page-back:hover{text-decoration:underline}
 .page-title{font-family:'Fraunces',serif;font-weight:500;font-size:22px;margin:6px 0 22px}
 .empty{text-align:center;padding:60px 20px;color:var(--ink-faint);font-size:13px}
+.searchbar{padding:0 20px 16px;display:flex;gap:8px}
+.searchbar input{flex:1;padding:9px 13px;border:1px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;color:var(--ink);background:var(--surface);transition:.12s}
+.searchbar input:focus{outline:none;border-color:var(--sage);box-shadow:0 0 0 3px var(--sage-soft)}
+.paginacion{display:flex;align-items:center;justify-content:center;gap:14px;padding:16px 20px;border-top:1px solid var(--line-soft);font-size:12.5px;color:var(--ink-faint)}
 
 /* Constancia */
 .constancia{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);max-width:760px;overflow:hidden}

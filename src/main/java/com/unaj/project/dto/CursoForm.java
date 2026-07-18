@@ -1,5 +1,6 @@
 package com.unaj.project.dto;
 
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -19,6 +20,7 @@ public class CursoForm {
 
     @NotNull(message = "Las horas son obligatorias")
     @Min(value = 1, message = "Las horas deben ser al menos 1")
+    @Max(value = 40, message = "Las horas no pueden superar 40")
     private Integer horas;
 
     // Opcional: null = "Sin asignar"

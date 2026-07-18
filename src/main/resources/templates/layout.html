@@ -30,7 +30,11 @@
         </header>
 
         <div class="content">
-            <div class="wrap" layout:fragment="contenido"></div>
+            <div class="wrap">
+                <div th:if="${mensajeExito}" class="alert-success" th:text="${mensajeExito}"></div>
+                <div th:if="${mensajeError}" class="alert-error" th:text="${mensajeError}"></div>
+                <div layout:fragment="contenido"></div>
+            </div>
         </div>
     </main>
 </div>
@@ -57,5 +61,6 @@
         if(av){ var n = av.getAttribute('data-name') || 'U'; av.textContent = n.trim().substring(0,2).toUpperCase(); }
     })();
 </script>
+<th:block layout:fragment="scripts"></th:block>
 </body>
 </html>

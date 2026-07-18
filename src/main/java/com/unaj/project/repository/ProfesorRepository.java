@@ -9,4 +9,8 @@ import java.util.List;
 @Repository
 public interface ProfesorRepository extends JpaRepository<Profesor, Long> {
     List<Profesor> findByEliminadoFalse();
+
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
+
+    boolean existsByEmailIgnoreCase(String email);
 }

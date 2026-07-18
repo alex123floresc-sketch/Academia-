@@ -18,7 +18,7 @@
                 </div>
                 <div class="field">
                     <label>Horas semanales</label>
-                    <input type="number" min="1" th:field="*{horas}" placeholder="Ej. 6">
+                    <input type="number" min="1" max="40" th:field="*{horas}" placeholder="Ej. 6">
                     <span class="field-error" th:if="${#fields.hasErrors('horas')}" th:errors="*{horas}"></span>
                 </div>
             </div>

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/cursos")
@@ -37,12 +38,14 @@ public class CursoController {
     @PostMapping("/guardar")
     public String guardar(@Valid @ModelAttribute("cursoForm") CursoForm cursoForm,
                           BindingResult result,
-                          Model model) {
+                          Model model,
+                          RedirectAttributes ra) {
         if (result.hasErrors()) {
             model.addAttribute("profesores", profesorService.listarTodos());
             return "cursos/formulario";
         }
         cursoService.guardar(cursoForm);
+        ra.addFlashAttribute("mensajeExito", "Curso guardado correctamente.");
         return "redirect:/cursos";
     }
 
@@ -54,8 +57,9 @@ public class CursoController {
     }
 
     @PostMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Long id) {
+    public String eliminar(@PathVariable Long id, RedirectAttributes ra) {
         cursoService.eliminar(id);
+        ra.addFlashAttribute("mensajeExito", "Curso eliminado correctamente.");
         return "redirect:/cursos";
     }
 }

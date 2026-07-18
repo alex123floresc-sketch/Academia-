@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Reportes</title></head>
+<div layout:fragment="contenido">
+
+    <div class="card">
+        <div class="card-head">
+            <div><h2>Alumnos por ciclo y turno</h2><p>Cantidad de alumnos matriculados (activos) agrupados por ciclo y turno</p></div>
+        </div>
+        <div style="padding:16px 20px;display:flex;gap:10px">
+            <a th:href="@{/reportes/alumnos-por-ciclo/pdf}" class="btn btn-primary btn-sm">Ver PDF</a>
+            <a th:href="@{/reportes/alumnos-por-ciclo/excel}" class="btn btn-ghost btn-sm">Descargar Excel</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-head">
+            <div><h2>Ingresos por mes</h2><p>Total cobrado agrupado por mes de pago</p></div>
+        </div>
+        <div style="padding:16px 20px;display:flex;gap:10px">
+            <a th:href="@{/reportes/ingresos-mensuales/pdf}" class="btn btn-primary btn-sm">Ver PDF</a>
+            <a th:href="@{/reportes/ingresos-mensuales/excel}" class="btn btn-ghost btn-sm">Descargar Excel</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-head">
+            <div><h2>Alumnos morosos</h2><p>Alumnos con al menos un pago vencido y el monto adeudado</p></div>
+        </div>
+        <div style="padding:16px 20px;display:flex;gap:10px">
+            <a th:href="@{/reportes/morosos/pdf}" class="btn btn-primary btn-sm">Ver PDF</a>
+            <a th:href="@{/reportes/morosos/excel}" class="btn btn-ghost btn-sm">Descargar Excel</a>
+        </div>
+    </div>
+</div>
+</html>

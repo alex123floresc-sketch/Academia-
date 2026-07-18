@@ -1,38 +1,109 @@
-<div class="two-col">
-    <div class="card">
-        <div class="card-head">
-            <div><h2>Últimas matrículas</h2><p th:text="${cicloActivo != null} ? ${cicloActivo.nombre} : 'Academia Horizonte'"></p></div>
-            <a th:href="@{/matriculas}" class="btn btn-ghost btn-sm">Ver todas</a>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Inicio</title>
+</head>
+<div layout:fragment="contenido">
+
+    <div class="metrics" style="grid-template-columns:repeat(5,1fr)">
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Alumnos</div>
+            <div class="val" th:text="${totalAlumnos}">0</div>
         </div>
-        <table>
-            <thead><tr><th>Alumno</th><th>Ciclo</th><th>Turno</th><th>Estado</th></tr></thead>
-            <tbody>
-            <tr th:each="m : ${ultimas}">
-                <td class="strong" th:text="${m.estudiante.nombre + ' ' + m.estudiante.apellido}"></td>
-                <td th:text="${m.semestre.nombre}"></td>
-                <td th:text="${m.turno != null} ? ${m.turno.etiqueta} : '-'"></td>
-                <td>
-                    <span th:if="${m.estado == 'ACTIVA'}" class="pill pill-sage"><span class="d"></span>Activa</span>
-                    <span th:unless="${m.estado == 'ACTIVA'}" class="pill pill-gray" th:text="${m.estado}"></span>
-                </td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(ultimas)}"><td colspan="4" class="empty">No hay matrículas aún.</td></tr>
-            </tbody>
-        </table>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sky)"></span>Cursos</div>
+            <div class="val" th:text="${totalCursos}">0</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Cobrado</div>
+            <div class="val" th:text="'S/ ' + ${cobrado}">S/ 0</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--amber)"></span>Pendiente</div>
+            <div class="val" th:text="'S/ ' + ${pendiente}">S/ 0</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--rose)"></span>Vencidos</div>
+            <div class="val" th:text="${vencidos}">0</div>
+        </div>
     </div>
 
-    <div class="card">
-        <div class="card-head"><div><h2>Aforo por turno</h2><p th:text="${cicloActivo != null} ? ${cicloActivo.nombre} : ''"></p></div></div>
-        <div style="padding:20px;display:flex;flex-direction:column;gap:18px">
-            <div th:each="e : ${aforo}">
-                <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px">
-                    <span class="strong" th:text="${e.key}"></span>
-                    <span style="color:var(--ink-faint)" th:text="${e.value} + ' / ' + ${cupoPorTurno}"></span>
-                </div>
-                <div style="height:8px;background:var(--line-soft);border-radius:6px;overflow:hidden">
-                    <div th:style="'width:' + ${T(java.lang.Math).min(100, (e.value * 100) / cupoPorTurno)} + '%;height:100%;background:var(--sage);border-radius:6px'"></div>
+    <div class="card" style="margin-bottom:26px">
+        <div class="card-head"><div><h2>Ingresos por mes</h2><p>Total cobrado, agrupado por mes de pago</p></div></div>
+        <div style="padding:20px">
+            <canvas id="chartIngresos" height="90"></canvas>
+        </div>
+    </div>
+
+    <div class="two-col">
+        <div class="card">
+            <div class="card-head">
+                <div><h2>Últimas matrículas</h2><p th:text="${cicloActivo != null} ? ${cicloActivo.nombre} : 'Academia Horizonte'"></p></div>
+                <a th:href="@{/matriculas}" class="btn btn-ghost btn-sm">Ver todas</a>
+            </div>
+            <table>
+                <thead><tr><th>Alumno</th><th>Ciclo</th><th>Turno</th><th>Estado</th></tr></thead>
+                <tbody>
+                <tr th:each="m : ${ultimas}">
+                    <td class="strong" th:text="${m.estudiante.nombre + ' ' + m.estudiante.apellido}"></td>
+                    <td th:text="${m.semestre.nombre}"></td>
+                    <td th:text="${m.turno != null} ? ${m.turno.etiqueta} : '-'"></td>
+                    <td>
+                        <span th:if="${m.estado == 'ACTIVA'}" class="pill pill-sage"><span class="d"></span>Activa</span>
+                        <span th:unless="${m.estado == 'ACTIVA'}" class="pill pill-gray" th:text="${m.estado}"></span>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(ultimas)}"><td colspan="4" class="empty">No hay matrículas aún.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <div class="card-head"><div><h2>Aforo por turno</h2><p th:text="${cicloActivo != null} ? ${cicloActivo.nombre} : ''"></p></div></div>
+            <div style="padding:20px;display:flex;flex-direction:column;gap:18px">
+                <div th:each="e : ${aforo}">
+                    <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px">
+                        <span class="strong" th:text="${e.key}"></span>
+                        <span style="color:var(--ink-faint)" th:text="${e.value} + ' / ' + ${cupoPorTurno}"></span>
+                    </div>
+                    <div style="height:8px;background:var(--line-soft);border-radius:6px;overflow:hidden">
+                        <div th:style="'width:' + ${T(java.lang.Math).min(100, (e.value * 100) / cupoPorTurno)} + '%;height:100%;background:var(--sage);border-radius:6px'"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<th:block layout:fragment="scripts">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var etiquetas = /*[[${mesesLabels}]]*/ [];
+        var valores = /*[[${mesesValores}]]*/ [];
+        /*]]>*/
+        var ctx = document.getElementById('chartIngresos');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: etiquetas,
+                    datasets: [{
+                        label: 'Ingresos (S/)',
+                        data: valores,
+                        backgroundColor: '#6E9D91',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+    </script>
+</th:block>
+</html>

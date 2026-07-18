@@ -8,10 +8,8 @@
 </head>
 <div layout:fragment="contenido">
 
-    <div th:if="${mensajeError}" class="alert-error" th:text="${mensajeError}"></div>
-
     <div class="card">
-        <!-- ...resto igual... -->
+        <div class="card-head">
             <div>
                 <h2>Alumnos</h2>
                 <p>Registro general de alumnos de la academia</p>
@@ -19,6 +17,12 @@
             <a th:href="@{/alumnos/nuevo}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="btn btn-primary btn-sm">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo alumno
             </a>
+        </div>
+        <div class="searchbar">
+            <form method="get" th:action="@{/alumnos}" style="display:flex;gap:8px;flex:1">
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre, apellido o correo...">
+                <button type="submit" class="btn btn-ghost btn-sm">Buscar</button>
+            </form>
         </div>
         <table>
             <thead>
@@ -48,6 +52,7 @@
 
                 <td sec:authorize="hasAnyRole('ADMIN','CAJERO')">
                     <div class="rowact">
+                        <a th:href="@{/alumnos/{id}/expediente(id=${alumno.id})}" class="btn btn-ghost btn-sm">Expediente</a>
                         <a th:href="@{/alumnos/editar/{id}(id=${alumno.id})}" class="btn btn-ghost btn-sm">Editar</a>
                         <form class="tform" th:action="@{/alumnos/eliminar/{id}(id=${alumno.id})}" method="post">
                             <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar alumno?')">Eliminar</button>
@@ -60,6 +65,7 @@
             </tr>
             </tbody>
         </table>
+        <div th:replace="~{fragments/paginacion :: paginacion(${pagina}, '/alumnos', ${q})}"></div>
     </div>
 </div>
 </html>

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/profesores")
@@ -32,11 +33,13 @@ public class ProfesorController {
 
     @PostMapping("/guardar")
     public String guardar(@Valid @ModelAttribute("profesorForm") ProfesorForm profesorForm,
-                          BindingResult result) {
+                          BindingResult result,
+                          RedirectAttributes ra) {
         if (result.hasErrors()) {
             return "profesores/formulario";
         }
         profesorService.guardar(profesorForm);
+        ra.addFlashAttribute("mensajeExito", "Profesor guardado correctamente.");
         return "redirect:/profesores";
     }
 
@@ -47,8 +50,9 @@ public class ProfesorController {
     }
 
     @PostMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Long id) {
+    public String eliminar(@PathVariable Long id, RedirectAttributes ra) {
         profesorService.eliminar(id);
+        ra.addFlashAttribute("mensajeExito", "Profesor eliminado correctamente.");
         return "redirect:/profesores";
     }
 }

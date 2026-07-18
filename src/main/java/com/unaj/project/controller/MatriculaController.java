@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
@@ -68,11 +69,13 @@ public class MatriculaController {
                           @RequestParam(required = false) java.math.BigDecimal montoMatricula,
                           @RequestParam(required = false) String conceptoPension,
                           @RequestParam(required = false) java.math.BigDecimal montoPension,
-                          Model model) {
+                          Model model,
+                          RedirectAttributes ra) {
         try {
             Matricula matricula = matriculaService.matricular(
                     estudianteId, cicloId, turno, cursoIds,
                     conceptoMatricula, montoMatricula, conceptoPension, montoPension);
+            ra.addFlashAttribute("mensajeExito", "Matrícula guardada correctamente.");
             return "redirect:/matriculas/ficha/" + matricula.getId();
         } catch (IllegalArgumentException | IllegalStateException ex) {
             model.addAttribute("error", ex.getMessage());
@@ -85,14 +88,16 @@ public class MatriculaController {
         }
     }
     @PostMapping("/anular/{id}")
-    public String anular(@PathVariable Long id) {
+    public String anular(@PathVariable Long id, RedirectAttributes ra) {
         matriculaService.anular(id);
+        ra.addFlashAttribute("mensajeExito", "Matrícula anulada correctamente.");
         return "redirect:/matriculas";
     }
 
     @PostMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Long id) {
+    public String eliminar(@PathVariable Long id, RedirectAttributes ra) {
         matriculaService.eliminar(id);
+        ra.addFlashAttribute("mensajeExito", "Matrícula eliminada correctamente.");
         return "redirect:/matriculas";
     }
 

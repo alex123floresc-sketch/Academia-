@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/horarios")
@@ -69,7 +70,8 @@ public class HorarioController {
                           @RequestParam String horaInicio,
                           @RequestParam String horaFin,
                           @RequestParam(required = false) String aula,
-                          Model model) {
+                          Model model,
+                          RedirectAttributes ra) {
 
         Horario h = (id != null) ? horarioService.buscarPorId(id) : new Horario();
         h.setCurso(cursoService.buscarPorId(cursoId));
@@ -87,12 +89,14 @@ public class HorarioController {
             prepararForm(model, h);
             return "horarios/formulario";
         }
+        ra.addFlashAttribute("mensajeExito", "Horario guardado correctamente.");
         return "redirect:/horarios?cicloId=" + cicloId + "&turno=" + turno;
     }
 
     @PostMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Long id) {
+    public String eliminar(@PathVariable Long id, RedirectAttributes ra) {
         horarioService.eliminar(id);
+        ra.addFlashAttribute("mensajeExito", "Horario eliminado correctamente.");
         return "redirect:/horarios";
     }
 

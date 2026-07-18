@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/usuarios")
@@ -41,7 +42,8 @@ public class UsuarioController {
     @PostMapping("/guardar")
     public String guardar(@Valid @ModelAttribute("usuarioForm") UsuarioForm usuarioForm,
                           BindingResult result,
-                          Model model) {
+                          Model model,
+                          RedirectAttributes ra) {
         // Contraseña obligatoria solo al crear (id == null)
         boolean esNuevo = (usuarioForm.getId() == null);
         boolean sinPassword = (usuarioForm.getPasswordPlano() == null || usuarioForm.getPasswordPlano().isBlank());
@@ -54,12 +56,14 @@ public class UsuarioController {
             return "usuarios/formulario";
         }
         usuarioService.guardar(usuarioForm);
+        ra.addFlashAttribute("mensajeExito", "Usuario guardado correctamente.");
         return "redirect:/usuarios";
     }
 
     @PostMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Long id) {
+    public String eliminar(@PathVariable Long id, RedirectAttributes ra) {
         usuarioService.eliminar(id);
+        ra.addFlashAttribute("mensajeExito", "Usuario eliminado correctamente.");
         return "redirect:/usuarios";
     }
 }
