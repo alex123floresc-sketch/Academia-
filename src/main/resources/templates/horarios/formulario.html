@@ -11,16 +11,17 @@
         <div th:if="${error}" class="alert-error" th:text="${error}"></div>
         <form th:action="@{/horarios/guardar}" method="post">
             <input type="hidden" name="id" th:value="${horario.id}">
+
             <div class="field">
-                <label>Curso</label>
-                <label>
-                    <select name="cursoId" required>
-                        <option value="">-- Seleccione --</option>
-                        <option th:each="c : ${cursos}" th:value="${c.id}" th:text="${c.codigo + ' - ' + c.nombre}"
-                                th:selected="${horario.curso != null and horario.curso.id == c.id}"></option>
-                    </select>
-                </label>
+                <label>Curso <span class="hint">escribe para buscar</span></label>
+                <input type="search" id="buscarCurso" placeholder="Buscar por código o nombre..." autocomplete="off" style="margin-bottom:8px">
+                <select name="cursoId" id="selectCurso" required>
+                    <option value="">-- Seleccione --</option>
+                    <option th:each="c : ${cursos}" th:value="${c.id}" th:text="${c.codigo + ' - ' + c.nombre}"
+                            th:selected="${horario.curso != null and horario.curso.id == c.id}"></option>
+                </select>
             </div>
+
             <div class="grid-2">
                 <div class="field">
                     <label>Ciclo</label>
@@ -37,6 +38,7 @@
                     </select>
                 </div>
             </div>
+
             <div class="grid-3">
                 <div class="field">
                     <label>Día</label>
@@ -45,15 +47,46 @@
                                 th:selected="${horario.diaSemana == d}"></option>
                     </select>
                 </div>
-                <div class="field"><label>Inicio</label><input type="time" name="horaInicio" required th:value="${horario.horaInicio}"></div>
-                <div class="field"><label>Fin</label><input type="time" name="horaFin" required th:value="${horario.horaFin}"></div>
+                <div class="field"><label>Inicio</label><input type="time" name="horaInicio" id="horaInicio" required th:value="${horario.horaInicio}"></div>
+                <div class="field"><label>Fin</label><input type="time" name="horaFin" id="horaFin" required th:value="${horario.horaFin}"></div>
             </div>
-            <div class="field"><label>Aula</label><input type="text" name="aula" th:value="${horario.aula}" placeholder="Ej. 3"></div>
+            <p class="field-error" id="rangoError" style="display:none">La hora de fin debe ser posterior a la hora de inicio.</p>
+
+            <div class="field"><label>Aula <span class="hint">opcional</span></label><input type="text" name="aula" th:value="${horario.aula}" placeholder="Ej. 3"></div>
+
             <div class="form-foot">
                 <button type="submit" class="btn btn-primary">Guardar</button>
                 <a th:href="@{/horarios}" class="btn btn-ghost">Cancelar</a>
             </div>
         </form>
     </div>
+
+    <!-- Búsqueda de curso -->
+    <script>(function(){
+        var buscar = document.getElementById('buscarCurso');
+        var select = document.getElementById('selectCurso');
+        if(!buscar || !select) return;
+        var opciones = Array.prototype.slice.call(select.options).filter(function(o){ return o.value !== ''; });
+        buscar.addEventListener('input', function(){
+            var q = buscar.value.trim().toLowerCase();
+            opciones.forEach(function(o){ o.hidden = q !== '' && o.text.toLowerCase().indexOf(q) === -1; });
+        });
+    })();</script>
+
+    <!-- Validación en vivo del rango horario -->
+    <script>(function(){
+        var inicio = document.getElementById('horaInicio');
+        var fin = document.getElementById('horaFin');
+        var error = document.getElementById('rangoError');
+        if(!inicio || !fin) return;
+        function validar(){
+            var invalido = inicio.value && fin.value && fin.value <= inicio.value;
+            error.style.display = invalido ? 'block' : 'none';
+            fin.classList.toggle('input-invalid', invalido);
+        }
+        inicio.addEventListener('input', validar);
+        fin.addEventListener('input', validar);
+        validar();
+    })();</script>
 </div>
 </html>

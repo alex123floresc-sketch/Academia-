@@ -15,8 +15,9 @@
         <form th:action="@{/matriculas/guardar}" method="post">
             <div class="grid-2">
                 <div class="field">
-                    <label>Alumno</label>
-                    <select name="estudianteId" required>
+                    <label>Alumno <span class="hint">escribe para buscar</span></label>
+                    <input type="search" id="buscarAlumno" placeholder="Buscar por nombre..." autocomplete="off" style="margin-bottom:8px">
+                    <select name="estudianteId" id="selectAlumno" required>
                         <option value="">-- Seleccione --</option>
                         <option th:each="al : ${alumnos}" th:value="${al.id}"
                                 th:text="${al.nombre + ' ' + al.apellido + ' — ' + al.area}"></option>
@@ -40,16 +41,20 @@
 
             <div class="field">
                 <label>Cursos a matricular <span class="hint">selecciona los del plan del alumno</span></label>
-                <div class="courselist">
-                    <label class="courserow" th:each="curso : ${cursos}">
-                        <input type="checkbox" name="cursoIds" th:value="${curso.id}">
+                <input type="search" id="buscarCurso" placeholder="Buscar curso por nombre o código..." autocomplete="off" style="margin-bottom:8px">
+                <div class="courselist" id="courseList">
+                    <label class="courserow" th:each="curso : ${cursos}"
+                           th:attr="data-buscar=${#strings.toLowerCase(curso.nombre + ' ' + curso.codigo)}">
+                        <input type="checkbox" name="cursoIds" th:value="${curso.id}" class="js-curso">
                         <div>
                             <div class="cn" th:text="${curso.nombre}"></div>
                             <div class="cm" th:text="${curso.codigo} + ' · ' + (${curso.profesor != null} ? ${curso.profesor.nombreCompleto} : 'Sin asignar')"></div>
                         </div>
                         <span class="ch" th:text="${curso.horas} + ' h'"></span>
                     </label>
+                    <p class="empty" id="courseEmpty" style="display:none">Ningún curso coincide con tu búsqueda.</p>
                 </div>
+                <p class="hint" id="cursosSelCount" style="margin-top:8px">Ningún curso seleccionado.</p>
             </div>
 
             <!-- Bloque de pagos editable -->
@@ -99,5 +104,48 @@
 
     <!-- Script de cálculo del total en tiempo real -->
     <script>(function(){  var montos = document.querySelectorAll('.js-monto');  var out = document.getElementById('totalPago');  function calc(){    var t = 0;    montos.forEach(function(i){ t += parseFloat(i.value) || 0; });    out.textContent = 'S/ ' + t.toFixed(2);  }  montos.forEach(function(i){ i.addEventListener('input', calc); });  calc();})();</script>
+
+    <!-- Búsqueda de alumno -->
+    <script>(function(){
+        var buscar = document.getElementById('buscarAlumno');
+        var select = document.getElementById('selectAlumno');
+        if(!buscar || !select) return;
+        var opciones = Array.prototype.slice.call(select.options).filter(function(o){ return o.value !== ''; });
+        buscar.addEventListener('input', function(){
+            var q = buscar.value.trim().toLowerCase();
+            opciones.forEach(function(o){ o.hidden = q !== '' && o.text.toLowerCase().indexOf(q) === -1; });
+        });
+    })();</script>
+
+    <!-- Búsqueda y contador de cursos -->
+    <script>(function(){
+        var buscar = document.getElementById('buscarCurso');
+        var lista = document.getElementById('courseList');
+        var vacio = document.getElementById('courseEmpty');
+        var contador = document.getElementById('cursosSelCount');
+        if(!lista) return;
+        var filas = Array.prototype.slice.call(lista.querySelectorAll('.courserow'));
+        var checks = Array.prototype.slice.call(lista.querySelectorAll('.js-curso'));
+
+        if(buscar){
+            buscar.addEventListener('input', function(){
+                var q = buscar.value.trim().toLowerCase();
+                var visibles = 0;
+                filas.forEach(function(fila){
+                    var coincide = q === '' || (fila.getAttribute('data-buscar') || '').indexOf(q) !== -1;
+                    fila.style.display = coincide ? '' : 'none';
+                    if(coincide) visibles++;
+                });
+                vacio.style.display = visibles === 0 ? 'block' : 'none';
+            });
+        }
+
+        function actualizarContador(){
+            var n = checks.filter(function(c){ return c.checked; }).length;
+            contador.textContent = n === 0 ? 'Ningún curso seleccionado.' : (n === 1 ? '1 curso seleccionado.' : n + ' cursos seleccionados.');
+        }
+        checks.forEach(function(c){ c.addEventListener('change', actualizarContador); });
+        actualizarContador();
+    })();</script>
 </div>
 </html>

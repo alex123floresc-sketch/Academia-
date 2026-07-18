@@ -13,23 +13,23 @@
             <div class="grid-2">
                 <div class="field">
                     <label>Nombre</label>
-                    <input type="text" th:field="*{nombre}" placeholder="Nombre">
+                    <input type="text" th:field="*{nombre}" placeholder="Nombre" autocomplete="given-name">
                     <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
                 </div>
                 <div class="field">
                     <label>Apellido</label>
-                    <input type="text" th:field="*{apellido}" placeholder="Apellido">
+                    <input type="text" th:field="*{apellido}" placeholder="Apellido" autocomplete="family-name">
                     <span class="field-error" th:if="${#fields.hasErrors('apellido')}" th:errors="*{apellido}"></span>
                 </div>
             </div>
             <div class="field">
                 <label>Correo</label>
-                <input type="email" th:field="*{email}" placeholder="profesor@horizonte.edu.pe">
+                <input type="email" th:field="*{email}" placeholder="profesor@horizonte.edu.pe" autocomplete="email">
                 <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
             </div>
             <div class="field">
-                <label>Especialidad</label>
-                <input type="text" th:field="*{especialidad}" placeholder="Curso que dicta">
+                <label>Especialidad <span class="hint">opcional</span></label>
+                <input type="text" th:field="*{especialidad}" placeholder="Ej. Matemática, Comunicación...">
             </div>
             <div class="form-foot">
                 <button type="submit" class="btn btn-primary">Guardar</button>

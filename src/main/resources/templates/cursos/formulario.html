@@ -12,8 +12,8 @@
             <input type="hidden" th:field="*{id}">
             <div class="grid-2">
                 <div class="field">
-                    <label>Código</label>
-                    <input type="text" th:field="*{codigo}" placeholder="Ej. MAT-ARI">
+                    <label>Código <span class="hint">identificador único</span></label>
+                    <input type="text" th:field="*{codigo}" placeholder="Ej. MAT-ARI" autocomplete="off">
                     <span class="field-error" th:if="${#fields.hasErrors('codigo')}" th:errors="*{codigo}"></span>
                 </div>
                 <div class="field">
@@ -24,11 +24,11 @@
             </div>
             <div class="field">
                 <label>Nombre</label>
-                <input type="text" th:field="*{nombre}" placeholder="Ej. Aritmética">
+                <input type="text" th:field="*{nombre}" placeholder="Ej. Aritmética" autocomplete="off">
                 <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
             </div>
             <div class="field">
-                <label>Profesor</label>
+                <label>Profesor <span class="hint">opcional, se puede asignar después</span></label>
                 <select th:field="*{profesorId}">
                     <option value="">-- Sin asignar --</option>
                     <option th:each="p : ${profesores}" th:value="${p.id}" th:text="${p.nombreCompleto}"></option>

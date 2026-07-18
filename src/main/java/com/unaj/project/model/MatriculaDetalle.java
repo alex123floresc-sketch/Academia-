@@ -6,8 +6,9 @@ import jakarta.persistence.*;
 @Table(name = "matricula_detalles", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"matricula_id", "curso_id"})
 })
-public class MatriculaDetalle {
-it
+public class
+MatriculaDetalle {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

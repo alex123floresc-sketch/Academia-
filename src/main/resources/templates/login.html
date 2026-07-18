@@ -8,18 +8,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <style>
-        .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-        .login-card{width:100%;max-width:360px}
-        .login-box{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:32px}
-        .login-head{text-align:center;margin-bottom:26px}
-        .login-head .seal{width:54px;height:54px;border-radius:15px;background:var(--sage-soft);color:var(--sage-strong);display:inline-flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:26px;border:1px solid #D7E5DF;margin-bottom:12px}
-        .login-head h1{font-family:'Fraunces',serif;font-weight:600;font-size:20px;color:var(--ink)}
-        .login-head p{font-size:12.5px;color:var(--ink-faint);margin-top:3px}
+        body{background:var(--bg)}
+        .login-wrap{
+            min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+            background:
+                radial-gradient(480px 320px at 12% 8%, var(--sage-soft), transparent 60%),
+                radial-gradient(420px 300px at 90% 92%, var(--lav-soft), transparent 60%);
+        }
+        .login-card{width:100%;max-width:380px}
+        .login-box{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:34px 30px;box-shadow:0 18px 40px -22px rgba(49,59,55,.28)}
+        .login-head{text-align:center;margin-bottom:28px}
+        .login-head .seal{width:56px;height:56px;border-radius:16px;background:var(--sage-soft);color:var(--sage-strong);display:inline-flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:27px;border:1px solid #D7E5DF;margin-bottom:14px}
+        .login-head h1{font-family:'Fraunces',serif;font-weight:600;font-size:21px;color:var(--ink)}
+        .login-head p{font-size:12.5px;color:var(--ink-faint);margin-top:4px}
         .login-box label{display:block;font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:6px}
-        .login-box input{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:14px;color:var(--ink);background:var(--surface);margin-bottom:16px}
+        .login-box .field{margin-bottom:17px}
+        .login-box input{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:14.5px;color:var(--ink);background:var(--surface)}
         .login-box input:focus{outline:none;border-color:var(--sage);box-shadow:0 0 0 3px var(--sage-soft)}
-        .login-box .btn{width:100%;justify-content:center;padding:12px}
-        .hintbox{font-size:11.5px;color:var(--ink-faint);text-align:center;margin-top:18px}
+        .pw-wrap{position:relative}
+        .pw-wrap input{padding-right:44px}
+        .pw-toggle{all:unset;position:absolute;right:4px;top:50%;transform:translateY(-50%);width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);cursor:pointer;border-radius:8px}
+        .pw-toggle:hover{background:var(--surface-2);color:var(--ink-soft)}
+        .pw-toggle svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.8;fill:none}
+        .login-box .btn{width:100%;justify-content:center;padding:12px;font-size:13.5px;margin-top:6px}
+        .login-foot{text-align:center;font-size:11.5px;color:var(--ink-faint);margin-top:22px}
     </style>
 </head>
 <body>
@@ -34,15 +46,39 @@
             <div th:if="${param.error}" class="alert-error">Usuario o contraseña incorrectos.</div>
             <div th:if="${param.logout}" class="note" style="margin-bottom:16px">Sesión cerrada correctamente.</div>
             <form th:action="@{/login}" method="post">
-                <label>Usuario</label>
-                <input type="text" name="username" required autofocus>
-                <label>Contraseña</label>
-                <input type="password" name="password" required>
+                <div class="field">
+                    <label for="username">Usuario</label>
+                    <input id="username" type="text" name="username" required autofocus autocomplete="username">
+                </div>
+                <div class="field">
+                    <label for="password">Contraseña</label>
+                    <div class="pw-wrap">
+                        <input id="password" type="password" name="password" required autocomplete="current-password">
+                        <button type="button" class="pw-toggle" id="pwToggle" aria-label="Mostrar contraseña">
+                            <svg id="pwIcon" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                </div>
                 <button type="submit" class="btn btn-primary">Ingresar</button>
             </form>
-            <p class="hintbox">Prueba: admin / admin123 · cajero / cajero123 · auxiliar / auxiliar123</p>
         </div>
+        <p class="login-foot">Academia Horizonte · Acceso restringido a personal autorizado</p>
     </div>
 </div>
+<script>
+    (function(){
+        var toggle = document.getElementById('pwToggle');
+        var input = document.getElementById('password');
+        var icon = document.getElementById('pwIcon');
+        var eyeOff = '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a20.6 20.6 0 0 1 5.06-5.94M9.9 4.24A10.6 10.6 0 0 1 12 4c7 0 11 7 11 7a20.6 20.6 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/>';
+        var eyeOn = icon.innerHTML;
+        toggle.addEventListener('click', function(){
+            var hidden = input.type === 'password';
+            input.type = hidden ? 'text' : 'password';
+            icon.innerHTML = hidden ? eyeOff : eyeOn;
+            toggle.setAttribute('aria-label', hidden ? 'Ocultar contraseña' : 'Mostrar contraseña');
+        });
+    })();
+</script>
 </body>
 </html>

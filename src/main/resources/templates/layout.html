@@ -17,16 +17,22 @@
 <div class="app">
 
     <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     <main class="main">
         <header class="topbar">
-            <div>
-                <div class="crumb" id="crumb">Panel</div>
-                <h1 id="ptitle">Academia Horizonte</h1>
+            <div class="topbar-left">
+                <button type="button" class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false">
+                    <svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                </button>
+                <div>
+                    <div class="crumb" id="crumb">Panel</div>
+                    <h1 id="ptitle">Academia Horizonte</h1>
+                </div>
             </div>
             <div class="top-actions" sec:authorize="hasAnyRole('ADMIN','CAJERO')">
                 <a th:href="@{/pagos}" class="btn btn-ghost btn-sm">Ver pagos</a>
                 <a th:href="@{/matriculas/nueva}" class="btn btn-primary btn-sm">
-                    <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nueva matrícula</a>
+                    <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span class="btn-label">Nueva matrícula</span></a>
             </div>
         </header>
 
@@ -60,6 +66,31 @@
         }
         var av = document.getElementById('av');
         if(av){ var n = av.getAttribute('data-name') || 'U'; av.textContent = n.trim().substring(0,2).toUpperCase(); }
+    })();
+
+    (function(){
+        var sidebar = document.querySelector('.sidebar');
+        var backdrop = document.getElementById('sidebarBackdrop');
+        var toggle = document.getElementById('menuToggle');
+        if(!sidebar || !backdrop || !toggle) return;
+
+        function open(){
+            sidebar.classList.add('open');
+            backdrop.classList.add('show');
+            toggle.setAttribute('aria-expanded', 'true');
+        }
+        function close(){
+            sidebar.classList.remove('open');
+            backdrop.classList.remove('show');
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+        toggle.addEventListener('click', function(){
+            sidebar.classList.contains('open') ? close() : open();
+        });
+        backdrop.addEventListener('click', close);
+        sidebar.querySelectorAll('.nav a').forEach(function(a){ a.addEventListener('click', close); });
+        document.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
+        window.addEventListener('resize', function(){ if(window.innerWidth > 920) close(); });
     })();
 </script>
 <th:block layout:fragment="scripts"></th:block>
