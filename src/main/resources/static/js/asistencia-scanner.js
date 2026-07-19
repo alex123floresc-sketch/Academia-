@@ -28,8 +28,10 @@
         tbody.insertBefore(tr, tbody.firstChild);
     }
 
-    function onScanSuccess(decodedText) {
-        if (procesando) return;
+    // Registra la entrada del alumno identificado por "codigo": el texto decodificado del QR
+    // del carnet ("ALU-{id}"), o su DNI de 8 dígitos si no lo trajo.
+    function registrarCodigo(codigo) {
+        if (procesando || !codigo) return;
         procesando = true;
 
         var headers = { 'Content-Type': 'application/json' };
@@ -38,7 +40,7 @@
         fetch('/asistencias/registrar', {
             method: 'POST',
             headers: headers,
-            body: JSON.stringify({ horarioId: horarioId, codigo: decodedText })
+            body: JSON.stringify({ horarioId: horarioId, codigo: codigo })
         })
             .then(function (resp) { return resp.json(); })
             .then(function (data) {
@@ -51,17 +53,38 @@
                 }
             })
             .catch(function () {
-                mostrarEstado(false, 'Error de conexión al registrar la asistencia.');
+                mostrarEstado(false, 'Error de conexión al registrar la entrada.');
             })
             .finally(function () {
                 setTimeout(function () { procesando = false; }, 2000);
             });
     }
 
+    function onScanSuccess(decodedText) { registrarCodigo(decodedText); }
     function onScanFailure() {
         // Se ignoran los frames en los que no se detecta ningún QR.
     }
 
     var scanner = new Html5QrcodeScanner('reader', { fps: 10, qrbox: 250 }, false);
     scanner.render(onScanSuccess, onScanFailure);
+
+    // Fallback manual: si el alumno no trajo su carnet, se busca por DNI.
+    var dniInput = document.getElementById('dni-manual');
+    var dniBtn = document.getElementById('btn-dni-manual');
+    if (dniInput && dniBtn) {
+        function enviarDni() {
+            var dni = dniInput.value.trim();
+            if (!/^\d{8}$/.test(dni)) {
+                mostrarEstado(false, 'Ingresa un DNI válido de 8 dígitos.');
+                return;
+            }
+            registrarCodigo(dni);
+            dniInput.value = '';
+            dniInput.focus();
+        }
+        dniBtn.addEventListener('click', enviarDni);
+        dniInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); enviarDni(); }
+        });
+    }
 })();

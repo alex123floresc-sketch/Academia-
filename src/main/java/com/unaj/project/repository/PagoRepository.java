@@ -1,5 +1,6 @@
 package com.unaj.project.repository;
 
+import com.unaj.project.model.Alumno;
 import com.unaj.project.model.Pago;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,19 +27,25 @@ public interface PagoRepository extends JpaRepository<Pago, Long> {
             "ORDER BY p.fechaVencimiento DESC")
     List<Pago> findAllConAlumno();
 
-    // Búsqueda paginada por nombre/apellido del alumno o concepto del pago (q vacío = todos)
-    @Query(value = "SELECT p FROM Pago p JOIN FETCH p.matricula m JOIN FETCH m.estudiante e " +
+    // Alumnos que tienen al menos un pago que coincide con la búsqueda (para agrupar el listado por alumno)
+    @Query(value = "SELECT DISTINCT m.estudiante FROM Pago p JOIN p.matricula m JOIN m.estudiante e " +
             "WHERE (:q IS NULL OR :q = '' " +
             "OR LOWER(e.nombre) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(e.apellido) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(p.concepto) LIKE LOWER(CONCAT('%', :q, '%'))) " +
-            "ORDER BY p.fechaVencimiento DESC",
-            countQuery = "SELECT COUNT(p) FROM Pago p JOIN p.matricula m JOIN m.estudiante e " +
+            "ORDER BY e.apellido, e.nombre",
+            countQuery = "SELECT COUNT(DISTINCT m.estudiante) FROM Pago p JOIN p.matricula m JOIN m.estudiante e " +
             "WHERE (:q IS NULL OR :q = '' " +
             "OR LOWER(e.nombre) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(e.apellido) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(p.concepto) LIKE LOWER(CONCAT('%', :q, '%')))")
-    Page<Pago> buscar(@Param("q") String q, Pageable pageable);
+    Page<Alumno> buscarAlumnosConPagos(@Param("q") String q, Pageable pageable);
+
+    // Todos los pagos (con concepto coincidente si se buscó por concepto) de un grupo de alumnos, para pintar cada tarjeta
+    @Query("SELECT p FROM Pago p JOIN FETCH p.matricula m JOIN FETCH m.estudiante e " +
+            "WHERE e.id IN :alumnoIds " +
+            "ORDER BY e.apellido, e.nombre, p.fechaVencimiento DESC")
+    List<Pago> buscarPorAlumnoIds(@Param("alumnoIds") List<Long> alumnoIds);
 
     // Cuenta pagos no pagados agrupados por alumno (id del alumno, cantidad)
     @Query("SELECT p.matricula.estudiante.id, COUNT(p) " +

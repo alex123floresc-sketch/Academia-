@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AlumnoRepository extends JpaRepository<Alumno, Long> {
@@ -21,6 +22,8 @@ public interface AlumnoRepository extends JpaRepository<Alumno, Long> {
     boolean existsByDniAndIdNot(String dni, Long id);
 
     boolean existsByDni(String dni);
+
+    Optional<Alumno> findByDni(String dni);
 
     // Búsqueda paginada por nombre, apellido, DNI o correo (q vacío = todos los no eliminados)
     @Query(value = "SELECT a FROM Alumno a WHERE a.eliminado = false AND (:q IS NULL OR :q = '' " +

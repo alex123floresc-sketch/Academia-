@@ -6,7 +6,7 @@
 <div layout:fragment="contenido">
     <div class="card-head" style="border:none;padding:0 0 6px">
         <div><h2 style="font-family:'Fraunces',serif;font-weight:500;font-size:20px">Asistencia</h2>
-            <p style="font-size:12px;color:var(--ink-faint)">Elige ciclo, turno y día para ver las sesiones y registrar asistencia</p></div>
+            <p style="font-size:12px;color:var(--ink-faint)">Elige ciclo, turno y día para ver las sesiones y registrar la entrada de los alumnos</p></div>
     </div>
 
     <form th:action="@{/asistencias}" method="get" class="filters">
@@ -35,7 +35,7 @@
             <div class="val" style="font-size:16px" th:text="${h.horaInicio} + ' - ' + ${h.horaFin}"></div>
             <div class="delta" th:text="(${h.aula != null} ? 'Aula ' + ${h.aula} + ' · ' : '') + ${conteos.get(h.id)} + ' registrados hoy'"></div>
             <div style="margin-top:12px">
-                <a th:href="@{/asistencias/escanear/{id}(id=${h.id})}" class="btn btn-primary btn-sm">Escanear asistencia</a>
+                <a th:href="@{/asistencias/escanear/{id}(id=${h.id})}" class="btn btn-primary btn-sm">Registrar entrada</a>
             </div>
         </div>
     </div>

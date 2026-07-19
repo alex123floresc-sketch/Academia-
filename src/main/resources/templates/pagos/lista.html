@@ -27,22 +27,32 @@
     </div>
 
     <div class="card">
-        <div class="card-head"><div><h2>Cuotas y pensiones</h2><p>Seguimiento de pagos por alumno</p></div></div>
+        <div class="card-head"><div><h2>Cuotas y pensiones</h2><p>Seguimiento de pagos, agrupado por alumno</p></div></div>
         <div class="searchbar">
             <form method="get" th:action="@{/pagos}" style="display:flex;gap:8px;flex:1">
                 <input type="text" name="q" th:value="${q}" placeholder="Buscar por alumno o concepto...">
                 <button type="submit" class="btn btn-ghost btn-sm">Buscar</button>
             </form>
         </div>
+        <div th:if="${#lists.isEmpty(alumnos)}" class="empty">No hay pagos registrados aún.</div>
+    </div>
+
+    <div class="card" style="margin-top:16px" th:each="alumno : ${alumnos}">
+        <div class="card-head">
+            <div>
+                <h2 th:text="${alumno.nombre + ' ' + alumno.apellido}">Alumno</h2>
+                <p th:text="'DNI ' + (${alumno.dni} ?: '-')">-</p>
+            </div>
+            <a th:href="@{/alumnos/{id}/expediente(id=${alumno.id})}" class="btn btn-ghost btn-sm">Ver expediente</a>
+        </div>
         <table>
-            <thead><tr><th>Alumno</th><th>Concepto</th><th>Vence</th><th>Monto</th><th>Estado</th><th></th></tr></thead>
+            <thead><tr><th>Concepto</th><th>Vence</th><th>Monto</th><th>Estado</th><th></th></tr></thead>
             <tbody>
-            <tr th:each="pago : ${pagos}">
+            <tr th:each="pago : ${pagosPorAlumno.get(alumno.id)}">
                 <td>
                     <a th:href="@{/pagos/{id}(id=${pago.id})}" class="strong" style="text-decoration:none;color:inherit"
-                       th:text="${pago.matricula.estudiante.nombre + ' ' + pago.matricula.estudiante.apellido}"></a>
+                       th:text="${pago.concepto}"></a>
                 </td>
-                <td th:text="${pago.concepto}"></td>
                 <td th:text="${pago.fechaVencimiento}"></td>
                 <td>
                     <div class="strong" th:text="'S/ ' + ${pago.monto}"></div>
@@ -71,9 +81,11 @@
                     <span th:if="${pago.estado == 'PAGADO'}" class="pill pill-sage" th:text="${pago.metodo}">—</span>
                 </td>
             </tr>
-            <tr th:if="${#lists.isEmpty(pagos)}"><td colspan="6" class="empty">No hay pagos registrados aún.</td></tr>
             </tbody>
         </table>
+    </div>
+
+    <div class="card" th:if="${!#lists.isEmpty(alumnos)}" style="margin-top:16px">
         <div th:replace="~{fragments/paginacion :: paginacion(${pagina}, '/pagos', ${q})}"></div>
     </div>
 </div>

@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout}">
 <head>
-    <title>Escanear asistencia</title>
+    <title>Registrar entrada</title>
     <th:block layout:fragment="estilos">
         <meta name="_csrf" th:content="${_csrf.token}">
         <meta name="_csrf_header" th:content="${_csrf.headerName}">
@@ -12,6 +12,11 @@
 <div layout:fragment="contenido">
 
     <a th:href="@{/asistencias}" class="page-back">&laquo; Volver</a>
+
+    <div class="note">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 8v8m-3-5h6M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"/></svg>
+        <div>Este registro es solo de <b>entrada</b> del alumno a la sesión; no hay registro de salida.</div>
+    </div>
 
     <div class="card" style="margin-top:14px">
         <div class="card-head">
@@ -23,6 +28,20 @@
         <div style="padding:24px">
             <div id="reader" style="width:100%;max-width:420px;margin:0 auto"></div>
             <div id="scan-status" style="display:none;margin-top:16px"></div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+        <div class="card-head">
+            <div>
+                <h2>¿No trajo su carnet?</h2>
+                <p>Registra su entrada escribiendo su DNI</p>
+            </div>
+        </div>
+        <div style="padding:20px 24px;display:flex;gap:10px;flex-wrap:wrap">
+            <input type="text" id="dni-manual" inputmode="numeric" maxlength="8" placeholder="DNI (8 dígitos)"
+                   style="flex:1;min-width:180px;padding:10px 13px;border:1px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:13.5px">
+            <button type="button" id="btn-dni-manual" class="btn btn-primary">Registrar entrada</button>
         </div>
     </div>
 

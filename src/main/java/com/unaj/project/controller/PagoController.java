@@ -1,5 +1,6 @@
 package com.unaj.project.controller;
 
+import com.unaj.project.model.Alumno;
 import com.unaj.project.model.Pago;
 import com.unaj.project.service.MatriculaService;
 import com.unaj.project.service.PagoService;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/pagos")
@@ -30,11 +32,13 @@ public class PagoController {
 
     @GetMapping
     public String listar(@RequestParam(required = false) String q,
-                         @PageableDefault(size = 15) Pageable pageable,
+                         @PageableDefault(size = 10) Pageable pageable,
                          Model model) {
-        Page<Pago> pagina = pagoService.buscarPagina(q, pageable);
+        Page<Alumno> pagina = pagoService.buscarAlumnosConPagos(q, pageable);
+        List<Long> alumnoIds = pagina.getContent().stream().map(Alumno::getId).collect(Collectors.toList());
         model.addAttribute("pagina", pagina);
-        model.addAttribute("pagos", pagina.getContent());
+        model.addAttribute("alumnos", pagina.getContent());
+        model.addAttribute("pagosPorAlumno", pagoService.agruparPorAlumno(alumnoIds));
         model.addAttribute("q", q);
 
         List<Pago> todos = pagoService.listarTodos();

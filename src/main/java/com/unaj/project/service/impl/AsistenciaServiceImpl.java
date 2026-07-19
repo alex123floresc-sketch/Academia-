@@ -49,6 +49,8 @@ public class AsistenciaServiceImpl implements AsistenciaService {
         return asistenciaRepository.countByHorarioIdAndFecha(horarioId, LocalDate.now());
     }
 
+    // Este flujo registra únicamente la ENTRADA del alumno a la sesión (no hay registro de salida);
+    // por eso basta con una fila por alumno+horario+día (ver existsByAlumnoIdAndHorarioIdAndFecha).
     @Override
     @Transactional
     public AsistenciaResultadoDTO registrar(Long horarioId, String codigoQr, String username) {
@@ -57,14 +59,9 @@ public class AsistenciaServiceImpl implements AsistenciaService {
             return new AsistenciaResultadoDTO(false, "La sesión de clase no existe.", null);
         }
 
-        Long alumnoId = parseCodigoQr(codigoQr);
-        if (alumnoId == null) {
-            return new AsistenciaResultadoDTO(false, "Código QR no reconocido.", null);
-        }
-
-        Alumno alumno = alumnoRepository.findById(alumnoId).orElse(null);
+        Alumno alumno = resolverAlumno(codigoQr);
         if (alumno == null || alumno.isEliminado()) {
-            return new AsistenciaResultadoDTO(false, "Alumno no encontrado.", null);
+            return new AsistenciaResultadoDTO(false, "No se encontró ningún alumno con ese código o DNI.", null);
         }
 
         boolean matriculado = matriculaDetalleRepository.existeMatriculaActiva(
@@ -77,7 +74,7 @@ public class AsistenciaServiceImpl implements AsistenciaService {
         LocalDate hoy = LocalDate.now();
         if (asistenciaRepository.existsByAlumnoIdAndHorarioIdAndFecha(alumno.getId(), horarioId, hoy)) {
             return new AsistenciaResultadoDTO(false,
-                    alumno.getNombreCompleto() + " ya tiene asistencia registrada hoy.", alumno.getNombreCompleto());
+                    alumno.getNombreCompleto() + " ya tiene su entrada registrada hoy.", alumno.getNombreCompleto());
         }
 
         Usuario registradoPor = (username != null) ? usuarioRepository.findByUsername(username) : null;
@@ -90,17 +87,29 @@ public class AsistenciaServiceImpl implements AsistenciaService {
         asistencia.setRegistradoPor(registradoPor);
         asistenciaRepository.save(asistencia);
 
-        return new AsistenciaResultadoDTO(true, "Asistencia registrada.", alumno.getNombreCompleto());
+        return new AsistenciaResultadoDTO(true, "Entrada registrada.", alumno.getNombreCompleto());
     }
 
-    private Long parseCodigoQr(String codigo) {
+    // Acepta el código del QR del carnet ("ALU-{id}") o, si el alumno no lo trajo, su DNI de 8 dígitos.
+    private Alumno resolverAlumno(String codigo) {
         if (codigo == null) return null;
         String limpio = codigo.trim();
+        if (limpio.isEmpty()) return null;
+
         if (limpio.startsWith("ALU-")) {
-            limpio = limpio.substring(4);
+            try {
+                return alumnoRepository.findById(Long.parseLong(limpio.substring(4))).orElse(null);
+            } catch (NumberFormatException e) {
+                return null;
+            }
         }
+
+        if (limpio.matches("\\d{8}")) {
+            return alumnoRepository.findByDni(limpio).orElse(null);
+        }
+
         try {
-            return Long.parseLong(limpio);
+            return alumnoRepository.findById(Long.parseLong(limpio)).orElse(null);
         } catch (NumberFormatException e) {
             return null;
         }

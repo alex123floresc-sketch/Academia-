@@ -2,6 +2,7 @@ package com.unaj.project.service.impl;
 
 import com.unaj.project.exception.RecursoNoEncontradoException;
 import com.unaj.project.model.Abono;
+import com.unaj.project.model.Alumno;
 import com.unaj.project.model.Pago;
 import com.unaj.project.model.Usuario;
 import com.unaj.project.repository.AbonoRepository;
@@ -16,7 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class PagoServiceImpl implements PagoService {
@@ -38,8 +42,19 @@ public class PagoServiceImpl implements PagoService {
     }
 
     @Override
-    public Page<Pago> buscarPagina(String q, Pageable pageable) {
-        return pagoRepository.buscar(q, pageable);
+    public Page<Alumno> buscarAlumnosConPagos(String q, Pageable pageable) {
+        return pagoRepository.buscarAlumnosConPagos(q, pageable);
+    }
+
+    @Override
+    public Map<Long, List<Pago>> agruparPorAlumno(List<Long> alumnoIds) {
+        if (alumnoIds == null || alumnoIds.isEmpty()) {
+            return Map.of();
+        }
+        return pagoRepository.buscarPorAlumnoIds(alumnoIds).stream()
+                .collect(Collectors.groupingBy(
+                        p -> p.getMatricula().getEstudiante().getId(),
+                        LinkedHashMap::new, Collectors.toList()));
     }
 
     @Override

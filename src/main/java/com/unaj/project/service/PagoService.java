@@ -1,17 +1,24 @@
 package com.unaj.project.service;
 
 import com.unaj.project.model.Abono;
+import com.unaj.project.model.Alumno;
 import com.unaj.project.model.Pago;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 public interface PagoService {
     List<Pago> listarTodos();
-    Page<Pago> buscarPagina(String q, Pageable pageable);
     Pago buscarPorId(Long id);
     List<Pago> listarPorMatricula(Long matriculaId);
+
+    /** Alumnos con al menos un pago que coincide con la búsqueda, paginados, para agrupar el listado por alumno. */
+    Page<Alumno> buscarAlumnosConPagos(String q, Pageable pageable);
+
+    /** Pagos de los alumnos dados, agrupados por id de alumno (para pintar la tarjeta de cada uno). */
+    Map<Long, List<Pago>> agruparPorAlumno(List<Long> alumnoIds);
 
     /** Abonos registrados para un pago, del más reciente al más antiguo. */
     List<Abono> listarAbonos(Long pagoId);
