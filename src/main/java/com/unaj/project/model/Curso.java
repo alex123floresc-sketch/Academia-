@@ -21,7 +21,7 @@ public class Curso {
     private Integer horas;   // horas semanales (reemplaza a créditos)
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "docente_id")   // se conserva la columna/FK existente
+    @JoinColumn(name = "profesor_id")
     private Profesor profesor;
 
     // Borrado lógico

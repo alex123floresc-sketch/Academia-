@@ -28,12 +28,19 @@
                 <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
             </div>
             <div class="field">
-                <label>Profesor <span class="hint">opcional, se puede asignar después · escribe para buscar</span></label>
-                <input type="search" id="buscarProfesor" placeholder="Buscar profesor..." autocomplete="off" style="margin-bottom:8px">
-                <select th:field="*{profesorId}">
-                    <option value="">-- Sin asignar --</option>
-                    <option th:each="p : ${profesores}" th:value="${p.id}" th:text="${p.nombreCompleto}"></option>
-                </select>
+                <label>Profesor <span class="hint">opcional, se puede asignar después</span></label>
+                <div class="combo" id="comboProfesor" th:attr="data-selected=${cursoForm.profesorId}">
+                    <input type="text" class="combo-input" placeholder="Buscar profesor... (opcional)" autocomplete="off">
+                    <button type="button" class="combo-clear" aria-label="Quitar selección">&times;</button>
+                    <input type="hidden" name="profesorId" class="combo-value">
+                    <div class="combo-panel">
+                        <div class="combo-row" th:each="p : ${profesores}"
+                             th:attr="data-valor=${p.id},data-texto=${p.nombreCompleto},data-buscar=${#strings.toLowerCase(p.nombreCompleto)}">
+                            <div class="cn" th:text="${p.nombreCompleto}"></div>
+                        </div>
+                        <p class="combo-empty" style="display:none">Sin resultados.</p>
+                    </div>
+                </div>
             </div>
             <div class="form-foot">
                 <button type="submit" class="btn btn-primary">Guardar</button>
@@ -43,6 +50,6 @@
     </div>
 
     <script th:src="@{/js/buscador-select.js}"></script>
-    <script>initFiltroSelect('buscarProfesor', 'profesorId');</script>
+    <script>initCombo('comboProfesor');</script>
 </div>
 </html>

@@ -4,7 +4,7 @@ package com.unaj.project.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "docentes")
+@Table(name = "profesores")
 public class Profesor {
 
     @Id

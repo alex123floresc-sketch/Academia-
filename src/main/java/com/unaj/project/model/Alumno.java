@@ -4,7 +4,7 @@ package com.unaj.project.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "estudiantes")   // se conserva el nombre físico de la tabla
+@Table(name = "alumnos")
 public class Alumno {
 
     @Id
@@ -33,8 +33,7 @@ public class Alumno {
     private String telefonoPadre;
 
     // Área a la que postula (Ingenierías, Biomédicas, Sociales).
-    // Reutiliza la columna "carrera" para no perder datos existentes.
-    @Column(name = "carrera")
+    @Column(name = "area")
     private String area;
 
     // Borrado lógico: true = registro "eliminado" (oculto de los listados)

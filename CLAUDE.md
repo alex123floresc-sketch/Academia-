@@ -22,7 +22,7 @@ On Windows use `mvnw.cmd` instead of `./mvnw` if not running under Git Bash/Powe
 
 There is essentially one test currently (`ProjectApplicationTests`, a Spring context-load smoke test), so `spring-boot:run` plus manual verification in the browser is the primary way changes get checked.
 
-**Database**: requires a running MySQL instance. Connection is hardcoded in `src/main/resources/application.yml` — `jdbc:mysql://localhost:3306/proyect`, user `root`. `spring.jpa.hibernate.ddl-auto: update`, so schema evolves automatically from entity changes; there are no migration scripts (no Flyway/Liquibase). On first run, `DataInitializer` seeds two roles (`ROLE_ADMIN`, `ROLE_CAJERO`) and two users (`admin`/`admin123`, `cajero`/`cajero123`) if they don't already exist.
+**Database**: requires a running MySQL instance. `src/main/resources/application.yml` reads connection details from environment variables (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `PORT`, `SHOW_SQL`, `THYMELEAF_CACHE`), each with a local-dev default baked in (`jdbc:mysql://localhost:3306/Academia`, user `root`) so `./mvnw spring-boot:run` works out of the box locally; override the env vars for any other environment. `spring.jpa.hibernate.ddl-auto: update`, so schema evolves automatically from entity changes; there are no migration scripts (no Flyway/Liquibase) — see the `model/` note below for what that means in practice. On first run, `DataInitializer` seeds three roles (`ROLE_ADMIN`, `ROLE_CAJERO`, `ROLE_AUXILIAR`) and three users (`admin`/`admin123`, `cajero`/`cajero123`, `auxiliar`/`auxiliar123`) if they don't already exist.
 
 ## Architecture
 
@@ -31,7 +31,7 @@ Classic layered Spring MVC + Thymeleaf app, no REST/JSON API — controllers ret
 - `controller/` — `@Controller` classes, one per module (`AlumnoController`, `CursoController`, `MatriculaController`, etc.), each mapped under a plural path (`/alumnos`, `/cursos`, ...). Return Thymeleaf view names like `"alumnos/lista"` / `"alumnos/formulario"`, or `redirect:/...`.
 - `service/` + `service/impl/` — interface/implementation split. Business rules and transactional boundaries (`@Transactional`) live in `*ServiceImpl`, not in controllers or repositories.
 - `repository/` — Spring Data JPA interfaces. Custom queries (e.g. `findAllConEstudianteYSemestre`, `findByIdConDetalle` in `MatriculaRepository`) fetch aggregate roots with eager joins for detail pages, since entity associations default to `FetchType.LAZY`.
-- `model/` — JPA entities. Tables sometimes keep old physical names for backward compatibility with existing data even though the Java field/domain name has moved on — e.g. `Alumno` maps to table `estudiantes` and column `carrera` is now exposed as Java field `area`; `Matricula.estudiante`/`Matricula.semestre` are commented as kept "por compatibilidad". When touching these entities, don't rename columns/tables to match Java names — check for this kind of intentional drift first.
+- `model/` — JPA entities. Table/column physical names match the Java class/field names (`alumnos`, `profesores`, `ciclos`, `alumnos.area`, `cursos.profesor_id`, `matriculas.alumno_id`, `matriculas.ciclo_id`, etc.) — the tables were renamed directly against the database (`RENAME TABLE`/`RENAME COLUMN`, preserving data) so that `ddl-auto=update` wouldn't create orphaned duplicate tables, and the `@Table`/`@Column`/`@JoinColumn` annotations were updated to match in the same change. **If you're working against a database that predates this rename** (still has `estudiantes`/`docentes`/`semestres`/`carrera`/`docente_id`/`estudiante_id`/`semestre_id`), it needs the same one-time `RENAME TABLE`/`RENAME COLUMN` treatment before the app will start cleanly — don't just let Hibernate create fresh tables under the new names, that orphans the old data. One remaining bit of drift: `Matricula`'s Java *fields* are still named `estudiante` (type `Alumno`) and `semestre` (type `Ciclo`) rather than `alumno`/`ciclo` — renaming those would touch the JPQL derived-query method names (`findByEstudianteId...`) and every template binding (`m.estudiante`, `m.semestre`), so it was left out of scope; keep that in mind when searching for "alumno" or "ciclo" usage on `Matricula`.
 - `dto/` — `*Form` classes used for Bean Validation (`@Valid`) on create/edit forms, separate from the JPA entities.
 - `exception/` + `controller/GlobalExceptionHandler.java` — `RecursoNoEncontradoException` and `IllegalArgumentException`/`IllegalStateException` are caught centrally and turned into a redirect back to the current module's list view with a flash error message (`mensajeError`), rather than an error page. `GlobalExceptionHandler.rutaBaseDeModulo` derives the redirect target from the request URI against a hardcoded list of module prefixes — add new modules there too if their controllers should get this fallback behavior.
 - `config/SecurityConfig.java` — Spring Security filter chain; authorization is role-based per URL pattern (`hasRole("ADMIN")`, `hasAnyRole("ADMIN", "CAJERO")`), configured per-path rather than per-method/annotation. Check this file when adding new controller endpoints that should be restricted, especially write actions (`/nuevo`, `/guardar`, `/editar/**`, `/eliminar/**`), which are consistently admin/cajero-gated while read (`GET`) endpoints are just `authenticated()`.
@@ -40,33 +40,32 @@ Classic layered Spring MVC + Thymeleaf app, no REST/JSON API — controllers ret
 
 ### Enrollment domain notes
 
-`Matricula` (enrollment) is the most complex aggregate: one `Matricula` per (student, `Ciclo`) has many `MatriculaDetalle` (enrolled courses) and many `Pago` (payments, e.g. matrícula fee + pensión installment). `MatriculaServiceImpl.matricular(...)` is upsert-like: if a `Matricula` already exists for that student+ciclo, it replaces the course details (deleting old `MatriculaDetalle` rows directly via repository + `flush()` before clearing the in-memory collection — required because of the unique constraint on `(matricula_id, curso_id)`) rather than creating a new enrollment record.
+`Matricula` (enrollment) is the most complex aggregate: one `Matricula` per (student, `Ciclo`) has many `MatriculaDetalle` (enrolled courses) and many `Pago` (payments, e.g. matrícula fee + pensión installments). `MatriculaServiceImpl.matricular(...)` is upsert-like: if a `Matricula` already exists for that student+ciclo, it replaces the course details (deleting old `MatriculaDetalle` rows directly via repository + `flush()` before clearing the in-memory collection — required because of the unique constraint on `(matricula_id, curso_id)`) rather than creating a new enrollment record. `MatriculaService.agregarCuota(...)` adds a new `Pago` to an already-existing `Matricula` (e.g. next month's pensión) without touching enrollment/course details.
 
 ### Soft delete
 
-`Alumno` uses a boolean `eliminado` flag for logical deletion rather than removing rows; check for existing filtering-by-`eliminado` conventions in `AlumnoRepository`/`AlumnoServiceImpl` before adding new queries against that table.
+`Alumno`/`Profesor`/`Curso`/`Ciclo` use a boolean `eliminado` flag for logical deletion rather than removing rows; check for existing filtering-by-`eliminado` conventions in the corresponding repository/service before adding new queries against those tables.
+
+## Implemented beyond the original scaffold
+
+The app has grown well past its initial commit. These are already in place — **check here before re-adding them**:
+
+- **Success/error flash messages** on every module (`mensajeExito`/`mensajeError`, rendered once in `layout.html`), plus a dedicated `templates/error/404.html` / `500.html`.
+- **Server-side search + pagination** on every list view (`alumnos`, `cursos`, `profesores`, `ciclos`, `matriculas`, `pagos`, `usuarios`), all following the same shape: repository `buscar(q, Pageable)` with a `@Query`/`countQuery` pair, controller `@RequestParam(required=false) String q` + `@PageableDefault`, a `.searchbar` block in the template, and `fragments/paginacion :: paginacion`. Several services also keep an unpaginated `listarTodos()` — that's not redundant, it feeds pickers embedded in *other* forms (e.g. the course checklist in `matriculas/formulario.html`) which must stay unpaginated.
+- **Click-to-select searchable pickers** for single-choice fields with many rows (alumno, ciclo, curso, profesor), replacing plain `<select>` dropdowns — a hidden input holds the real value, and a `.courselist`/`.courserow`-style list of clickable rows is filtered live by a search box, so picking is a single click instead of open-dropdown-then-scroll. Shared JS lives in `static/js/buscador-select.js`.
+- **Mobile navigation.** The sidebar becomes a slide-in drawer with a hamburger toggle under ~920px; tables scroll horizontally instead of breaking layout.
+- **Reports & export** (`ReporteController`): PDF (flying-saucer) and Excel (Apache POI) for alumnos por ciclo/turno, ingresos por mes, and alumnos morosos.
+- **Dashboard chart** on `inicio.html` via Chart.js (ingresos por mes).
+- **Automatic overdue payments**: `scheduler/PagoScheduler` runs daily (`@Scheduled(cron = "0 0 1 * * *")`) and flips unpaid `Pago`s past their `fechaVencimiento` to `VENCIDO` via `PagoService.marcarVencidos()`.
+- **Student expediente** (`/alumnos/{id}/expediente`): every `Matricula` for that student, its cursos, and its pagos, plus an inline "+ Agregar cuota" form.
+- **Partial payments.** `Pago` has `montoPagado` (nullable column, treat `null` as `ZERO`) and a computed `getSaldo()`; a fourth `estado` value `PARCIAL` sits between `PENDIENTE` and `PAGADO`. Each payment/abono is its own `Abono` row (`model/Abono.java`: monto, fecha, método, `registradoPor`) rather than overwriting `Pago` directly — `PagoService.registrarAbono(...)` is the only way to move money against a `Pago`. Monthly income reporting (`ReporteServiceImpl.ingresosPorMes`) sums `Abono` rows (real cash received), not `Pago.monto` — don't switch that back to summing pagos, it would double- or under-count once partial payments exist.
+- **Extra alumno fields**: `dni` (required, 8 digits), `nombrePadre`/`telefonoPadre` (optional). `email` is optional (nullable, still unique when present) — always null-check/`?: '-'` it in templates, and skip the duplicate-check in `AlumnoServiceImpl.guardar()` when blank.
+
+## Still open
+
+- `HorarioController.guardar` binds straight from `@RequestParam`s onto the `Horario` entity rather than through a validated `dto/*Form` — it's not unvalidated (`HorarioServiceImpl.guardar` checks hora-fin-after-hora-inicio and schedule-overlap conflicts server-side), just a different pattern (service-layer validation, not Bean Validation) from the rest of the `*Form` + `@Valid` modules. Every other module (`Alumno`, `Curso`, `Profesor`, `Usuario`, `Ciclo`) does use a validated `*Form`.
+- `Matricula`'s Java field names (`estudiante`, `semestre`) still don't match the `Alumno`/`Ciclo` types they hold — see the `model/` note above.
 
 ## Stray items
 
 - A top-level `org/springframework/boot/diagnostics/annotations.xml` directory exists at the repo root (outside `src/`) — this is not part of the Maven source layout; don't treat it as an active source location.
-## Roadmap: potential improvements
-
-Forward-looking suggestions to move the app from "working" to production-quality, ordered by impact. Not yet implemented, or only partially — **verify current state before starting**, since some scaffolding already exists (Bean Validation `dto/*Form`, `GlobalExceptionHandler` with error flash, `Alumno` soft delete) and should be extended, not duplicated.
-
-### Robustness & UX (highest impact)
-
-- **Success/confirmation flash messages.** Error flash (`mensajeError`) already exists via `GlobalExceptionHandler`; add a parallel success channel (e.g. `mensajeExito`) set with `RedirectAttributes` after every guardar/eliminar, and render it once in the shared layout so all modules show "Guardado correctamente" / "Eliminado correctamente".
-- **Dedicated error page.** Current handling redirects back to the module list with a flash message; add a friendly `templates/error.html` (Spring Boot resolves it automatically) so uncaught errors and 404/500 never surface a raw stacktrace to the user.
-- **Complete Bean Validation coverage.** `@Valid` on `dto/*Form` exists for some forms; ensure every create/edit form has field constraints (`@NotBlank`, `@Email`, `@Positive` for `Curso.horas` and `Pago.monto`, uniqueness checks for `Alumno`/`Profesor` email) and that each template renders `th:errors` next to the field.
-- **Pagination & search on list views.** List controllers load whole tables today; switch to Spring Data `Pageable` and add simple filters (`findByNombreContainingIgnoreCase`, etc.), starting with `alumnos` and `pagos` where row counts grow fastest.
-
-### Domain features
-
-- **Reports & export.** Reuse the existing `flying-saucer-pdf` pipeline (already used for the enrollment receipt in `MatriculaController.fichaPdf`) to generate: alumnos por ciclo/turno, ingresos por mes, and alumnos morosos. Apache POI can add Excel export of the same datasets.
-- **Dashboard chart.** `InicioController` already computes metrics (totals, aforo por turno); add a Chart.js chart to `inicio.html` (e.g. ingresos por mes or matrículas por turno) for a stronger at-a-glance overview.
-- **Automatic overdue payments.** A `Pago` currently becomes `VENCIDO` only when edited by hand. Add an `@EnableScheduling` + `@Scheduled` daily job that flips `PENDIENTE` -> `VENCIDO` for pagos whose `fechaVencimiento` has passed.
-- **Student history / expediente view.** A per-`Alumno` detail page listing all of the student's `Matricula` across ciclos plus full `Pago` history — the natural front-desk lookup screen.
-
-### Explicitly NOT recommended
-
-- **Do not rename tables/columns to match Java names** (`estudiantes` -> `alumnos`, `semestres` -> `ciclos`, `docentes` -> `profesores`, `carrera` -> `area`). This physical-name drift is intentional and documented under `model/` above. Under `spring.jpa.hibernate.ddl-auto: update`, renaming would create new empty tables/columns and orphan existing data. Keep `@Table(name=...)` / `@Column(name=...)` mappings as they are.

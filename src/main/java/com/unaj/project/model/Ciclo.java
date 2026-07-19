@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "semestres")
+@Table(name = "ciclos")
 public class Ciclo {
 
     @Id

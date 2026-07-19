@@ -117,6 +117,22 @@ td .strong,td.strong{color:var(--ink);font-weight:500}
 .courserow .cn{font-size:13px;font-weight:500;color:var(--ink)}
 .courserow .cm{font-size:11.5px;color:var(--ink-faint)}
 .courserow .ch{margin-left:auto;font-size:11.5px;color:var(--ink-soft)}
+
+/* Combobox: buscar y seleccionar de un clic en vez de un <select> nativo largo */
+.combo{position:relative}
+.combo-input{cursor:text;padding-right:34px!important}
+.combo-input.has-value{color:var(--ink);font-weight:500}
+.combo-clear{all:unset;position:absolute;right:9px;top:50%;transform:translateY(-50%);color:var(--ink-faint);cursor:pointer;font-size:16px;line-height:1;padding:6px;display:none}
+.combo.has-value .combo-clear{display:block}
+.combo-panel{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);box-shadow:0 14px 32px -14px rgba(49,59,55,.28);max-height:264px;overflow-y:auto;display:none}
+.combo-panel.open{display:block}
+.combo-row{display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;transition:.12s;border-bottom:1px solid var(--line-soft)}
+.combo-row:last-child{border-bottom:none}
+.combo-row:hover,.combo-row.active{background:var(--surface-2)}
+.combo-row .cn{font-size:13px;font-weight:500;color:var(--ink)}
+.combo-row .cm{font-size:11.5px;color:var(--ink-faint)}
+.combo-row .ch{margin-left:auto;font-size:11.5px;color:var(--ink-soft)}
+.combo-empty{padding:16px;text-align:center;font-size:12.5px;color:var(--ink-faint)}
 .pay-box{background:var(--sage-soft);border:1px solid #D7E5DF;border-radius:var(--radius);padding:18px 20px;margin-top:6px}
 .pay-box .pt{font-family:'Fraunces',serif;font-weight:600;font-size:15px;color:var(--sage-strong);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .pay-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--sage-strong);padding:5px 0}

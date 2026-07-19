@@ -15,12 +15,12 @@ public class Matricula {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "estudiante_id", nullable = false)
-    private Alumno estudiante;   // tipo Alumno, propiedad se mantiene por compatibilidad
+    @JoinColumn(name = "alumno_id", nullable = false)
+    private Alumno estudiante;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "semestre_id", nullable = false)
-    private Ciclo semestre;      // tipo Ciclo, propiedad se mantiene por compatibilidad
+    @JoinColumn(name = "ciclo_id", nullable = false)
+    private Ciclo semestre;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)         // nullable para no romper filas existentes

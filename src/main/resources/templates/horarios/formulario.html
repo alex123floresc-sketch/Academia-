@@ -12,23 +12,37 @@
         <form th:action="@{/horarios/guardar}" method="post">
             <input type="hidden" name="id" th:value="${horario.id}">
             <div class="field">
-                <label>Curso <span class="hint">escribe para buscar</span></label>
-                <input type="search" id="buscarCurso" placeholder="Buscar por código o nombre..." autocomplete="off" style="margin-bottom:8px">
-                <select name="cursoId" id="selectCurso" required>
-                    <option value="">-- Seleccione --</option>
-                    <option th:each="c : ${cursos}" th:value="${c.id}" th:text="${c.codigo + ' - ' + c.nombre}"
-                            th:selected="${horario.curso != null and horario.curso.id == c.id}"></option>
-                </select>
+                <label>Curso</label>
+                <div class="combo" id="comboCurso" th:attr="data-selected=${horario.curso != null ? horario.curso.id : null}">
+                    <input type="text" class="combo-input" placeholder="Buscar por código o nombre..." autocomplete="off" required>
+                    <button type="button" class="combo-clear" aria-label="Quitar selección">&times;</button>
+                    <input type="hidden" name="cursoId" class="combo-value">
+                    <div class="combo-panel">
+                        <div class="combo-row" th:each="c : ${cursos}"
+                             th:attr="data-valor=${c.id},data-texto=${c.codigo + ' - ' + c.nombre},data-buscar=${#strings.toLowerCase(c.codigo + ' ' + c.nombre)}">
+                            <div class="cn" th:text="${c.nombre}"></div>
+                            <span class="ch" th:text="${c.codigo}"></span>
+                        </div>
+                        <p class="combo-empty" style="display:none">Sin resultados.</p>
+                    </div>
+                </div>
             </div>
 
             <div class="grid-2">
                 <div class="field">
-                    <label>Ciclo <span class="hint">escribe para buscar</span></label>
-                    <input type="search" id="buscarCiclo" placeholder="Buscar ciclo..." autocomplete="off" style="margin-bottom:8px">
-                    <select name="cicloId" id="selectCiclo" required>
-                        <option th:each="c : ${ciclos}" th:value="${c.id}" th:text="${c.nombre}"
-                                th:selected="${horario.ciclo != null and horario.ciclo.id == c.id}"></option>
-                    </select>
+                    <label>Ciclo</label>
+                    <div class="combo" id="comboCiclo" th:attr="data-selected=${horario.ciclo != null ? horario.ciclo.id : null}">
+                        <input type="text" class="combo-input" placeholder="Buscar ciclo..." autocomplete="off" required>
+                        <button type="button" class="combo-clear" aria-label="Quitar selección">&times;</button>
+                        <input type="hidden" name="cicloId" class="combo-value">
+                        <div class="combo-panel">
+                            <div class="combo-row" th:each="c : ${ciclos}"
+                                 th:attr="data-valor=${c.id},data-texto=${c.nombre},data-buscar=${#strings.toLowerCase(c.nombre)}">
+                                <div class="cn" th:text="${c.nombre}"></div>
+                            </div>
+                            <p class="combo-empty" style="display:none">Sin resultados.</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="field">
                     <label>Turno</label>
@@ -63,8 +77,8 @@
 
     <script th:src="@{/js/buscador-select.js}"></script>
     <script>
-        initFiltroSelect('buscarCurso', 'selectCurso');
-        initFiltroSelect('buscarCiclo', 'selectCiclo');
+        initCombo('comboCurso');
+        initCombo('comboCiclo');
     </script>
 
     <!-- Validación en vivo del rango horario -->
