@@ -17,13 +17,24 @@ public class AlumnoForm {
     @Size(min = 2, max = 50, message = "El apellido debe tener entre 2 y 50 caracteres")
     private String apellido;
 
-    @NotBlank(message = "El correo es obligatorio")
+    // Opcional
     @Email(message = "El correo no tiene un formato válido")
     private String email;
 
     // Opcional; si se llena, debe ser 9 dígitos
     @Pattern(regexp = "^$|^[0-9]{9}$", message = "El celular debe tener 9 dígitos")
     private String celular;
+
+    @NotBlank(message = "El DNI es obligatorio")
+    @Pattern(regexp = "^[0-9]{8}$", message = "El DNI debe tener 8 dígitos")
+    private String dni;
+
+    // Opcional
+    private String nombrePadre;
+
+    // Opcional; si se llena, debe ser 9 dígitos
+    @Pattern(regexp = "^$|^[0-9]{9}$", message = "El teléfono del padre debe tener 9 dígitos")
+    private String telefonoPadre;
 
     @NotBlank(message = "El área es obligatoria")
     private String area;
@@ -44,6 +55,15 @@ public class AlumnoForm {
 
     public String getCelular() { return celular; }
     public void setCelular(String celular) { this.celular = celular; }
+
+    public String getDni() { return dni; }
+    public void setDni(String dni) { this.dni = dni; }
+
+    public String getNombrePadre() { return nombrePadre; }
+    public void setNombrePadre(String nombrePadre) { this.nombrePadre = nombrePadre; }
+
+    public String getTelefonoPadre() { return telefonoPadre; }
+    public void setTelefonoPadre(String telefonoPadre) { this.telefonoPadre = telefonoPadre; }
 
     public String getArea() { return area; }
     public void setArea(String area) { this.area = area; }

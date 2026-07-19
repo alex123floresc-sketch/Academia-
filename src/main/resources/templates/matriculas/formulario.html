@@ -24,8 +24,9 @@
                     </select>
                 </div>
                 <div class="field">
-                    <label>Ciclo</label>
-                    <select name="cicloId" required>
+                    <label>Ciclo <span class="hint">escribe para buscar</span></label>
+                    <input type="search" id="buscarCiclo" placeholder="Buscar ciclo..." autocomplete="off" style="margin-bottom:8px">
+                    <select name="cicloId" id="selectCiclo" required>
                         <option th:each="c : ${ciclos}" th:value="${c.id}" th:text="${c.nombre}"
                                 th:selected="${cicloActivo != null and cicloActivo.id == c.id}"></option>
                     </select>
@@ -105,47 +106,11 @@
     <!-- Script de cálculo del total en tiempo real -->
     <script>(function(){  var montos = document.querySelectorAll('.js-monto');  var out = document.getElementById('totalPago');  function calc(){    var t = 0;    montos.forEach(function(i){ t += parseFloat(i.value) || 0; });    out.textContent = 'S/ ' + t.toFixed(2);  }  montos.forEach(function(i){ i.addEventListener('input', calc); });  calc();})();</script>
 
-    <!-- Búsqueda de alumno -->
-    <script>(function(){
-        var buscar = document.getElementById('buscarAlumno');
-        var select = document.getElementById('selectAlumno');
-        if(!buscar || !select) return;
-        var opciones = Array.prototype.slice.call(select.options).filter(function(o){ return o.value !== ''; });
-        buscar.addEventListener('input', function(){
-            var q = buscar.value.trim().toLowerCase();
-            opciones.forEach(function(o){ o.hidden = q !== '' && o.text.toLowerCase().indexOf(q) === -1; });
-        });
-    })();</script>
-
-    <!-- Búsqueda y contador de cursos -->
-    <script>(function(){
-        var buscar = document.getElementById('buscarCurso');
-        var lista = document.getElementById('courseList');
-        var vacio = document.getElementById('courseEmpty');
-        var contador = document.getElementById('cursosSelCount');
-        if(!lista) return;
-        var filas = Array.prototype.slice.call(lista.querySelectorAll('.courserow'));
-        var checks = Array.prototype.slice.call(lista.querySelectorAll('.js-curso'));
-
-        if(buscar){
-            buscar.addEventListener('input', function(){
-                var q = buscar.value.trim().toLowerCase();
-                var visibles = 0;
-                filas.forEach(function(fila){
-                    var coincide = q === '' || (fila.getAttribute('data-buscar') || '').indexOf(q) !== -1;
-                    fila.style.display = coincide ? '' : 'none';
-                    if(coincide) visibles++;
-                });
-                vacio.style.display = visibles === 0 ? 'block' : 'none';
-            });
-        }
-
-        function actualizarContador(){
-            var n = checks.filter(function(c){ return c.checked; }).length;
-            contador.textContent = n === 0 ? 'Ningún curso seleccionado.' : (n === 1 ? '1 curso seleccionado.' : n + ' cursos seleccionados.');
-        }
-        checks.forEach(function(c){ c.addEventListener('change', actualizarContador); });
-        actualizarContador();
-    })();</script>
+    <script th:src="@{/js/buscador-select.js}"></script>
+    <script>
+        initFiltroSelect('buscarAlumno', 'selectAlumno');
+        initFiltroSelect('buscarCiclo', 'selectCiclo');
+        initFiltroLista('buscarCurso', 'courseList', '.courserow', 'courseEmpty', 'js-curso', 'cursosSelCount');
+    </script>
 </div>
 </html>

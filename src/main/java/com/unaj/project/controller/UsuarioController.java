@@ -1,8 +1,12 @@
 package com.unaj.project.controller;
 
 import com.unaj.project.dto.UsuarioForm;
+import com.unaj.project.model.Usuario;
 import com.unaj.project.service.UsuarioService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,8 +24,13 @@ public class UsuarioController {
     }
 
     @GetMapping
-    public String listar(Model model) {
-        model.addAttribute("usuarios", usuarioService.listarTodos());
+    public String listar(@RequestParam(required = false) String q,
+                         @PageableDefault(size = 15) Pageable pageable,
+                         Model model) {
+        Page<Usuario> pagina = usuarioService.buscarPagina(q, pageable);
+        model.addAttribute("pagina", pagina);
+        model.addAttribute("usuarios", pagina.getContent());
+        model.addAttribute("q", q);
         return "usuarios/lista";
     }
 

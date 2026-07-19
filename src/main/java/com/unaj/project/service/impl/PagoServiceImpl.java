@@ -1,8 +1,12 @@
 package com.unaj.project.service.impl;
 
 import com.unaj.project.exception.RecursoNoEncontradoException;
+import com.unaj.project.model.Abono;
 import com.unaj.project.model.Pago;
+import com.unaj.project.model.Usuario;
+import com.unaj.project.repository.AbonoRepository;
 import com.unaj.project.repository.PagoRepository;
+import com.unaj.project.repository.UsuarioRepository;
 import com.unaj.project.service.PagoService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,9 +22,14 @@ import java.util.List;
 public class PagoServiceImpl implements PagoService {
 
     private final PagoRepository pagoRepository;
+    private final AbonoRepository abonoRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public PagoServiceImpl(PagoRepository pagoRepository) {
+    public PagoServiceImpl(PagoRepository pagoRepository, AbonoRepository abonoRepository,
+                           UsuarioRepository usuarioRepository) {
         this.pagoRepository = pagoRepository;
+        this.abonoRepository = abonoRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Override
@@ -45,15 +54,45 @@ public class PagoServiceImpl implements PagoService {
     }
 
     @Override
+    public List<Abono> listarAbonos(Long pagoId) {
+        return abonoRepository.findByPagoIdOrderByFechaDesc(pagoId);
+    }
+
+    @Override
     @Transactional
-    public Pago registrarPago(Long pagoId, String metodo) {
+    public Pago registrarAbono(Long pagoId, BigDecimal monto, String metodo, String username) {
         Pago pago = buscarPorId(pagoId);
-        if ("PAGADO".equals(pago.getEstado())) {
-            throw new IllegalStateException("Este pago ya fue registrado.");
+
+        BigDecimal saldo = pago.getSaldo();
+        if (saldo.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalStateException("Este pago ya está saldado.");
         }
-        pago.setEstado("PAGADO");
-        pago.setFechaPago(LocalDateTime.now());
+        if (monto == null || monto.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("El monto del abono debe ser mayor a 0.");
+        }
+        if (monto.compareTo(saldo) > 0) {
+            throw new IllegalArgumentException("El abono no puede superar el saldo pendiente (S/ " + saldo + ").");
+        }
+
+        Usuario registradoPor = (username != null) ? usuarioRepository.findByUsername(username) : null;
+
+        Abono abono = new Abono();
+        abono.setPago(pago);
+        abono.setMonto(monto);
+        abono.setFecha(LocalDateTime.now());
+        abono.setMetodo(metodo);
+        abono.setRegistradoPor(registradoPor);
+        abonoRepository.save(abono);
+
+        pago.setMontoPagado(pago.getMontoPagado().add(monto));
         pago.setMetodo(metodo);
+        if (pago.getMontoPagado().compareTo(pago.getMonto()) >= 0) {
+            pago.setEstado("PAGADO");
+            pago.setFechaPago(LocalDateTime.now());
+        } else {
+            pago.setEstado("PARCIAL");
+        }
+
         return pagoRepository.save(pago);
     }
 
@@ -64,6 +103,21 @@ public class PagoServiceImpl implements PagoService {
         return pagos.stream()
                 .filter(p -> estado.equals(p.getEstado()))
                 .map(Pago::getMonto)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    @Override
+    public BigDecimal totalCobrado(List<Pago> pagos) {
+        return pagos.stream()
+                .map(Pago::getMontoPagado)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    @Override
+    public BigDecimal totalSaldo(List<Pago> pagos, String estado) {
+        return pagos.stream()
+                .filter(p -> estado.equals(p.getEstado()))
+                .map(Pago::getSaldo)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 

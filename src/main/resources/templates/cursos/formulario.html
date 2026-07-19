@@ -28,7 +28,8 @@
                 <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
             </div>
             <div class="field">
-                <label>Profesor <span class="hint">opcional, se puede asignar después</span></label>
+                <label>Profesor <span class="hint">opcional, se puede asignar después · escribe para buscar</span></label>
+                <input type="search" id="buscarProfesor" placeholder="Buscar profesor..." autocomplete="off" style="margin-bottom:8px">
                 <select th:field="*{profesorId}">
                     <option value="">-- Sin asignar --</option>
                     <option th:each="p : ${profesores}" th:value="${p.id}" th:text="${p.nombreCompleto}"></option>
@@ -40,5 +41,8 @@
             </div>
         </form>
     </div>
+
+    <script th:src="@{/js/buscador-select.js}"></script>
+    <script>initFiltroSelect('buscarProfesor', 'profesorId');</script>
 </div>
 </html>

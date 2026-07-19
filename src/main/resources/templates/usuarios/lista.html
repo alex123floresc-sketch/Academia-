@@ -10,6 +10,12 @@
             <a th:href="@{/usuarios/nuevo}" class="btn btn-primary btn-sm">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo usuario</a>
         </div>
+        <div class="searchbar">
+            <form method="get" th:action="@{/usuarios}" style="display:flex;gap:8px;flex:1">
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar por usuario o nombre...">
+                <button type="submit" class="btn btn-ghost btn-sm">Buscar</button>
+            </form>
+        </div>
         <table>
             <thead><tr><th>Usuario</th><th>Nombre</th><th>Roles</th><th>Estado</th><th></th></tr></thead>
             <tbody>
@@ -34,6 +40,7 @@
             <tr th:if="${#lists.isEmpty(usuarios)}"><td colspan="5" class="empty">No hay usuarios registrados aún.</td></tr>
             </tbody>
         </table>
+        <div th:replace="~{fragments/paginacion :: paginacion(${pagina}, '/usuarios', ${q})}"></div>
     </div>
 </div>
 </html>

@@ -11,7 +11,6 @@
         <div th:if="${error}" class="alert-error" th:text="${error}"></div>
         <form th:action="@{/horarios/guardar}" method="post">
             <input type="hidden" name="id" th:value="${horario.id}">
-
             <div class="field">
                 <label>Curso <span class="hint">escribe para buscar</span></label>
                 <input type="search" id="buscarCurso" placeholder="Buscar por código o nombre..." autocomplete="off" style="margin-bottom:8px">
@@ -24,8 +23,9 @@
 
             <div class="grid-2">
                 <div class="field">
-                    <label>Ciclo</label>
-                    <select name="cicloId" required>
+                    <label>Ciclo <span class="hint">escribe para buscar</span></label>
+                    <input type="search" id="buscarCiclo" placeholder="Buscar ciclo..." autocomplete="off" style="margin-bottom:8px">
+                    <select name="cicloId" id="selectCiclo" required>
                         <option th:each="c : ${ciclos}" th:value="${c.id}" th:text="${c.nombre}"
                                 th:selected="${horario.ciclo != null and horario.ciclo.id == c.id}"></option>
                     </select>
@@ -61,17 +61,11 @@
         </form>
     </div>
 
-    <!-- Búsqueda de curso -->
-    <script>(function(){
-        var buscar = document.getElementById('buscarCurso');
-        var select = document.getElementById('selectCurso');
-        if(!buscar || !select) return;
-        var opciones = Array.prototype.slice.call(select.options).filter(function(o){ return o.value !== ''; });
-        buscar.addEventListener('input', function(){
-            var q = buscar.value.trim().toLowerCase();
-            opciones.forEach(function(o){ o.hidden = q !== '' && o.text.toLowerCase().indexOf(q) === -1; });
-        });
-    })();</script>
+    <script th:src="@{/js/buscador-select.js}"></script>
+    <script>
+        initFiltroSelect('buscarCurso', 'selectCurso');
+        initFiltroSelect('buscarCiclo', 'selectCiclo');
+    </script>
 
     <!-- Validación en vivo del rango horario -->
     <script>(function(){

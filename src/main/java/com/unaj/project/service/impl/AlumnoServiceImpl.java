@@ -54,18 +54,31 @@ public class AlumnoServiceImpl implements AlumnoService {
             alumno = new Alumno();                // crea uno nuevo
         }
 
-        boolean emailDuplicado = (form.getId() != null)
-                ? alumnoRepository.existsByEmailIgnoreCaseAndIdNot(form.getEmail(), form.getId())
-                : alumnoRepository.existsByEmailIgnoreCase(form.getEmail());
-        if (emailDuplicado) {
-            throw new IllegalArgumentException("Ya existe un alumno registrado con ese correo.");
+        String email = (form.getEmail() != null && !form.getEmail().isBlank()) ? form.getEmail() : null;
+        if (email != null) {
+            boolean emailDuplicado = (form.getId() != null)
+                    ? alumnoRepository.existsByEmailIgnoreCaseAndIdNot(email, form.getId())
+                    : alumnoRepository.existsByEmailIgnoreCase(email);
+            if (emailDuplicado) {
+                throw new IllegalArgumentException("Ya existe un alumno registrado con ese correo.");
+            }
+        }
+
+        boolean dniDuplicado = (form.getId() != null)
+                ? alumnoRepository.existsByDniAndIdNot(form.getDni(), form.getId())
+                : alumnoRepository.existsByDni(form.getDni());
+        if (dniDuplicado) {
+            throw new IllegalArgumentException("Ya existe un alumno registrado con ese DNI.");
         }
 
         // Mapeo DTO -> entidad
         alumno.setNombre(form.getNombre());
         alumno.setApellido(form.getApellido());
-        alumno.setEmail(form.getEmail());
+        alumno.setEmail(email);
         alumno.setCelular(form.getCelular());
+        alumno.setDni(form.getDni());
+        alumno.setNombrePadre(form.getNombrePadre());
+        alumno.setTelefonoPadre(form.getTelefonoPadre());
         alumno.setArea(form.getArea());
 
         alumnoRepository.save(alumno);
@@ -88,6 +101,9 @@ public class AlumnoServiceImpl implements AlumnoService {
         form.setApellido(alumno.getApellido());
         form.setEmail(alumno.getEmail());
         form.setCelular(alumno.getCelular());
+        form.setDni(alumno.getDni());
+        form.setNombrePadre(alumno.getNombrePadre());
+        form.setTelefonoPadre(alumno.getTelefonoPadre());
         form.setArea(alumno.getArea());
         return form;
     }

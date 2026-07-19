@@ -35,8 +35,12 @@
         <td th:text="${matricula.estudiante.nombre} + ' ' + ${matricula.estudiante.apellido}">-</td>
     </tr>
     <tr>
+        <td class="label">DNI</td>
+        <td th:text="${matricula.estudiante.dni} ?: '-'">-</td>
+    </tr>
+    <tr>
         <td class="label">Correo</td>
-        <td th:text="${matricula.estudiante.email}">-</td>
+        <td th:text="${matricula.estudiante.email} ?: '-'">-</td>
     </tr>
     <tr>
         <td class="label">Área</td>

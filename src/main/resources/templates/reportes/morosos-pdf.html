@@ -27,7 +27,7 @@
     <tbody>
     <tr th:each="fila : ${filas}">
         <td th:text="${fila.nombre} + ' ' + ${fila.apellido}">-</td>
-        <td th:text="${fila.email}">-</td>
+        <td th:text="${fila.email} ?: '-'">-</td>
         <td th:text="${fila.pagosVencidos}">0</td>
         <td th:text="'S/ ' + ${fila.montoAdeudado}">0</td>
     </tr>

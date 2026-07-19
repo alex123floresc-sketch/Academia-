@@ -7,6 +7,8 @@ import com.unaj.project.model.Usuario;
 import com.unaj.project.repository.RolRepository;
 import com.unaj.project.repository.UsuarioRepository;
 import com.unaj.project.service.UsuarioService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +33,11 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public List<Usuario> listarTodos() { return usuarioRepository.findAll(); }
+
+    @Override
+    public Page<Usuario> buscarPagina(String q, Pageable pageable) {
+        return usuarioRepository.buscar(q, pageable);
+    }
 
     @Override
     public Usuario buscarPorId(Long id) {

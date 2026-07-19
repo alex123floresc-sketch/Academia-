@@ -1,8 +1,12 @@
 package com.unaj.project.controller;
 
 import com.unaj.project.dto.CicloForm;
+import com.unaj.project.model.Ciclo;
 import com.unaj.project.service.CicloService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,8 +24,13 @@ public class CicloController {
     }
 
     @GetMapping
-    public String listar(Model model) {
-        model.addAttribute("ciclos", cicloService.listarTodos());
+    public String listar(@RequestParam(required = false) String q,
+                         @PageableDefault(size = 15) Pageable pageable,
+                         Model model) {
+        Page<Ciclo> pagina = cicloService.buscarPagina(q, pageable);
+        model.addAttribute("pagina", pagina);
+        model.addAttribute("ciclos", pagina.getContent());
+        model.addAttribute("q", q);
         return "ciclos/lista";
     }
 

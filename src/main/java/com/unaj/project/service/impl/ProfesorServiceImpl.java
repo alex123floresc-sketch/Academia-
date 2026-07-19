@@ -5,6 +5,8 @@ import com.unaj.project.exception.RecursoNoEncontradoException;
 import com.unaj.project.model.Profesor;
 import com.unaj.project.repository.ProfesorRepository;
 import com.unaj.project.service.ProfesorService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,11 @@ public class ProfesorServiceImpl implements ProfesorService {
     @Override
     public List<Profesor> listarTodos() {
         return profesorRepository.findByEliminadoFalse();
+    }
+
+    @Override
+    public Page<Profesor> buscarPagina(String q, Pageable pageable) {
+        return profesorRepository.buscar(q, pageable);
     }
 
     @Override

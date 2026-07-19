@@ -17,11 +17,20 @@ public class Alumno {
     @Column(nullable = false)
     private String apellido;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String email;
 
     @Column
     private String celular;
+
+    @Column(length = 8)
+    private String dni;
+
+    @Column(name = "nombre_padre")
+    private String nombrePadre;
+
+    @Column(name = "telefono_padre")
+    private String telefonoPadre;
 
     // Área a la que postula (Ingenierías, Biomédicas, Sociales).
     // Reutiliza la columna "carrera" para no perder datos existentes.
@@ -48,6 +57,15 @@ public class Alumno {
 
     public String getCelular() { return celular; }
     public void setCelular(String celular) { this.celular = celular; }
+
+    public String getDni() { return dni; }
+    public void setDni(String dni) { this.dni = dni; }
+
+    public String getNombrePadre() { return nombrePadre; }
+    public void setNombrePadre(String nombrePadre) { this.nombrePadre = nombrePadre; }
+
+    public String getTelefonoPadre() { return telefonoPadre; }
+    public void setTelefonoPadre(String telefonoPadre) { this.telefonoPadre = telefonoPadre; }
 
     public String getArea() { return area; }
     public void setArea(String area) { this.area = area; }

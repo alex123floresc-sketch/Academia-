@@ -46,24 +46,17 @@ public interface PagoRepository extends JpaRepository<Pago, Long> {
             "GROUP BY p.matricula.estudiante.id")
     List<Object[]> contarDeudaPorAlumno();
 
-    // Reporte: ingresos cobrados agrupados por mes (yyyy-MM)
-    @Query(value = "SELECT DATE_FORMAT(p.fecha_pago, '%Y-%m'), SUM(p.monto) " +
-            "FROM pagos p WHERE p.estado = 'PAGADO' " +
-            "GROUP BY DATE_FORMAT(p.fecha_pago, '%Y-%m') " +
-            "ORDER BY 1", nativeQuery = true)
-    List<Object[]> sumarIngresosPorMes();
-
-    // Reporte: alumnos con pagos vencidos, cantidad y monto adeudado
-    @Query("SELECT a.id, a.nombre, a.apellido, a.email, COUNT(p), SUM(p.monto) " +
+    // Reporte: alumnos con pagos vencidos, cantidad y saldo realmente adeudado
+    @Query("SELECT a.id, a.nombre, a.apellido, a.email, COUNT(p), SUM(p.monto - COALESCE(p.montoPagado, 0)) " +
             "FROM Pago p JOIN p.matricula m JOIN m.estudiante a " +
             "WHERE p.estado = 'VENCIDO' " +
             "GROUP BY a.id, a.nombre, a.apellido, a.email " +
-            "ORDER BY SUM(p.monto) DESC")
+            "ORDER BY SUM(p.monto - COALESCE(p.montoPagado, 0)) DESC")
     List<Object[]> listarMorosos();
 
-    // Marca como VENCIDO todo pago PENDIENTE cuya fecha de vencimiento ya pasó
+    // Marca como VENCIDO todo pago PENDIENTE o PARCIAL cuya fecha de vencimiento ya pasó
     @Modifying
     @Query("UPDATE Pago p SET p.estado = 'VENCIDO' " +
-            "WHERE p.estado = 'PENDIENTE' AND p.fechaVencimiento < :hoy")
+            "WHERE p.estado IN ('PENDIENTE', 'PARCIAL') AND p.fechaVencimiento < :hoy")
     int marcarVencidos(@Param("hoy") LocalDate hoy);
 }

@@ -38,20 +38,29 @@
             <thead><tr><th>Alumno</th><th>Concepto</th><th>Vence</th><th>Monto</th><th>Estado</th><th></th></tr></thead>
             <tbody>
             <tr th:each="pago : ${pagos}">
-                <td class="strong" th:text="${pago.matricula.estudiante.nombre + ' ' + pago.matricula.estudiante.apellido}"></td>
+                <td>
+                    <a th:href="@{/pagos/{id}(id=${pago.id})}" class="strong" style="text-decoration:none;color:inherit"
+                       th:text="${pago.matricula.estudiante.nombre + ' ' + pago.matricula.estudiante.apellido}"></a>
+                </td>
                 <td th:text="${pago.concepto}"></td>
                 <td th:text="${pago.fechaVencimiento}"></td>
-                <td class="strong" th:text="'S/ ' + ${pago.monto}"></td>
+                <td>
+                    <div class="strong" th:text="'S/ ' + ${pago.monto}"></div>
+                    <div th:if="${pago.estado == 'PARCIAL'}" class="hint" th:text="'Saldo: S/ ' + ${pago.saldo}"></div>
+                </td>
                 <td>
                     <span th:if="${pago.estado == 'PAGADO'}" class="pill pill-sage">Pagado</span>
                     <span th:if="${pago.estado == 'PENDIENTE'}" class="pill pill-amber">Pendiente</span>
+                    <span th:if="${pago.estado == 'PARCIAL'}" class="pill pill-sky">Parcial</span>
                     <span th:if="${pago.estado == 'VENCIDO'}" class="pill pill-rose">Vencido</span>
                 </td>
                 <td>
                     <form class="tform" th:if="${pago.estado != 'PAGADO'}"
                           th:action="@{/pagos/registrar/{id}(id=${pago.id})}" method="post"
                           sec:authorize="hasAnyRole('ADMIN','CAJERO')"
-                          style="display:flex;gap:6px;align-items:center">
+                          style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                        <input type="number" name="monto" step="0.01" min="0.01" th:max="${pago.saldo}" th:value="${pago.saldo}"
+                               style="width:90px;padding:5px 8px;border:1px solid var(--line);border-radius:7px;font-size:12px;font-family:inherit">
                         <select name="metodo" style="padding:5px 8px;border:1px solid var(--line);border-radius:7px;font-size:12px;font-family:inherit">
                             <option value="EFECTIVO">Efectivo</option>
                             <option value="YAPE">Yape</option>

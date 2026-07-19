@@ -15,6 +15,12 @@
             <a th:href="@{/cursos/nuevo}" sec:authorize="hasRole('ADMIN')" class="btn btn-primary btn-sm">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo curso</a>
         </div>
+        <div class="searchbar">
+            <form method="get" th:action="@{/cursos}" style="display:flex;gap:8px;flex:1">
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre, código o profesor...">
+                <button type="submit" class="btn btn-ghost btn-sm">Buscar</button>
+            </form>
+        </div>
         <table>
             <thead><tr><th>Código</th><th>Curso</th><th>Horas / sem.</th><th>Profesor</th><th></th></tr></thead>
             <tbody>
@@ -35,6 +41,7 @@
             <tr th:if="${#lists.isEmpty(cursos)}"><td colspan="5" class="empty">No hay cursos registrados aún.</td></tr>
             </tbody>
         </table>
+        <div th:replace="~{fragments/paginacion :: paginacion(${pagina}, '/cursos', ${q})}"></div>
     </div>
 </div>
 </html>

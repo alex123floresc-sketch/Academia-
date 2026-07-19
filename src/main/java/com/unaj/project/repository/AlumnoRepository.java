@@ -18,14 +18,20 @@ public interface AlumnoRepository extends JpaRepository<Alumno, Long> {
 
     boolean existsByEmailIgnoreCase(String email);
 
-    // Búsqueda paginada por nombre, apellido o correo (q vacío = todos los no eliminados)
+    boolean existsByDniAndIdNot(String dni, Long id);
+
+    boolean existsByDni(String dni);
+
+    // Búsqueda paginada por nombre, apellido, DNI o correo (q vacío = todos los no eliminados)
     @Query(value = "SELECT a FROM Alumno a WHERE a.eliminado = false AND (:q IS NULL OR :q = '' " +
             "OR LOWER(a.nombre) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(a.apellido) LIKE LOWER(CONCAT('%', :q, '%')) " +
-            "OR LOWER(a.email) LIKE LOWER(CONCAT('%', :q, '%')))",
+            "OR LOWER(a.email) LIKE LOWER(CONCAT('%', :q, '%')) " +
+            "OR LOWER(a.dni) LIKE LOWER(CONCAT('%', :q, '%')))",
             countQuery = "SELECT COUNT(a) FROM Alumno a WHERE a.eliminado = false AND (:q IS NULL OR :q = '' " +
             "OR LOWER(a.nombre) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(a.apellido) LIKE LOWER(CONCAT('%', :q, '%')) " +
-            "OR LOWER(a.email) LIKE LOWER(CONCAT('%', :q, '%')))")
+            "OR LOWER(a.email) LIKE LOWER(CONCAT('%', :q, '%')) " +
+            "OR LOWER(a.dni) LIKE LOWER(CONCAT('%', :q, '%')))")
     Page<Alumno> buscar(@Param("q") String q, Pageable pageable);
 }

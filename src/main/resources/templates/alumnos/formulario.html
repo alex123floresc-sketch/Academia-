@@ -24,14 +24,31 @@
             </div>
             <div class="grid-2">
                 <div class="field">
-                    <label>Correo</label>
-                    <input type="email" th:field="*{email}" placeholder="correo@ejemplo.com">
-                    <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                    <label>DNI</label>
+                    <input type="text" th:field="*{dni}" placeholder="12345678" maxlength="8">
+                    <span class="field-error" th:if="${#fields.hasErrors('dni')}" th:errors="*{dni}"></span>
                 </div>
                 <div class="field">
-                    <label>Celular</label>
+                    <label>Celular <span class="hint">opcional</span></label>
                     <input type="text" th:field="*{celular}" placeholder="9XXXXXXXX">
                     <span class="field-error" th:if="${#fields.hasErrors('celular')}" th:errors="*{celular}"></span>
+                </div>
+            </div>
+            <div class="field">
+                <label>Correo <span class="hint">opcional</span></label>
+                <input type="email" th:field="*{email}" placeholder="correo@ejemplo.com">
+                <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label>Nombre del padre/apoderado <span class="hint">opcional</span></label>
+                    <input type="text" th:field="*{nombrePadre}" placeholder="Nombre completo">
+                    <span class="field-error" th:if="${#fields.hasErrors('nombrePadre')}" th:errors="*{nombrePadre}"></span>
+                </div>
+                <div class="field">
+                    <label>Teléfono del padre/apoderado <span class="hint">opcional</span></label>
+                    <input type="text" th:field="*{telefonoPadre}" placeholder="9XXXXXXXX">
+                    <span class="field-error" th:if="${#fields.hasErrors('telefonoPadre')}" th:errors="*{telefonoPadre}"></span>
                 </div>
             </div>
             <div class="field">

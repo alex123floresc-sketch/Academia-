@@ -1,8 +1,11 @@
 package com.unaj.project.repository;
 
 import com.unaj.project.model.Matricula;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -10,6 +13,19 @@ import java.util.Optional;
 
 @Repository
 public interface MatriculaRepository extends JpaRepository<Matricula, Long> {
+
+    // Búsqueda paginada por alumno o ciclo (q vacío = todas)
+    @Query(value = "SELECT m FROM Matricula m JOIN FETCH m.estudiante e JOIN FETCH m.semestre s " +
+            "WHERE (:q IS NULL OR :q = '' " +
+            "OR LOWER(e.nombre) LIKE LOWER(CONCAT('%', :q, '%')) " +
+            "OR LOWER(e.apellido) LIKE LOWER(CONCAT('%', :q, '%')) " +
+            "OR LOWER(s.nombre) LIKE LOWER(CONCAT('%', :q, '%')))",
+            countQuery = "SELECT COUNT(m) FROM Matricula m JOIN m.estudiante e JOIN m.semestre s " +
+            "WHERE (:q IS NULL OR :q = '' " +
+            "OR LOWER(e.nombre) LIKE LOWER(CONCAT('%', :q, '%')) " +
+            "OR LOWER(e.apellido) LIKE LOWER(CONCAT('%', :q, '%')) " +
+            "OR LOWER(s.nombre) LIKE LOWER(CONCAT('%', :q, '%')))")
+    Page<Matricula> buscar(@Param("q") String q, Pageable pageable);
 
     List<Matricula> findByEstudianteId(Long estudianteId);
 

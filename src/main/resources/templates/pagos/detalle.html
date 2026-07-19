@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head><title>Detalle de pago</title></head>
+<div layout:fragment="contenido">
+
+    <a th:href="@{/pagos}" class="page-back">&laquo; Volver a pagos</a>
+
+    <div class="card" style="margin-top:14px">
+        <div class="card-head">
+            <div>
+                <h2 th:text="${pago.concepto}">Concepto</h2>
+                <p th:text="${pago.matricula.estudiante.nombre + ' ' + pago.matricula.estudiante.apellido} + ' · Vence ' + ${pago.fechaVencimiento}">-</p>
+            </div>
+            <span th:if="${pago.estado == 'PAGADO'}" class="pill pill-sage">Pagado</span>
+            <span th:if="${pago.estado == 'PENDIENTE'}" class="pill pill-amber">Pendiente</span>
+            <span th:if="${pago.estado == 'PARCIAL'}" class="pill pill-sky">Parcial</span>
+            <span th:if="${pago.estado == 'VENCIDO'}" class="pill pill-rose">Vencido</span>
+        </div>
+        <div class="cons-grid" style="margin:20px">
+            <div class="cons-cell"><div class="k">Monto total</div><div class="v" th:text="'S/ ' + ${pago.monto}"></div></div>
+            <div class="cons-cell"><div class="k">Pagado</div><div class="v" th:text="'S/ ' + ${pago.montoPagado}"></div></div>
+            <div class="cons-cell full"><div class="k">Saldo pendiente</div><div class="v" th:text="'S/ ' + ${pago.saldo}"></div></div>
+        </div>
+
+        <div th:if="${pago.saldo.compareTo(T(java.math.BigDecimal).ZERO) > 0}" style="padding:0 20px 20px" sec:authorize="hasAnyRole('ADMIN','CAJERO')">
+            <form th:action="@{/pagos/registrar/{id}(id=${pago.id})}" method="post" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                <input type="number" name="monto" step="0.01" min="0.01" th:max="${pago.saldo}" th:value="${pago.saldo}"
+                       style="width:120px;padding:9px 12px;border:1px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:13px">
+                <select name="metodo" style="padding:9px 12px;border:1px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:13px">
+                    <option value="EFECTIVO">Efectivo</option>
+                    <option value="YAPE">Yape</option>
+                    <option value="TRANSFERENCIA">Transferencia</option>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm">Registrar abono</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+        <div class="card-head"><div><h2>Historial de abonos</h2></div></div>
+        <table>
+            <thead><tr><th>Fecha</th><th>Monto</th><th>Método</th><th>Registrado por</th></tr></thead>
+            <tbody>
+            <tr th:each="a : ${abonos}">
+                <td th:text="${#temporals.format(a.fecha, 'dd/MM/yyyy HH:mm')}">-</td>
+                <td class="strong" th:text="'S/ ' + ${a.monto}"></td>
+                <td><span class="pill pill-gray" th:text="${a.metodo}"></span></td>
+                <td th:text="${a.registradoPor != null} ? ${a.registradoPor.nombre} : '-'">-</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(abonos)}"><td colspan="4" class="empty">Aún no hay abonos registrados.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</html>

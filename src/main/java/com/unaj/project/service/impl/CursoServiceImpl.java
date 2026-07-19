@@ -7,6 +7,8 @@ import com.unaj.project.model.Profesor;
 import com.unaj.project.repository.CursoRepository;
 import com.unaj.project.repository.ProfesorRepository;
 import com.unaj.project.service.CursoService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,11 @@ public class CursoServiceImpl implements CursoService {
     @Override
     public List<Curso> listarTodos() {
         return cursoRepository.findAllConProfesor();
+    }
+
+    @Override
+    public Page<Curso> buscarPagina(String q, Pageable pageable) {
+        return cursoRepository.buscar(q, pageable);
     }
 
     @Override

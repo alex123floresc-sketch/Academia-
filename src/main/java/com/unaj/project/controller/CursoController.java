@@ -4,6 +4,9 @@ import com.unaj.project.dto.CursoForm;
 import com.unaj.project.service.CursoService;
 import com.unaj.project.service.ProfesorService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,8 +26,13 @@ public class CursoController {
     }
 
     @GetMapping
-    public String listar(Model model) {
-        model.addAttribute("cursos", cursoService.listarTodos());
+    public String listar(@RequestParam(required = false) String q,
+                         @PageableDefault(size = 15) Pageable pageable,
+                         Model model) {
+        Page<com.unaj.project.model.Curso> pagina = cursoService.buscarPagina(q, pageable);
+        model.addAttribute("pagina", pagina);
+        model.addAttribute("cursos", pagina.getContent());
+        model.addAttribute("q", q);
         return "cursos/lista";
     }
 

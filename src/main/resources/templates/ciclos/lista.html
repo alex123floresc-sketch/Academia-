@@ -10,6 +10,12 @@
             <a th:href="@{/ciclos/nuevo}" class="btn btn-primary btn-sm">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo ciclo</a>
         </div>
+        <div class="searchbar">
+            <form method="get" th:action="@{/ciclos}" style="display:flex;gap:8px;flex:1">
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre...">
+                <button type="submit" class="btn btn-ghost btn-sm">Buscar</button>
+            </form>
+        </div>
         <table>
             <thead><tr><th>Ciclo</th><th>Inicio</th><th>Fin</th><th>Estado</th><th></th></tr></thead>
             <tbody>
@@ -33,6 +39,7 @@
             <tr th:if="${#lists.isEmpty(ciclos)}"><td colspan="5" class="empty">No hay ciclos registrados aún.</td></tr>
             </tbody>
         </table>
+        <div th:replace="~{fragments/paginacion :: paginacion(${pagina}, '/ciclos', ${q})}"></div>
     </div>
 </div>
 </html>

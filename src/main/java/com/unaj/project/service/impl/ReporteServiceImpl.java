@@ -4,6 +4,7 @@ import com.unaj.project.dto.AlumnoMorosoDTO;
 import com.unaj.project.dto.AlumnosPorCicloTurnoDTO;
 import com.unaj.project.dto.IngresoMensualDTO;
 import com.unaj.project.model.Turno;
+import com.unaj.project.repository.AbonoRepository;
 import com.unaj.project.repository.MatriculaRepository;
 import com.unaj.project.repository.PagoRepository;
 import org.springframework.stereotype.Service;
@@ -16,10 +17,13 @@ public class ReporteServiceImpl implements com.unaj.project.service.ReporteServi
 
     private final MatriculaRepository matriculaRepository;
     private final PagoRepository pagoRepository;
+    private final AbonoRepository abonoRepository;
 
-    public ReporteServiceImpl(MatriculaRepository matriculaRepository, PagoRepository pagoRepository) {
+    public ReporteServiceImpl(MatriculaRepository matriculaRepository, PagoRepository pagoRepository,
+                              AbonoRepository abonoRepository) {
         this.matriculaRepository = matriculaRepository;
         this.pagoRepository = pagoRepository;
+        this.abonoRepository = abonoRepository;
     }
 
     @Override
@@ -34,7 +38,7 @@ public class ReporteServiceImpl implements com.unaj.project.service.ReporteServi
 
     @Override
     public List<IngresoMensualDTO> ingresosPorMes() {
-        return pagoRepository.sumarIngresosPorMes().stream()
+        return abonoRepository.sumarPorMes().stream()
                 .map(fila -> new IngresoMensualDTO(
                         (String) fila[0],
                         (BigDecimal) fila[1]))

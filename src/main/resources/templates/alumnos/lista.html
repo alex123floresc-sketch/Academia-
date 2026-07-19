@@ -20,13 +20,14 @@
         </div>
         <div class="searchbar">
             <form method="get" th:action="@{/alumnos}" style="display:flex;gap:8px;flex:1">
-                <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre, apellido o correo...">
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre, apellido, DNI o correo...">
                 <button type="submit" class="btn btn-ghost btn-sm">Buscar</button>
             </form>
         </div>
         <table>
             <thead>
             <tr>
+                <th>DNI</th>
                 <th>Alumno</th>
                 <th>Correo</th>
                 <th>Área</th>
@@ -37,10 +38,11 @@
             </thead>
             <tbody>
             <tr th:each="alumno : ${alumnos}">
+                <td th:text="${alumno.dni} ?: '-'"></td>
                 <td class="strong" th:text="${alumno.nombre + ' ' + alumno.apellido}"></td>
-                <td th:text="${alumno.email}"></td>
+                <td th:text="${alumno.email} ?: '-'"></td>
                 <td><span class="pill pill-lav" th:text="${alumno.area}"></span></td>
-                <td th:text="${alumno.celular}"></td>
+                <td th:text="${alumno.celular} ?: '-'"></td>
 
                 <!-- Columna con el estado de pago del alumno -->
                 <td>
@@ -62,7 +64,7 @@
                 </td>
             </tr>
             <tr th:if="${#lists.isEmpty(alumnos)}">
-                <td colspan="6" class="empty">No hay alumnos registrados aún.</td>
+                <td colspan="7" class="empty">No hay alumnos registrados aún.</td>
             </tr>
             </tbody>
         </table>

@@ -25,6 +25,11 @@ public class Pago {
     @Column(nullable = false, precision = 8, scale = 2)
     private BigDecimal monto;
 
+    // Suma de los abonos recibidos hasta ahora. Nullable (columna agregada sobre una tabla
+    // ya poblada); se trata como CERO cuando es null.
+    @Column(precision = 8, scale = 2)
+    private BigDecimal montoPagado;
+
     @Column(nullable = false)
     private LocalDate fechaVencimiento;
 
@@ -32,7 +37,7 @@ public class Pago {
     @Column
     private LocalDateTime fechaPago;
 
-    // PENDIENTE, PAGADO, VENCIDO
+    // PENDIENTE, PARCIAL, PAGADO, VENCIDO
     @Column(nullable = false)
     private String estado;
 
@@ -53,6 +58,11 @@ public class Pago {
 
     public BigDecimal getMonto() { return monto; }
     public void setMonto(BigDecimal monto) { this.monto = monto; }
+
+    public BigDecimal getMontoPagado() { return montoPagado != null ? montoPagado : BigDecimal.ZERO; }
+    public void setMontoPagado(BigDecimal montoPagado) { this.montoPagado = montoPagado; }
+
+    public BigDecimal getSaldo() { return monto.subtract(getMontoPagado()); }
 
     public LocalDate getFechaVencimiento() { return fechaVencimiento; }
     public void setFechaVencimiento(LocalDate fechaVencimiento) { this.fechaVencimiento = fechaVencimiento; }

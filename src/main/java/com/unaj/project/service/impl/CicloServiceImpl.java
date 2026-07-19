@@ -5,6 +5,8 @@ import com.unaj.project.exception.RecursoNoEncontradoException;
 import com.unaj.project.model.Ciclo;
 import com.unaj.project.repository.CicloRepository;
 import com.unaj.project.service.CicloService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,11 @@ public class CicloServiceImpl implements CicloService {
     @Override
     public List<Ciclo> listarTodos() {
         return cicloRepository.findByEliminadoFalse();
+    }
+
+    @Override
+    public Page<Ciclo> buscarPagina(String q, Pageable pageable) {
+        return cicloRepository.buscar(q, pageable);
     }
 
     @Override

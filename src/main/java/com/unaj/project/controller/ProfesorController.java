@@ -1,8 +1,12 @@
 package com.unaj.project.controller;
 
 import com.unaj.project.dto.ProfesorForm;
+import com.unaj.project.model.Profesor;
 import com.unaj.project.service.ProfesorService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,8 +24,13 @@ public class ProfesorController {
     }
 
     @GetMapping
-    public String listar(Model model) {
-        model.addAttribute("profesores", profesorService.listarTodos());
+    public String listar(@RequestParam(required = false) String q,
+                         @PageableDefault(size = 15) Pageable pageable,
+                         Model model) {
+        Page<Profesor> pagina = profesorService.buscarPagina(q, pageable);
+        model.addAttribute("pagina", pagina);
+        model.addAttribute("profesores", pagina.getContent());
+        model.addAttribute("q", q);
         return "profesores/lista";
     }
 

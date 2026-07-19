@@ -7,6 +7,8 @@ import com.unaj.project.repository.MatriculaDetalleRepository;
 import com.unaj.project.repository.MatriculaRepository;
 import com.unaj.project.repository.CicloRepository;
 import com.unaj.project.service.MatriculaService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +46,11 @@ public class MatriculaServiceImpl implements MatriculaService {
     @Override
     public List<Matricula> listarTodos() {
         return matriculaRepository.findAllConEstudianteYSemestre();
+    }
+
+    @Override
+    public Page<Matricula> buscarPagina(String q, Pageable pageable) {
+        return matriculaRepository.buscar(q, pageable);
     }
 
     @Override
@@ -158,8 +165,30 @@ public class MatriculaServiceImpl implements MatriculaService {
         Pago pago = new Pago();
         pago.setConcepto(concepto);
         pago.setMonto(monto);
+        pago.setMontoPagado(BigDecimal.ZERO);
         pago.setFechaVencimiento(vencimiento);
         pago.setEstado("PENDIENTE");
+        return pago;
+    }
+
+    @Override
+    @Transactional
+    public Pago agregarCuota(Long matriculaId, String concepto, BigDecimal monto, LocalDate vencimiento) {
+        if (concepto == null || concepto.isBlank()) {
+            throw new IllegalArgumentException("El concepto de la cuota es obligatorio.");
+        }
+        if (monto == null || monto.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("El monto de la cuota debe ser mayor a 0.");
+        }
+        if (vencimiento == null) {
+            throw new IllegalArgumentException("La fecha de vencimiento es obligatoria.");
+        }
+        Matricula matricula = matriculaRepository.findById(matriculaId)
+                .orElseThrow(() -> new IllegalArgumentException("Matrícula no encontrada: " + matriculaId));
+
+        Pago pago = crearPago(concepto, monto, vencimiento);
+        matricula.addPago(pago);
+        matriculaRepository.save(matricula);
         return pago;
     }
 

@@ -11,6 +11,12 @@
             <a th:href="@{/matriculas/nueva}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="btn btn-primary btn-sm">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nueva matrícula</a>
         </div>
+        <div class="searchbar">
+            <form method="get" th:action="@{/matriculas}" style="display:flex;gap:8px;flex:1">
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar por alumno o ciclo...">
+                <button type="submit" class="btn btn-ghost btn-sm">Buscar</button>
+            </form>
+        </div>
         <table>
             <thead><tr><th>N°</th><th>Alumno</th><th>Ciclo · Turno</th><th>Estado</th><th></th></tr></thead>
             <tbody>
@@ -35,6 +41,7 @@
             <tr th:if="${#lists.isEmpty(matriculas)}"><td colspan="5" class="empty">No hay matrículas registradas aún.</td></tr>
             </tbody>
         </table>
+        <div th:replace="~{fragments/paginacion :: paginacion(${pagina}, '/matriculas', ${q})}"></div>
     </div>
 </div>
 </html>

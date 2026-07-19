@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout}">
 <head><title>Expediente del alumno</title></head>
 <div layout:fragment="contenido">
@@ -11,7 +12,9 @@
         <div class="card-head">
             <div>
                 <h2 th:text="${alumno.nombre + ' ' + alumno.apellido}">Alumno</h2>
-                <p th:text="${alumno.email} + ' · ' + ${alumno.area}">-</p>
+                <p th:text="'DNI ' + (${alumno.dni} ?: '-') + ' · ' + (${alumno.email} ?: 'sin correo') + ' · ' + ${alumno.area}">-</p>
+                <p th:if="${alumno.nombrePadre != null and !alumno.nombrePadre.isBlank()}" style="font-size:12px;color:var(--ink-faint);margin-top:2px"
+                   th:text="'Padre/apoderado: ' + ${alumno.nombrePadre} + (${alumno.telefonoPadre != null and !alumno.telefonoPadre.isBlank()} ? ' · ' + ${alumno.telefonoPadre} : '')"></p>
             </div>
         </div>
     </div>
@@ -40,18 +43,47 @@
             <thead><tr><th>Concepto</th><th>Vence</th><th>Monto</th><th>Estado</th></tr></thead>
             <tbody>
             <tr th:each="p : ${pagosPorMatricula.get(m.id)}">
-                <td th:text="${p.concepto}">-</td>
+                <td>
+                    <a th:href="@{/pagos/{id}(id=${p.id})}" style="text-decoration:none;color:inherit" th:text="${p.concepto}">-</a>
+                </td>
                 <td th:text="${p.fechaVencimiento}">-</td>
-                <td th:text="'S/ ' + ${p.monto}">0</td>
+                <td>
+                    <div th:text="'S/ ' + ${p.monto}">0</div>
+                    <div th:if="${p.estado == 'PARCIAL'}" class="hint" th:text="'Saldo: S/ ' + ${p.saldo}"></div>
+                </td>
                 <td>
                     <span th:if="${p.estado == 'PAGADO'}" class="pill pill-sage">Pagado</span>
                     <span th:if="${p.estado == 'PENDIENTE'}" class="pill pill-amber">Pendiente</span>
+                    <span th:if="${p.estado == 'PARCIAL'}" class="pill pill-sky">Parcial</span>
                     <span th:if="${p.estado == 'VENCIDO'}" class="pill pill-rose">Vencido</span>
                 </td>
             </tr>
             <tr th:if="${#lists.isEmpty(pagosPorMatricula.get(m.id))}"><td colspan="4" class="empty">Sin pagos registrados.</td></tr>
             </tbody>
         </table>
+
+        <details sec:authorize="hasAnyRole('ADMIN','CAJERO')" style="margin:14px 20px 20px">
+            <summary style="cursor:pointer;font-size:12.5px;font-weight:600;color:var(--sage-strong)">+ Agregar cuota</summary>
+            <form th:action="@{/pagos/nueva-cuota}" method="post" class="grid-3" style="margin-top:12px;align-items:end">
+                <input type="hidden" name="matriculaId" th:value="${m.id}">
+                <input type="hidden" name="alumnoId" th:value="${alumno.id}">
+                <div class="field" style="margin-bottom:0">
+                    <label>Concepto</label>
+                    <input type="text" name="concepto" placeholder="Ej. Pensión marzo" required>
+                </div>
+                <div class="field" style="margin-bottom:0">
+                    <label>Monto (S/)</label>
+                    <input type="number" name="monto" step="0.01" min="0.01" placeholder="180.00" required>
+                </div>
+                <div class="field" style="margin-bottom:0">
+                    <label>Vence</label>
+                    <input type="date" name="fechaVencimiento" required>
+                </div>
+                <div style="grid-column:1/-1;margin-top:4px">
+                    <button type="submit" class="btn btn-primary btn-sm">Agregar cuota</button>
+                </div>
+            </form>
+        </details>
     </div>
 
     <div class="card" th:if="${#lists.isEmpty(matriculas)}" style="margin-top:20px">

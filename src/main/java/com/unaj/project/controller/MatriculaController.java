@@ -6,6 +6,9 @@ import com.unaj.project.model.Matricula;
 import com.unaj.project.model.Turno;
 import com.unaj.project.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -45,8 +48,13 @@ public class MatriculaController {
         this.templateEngine = templateEngine;
     }
     @GetMapping
-    public String listar(Model model) {
-        model.addAttribute("matriculas", matriculaService.listarTodos());
+    public String listar(@RequestParam(required = false) String q,
+                         @PageableDefault(size = 15) Pageable pageable,
+                         Model model) {
+        Page<Matricula> pagina = matriculaService.buscarPagina(q, pageable);
+        model.addAttribute("pagina", pagina);
+        model.addAttribute("matriculas", pagina.getContent());
+        model.addAttribute("q", q);
         return "matriculas/lista";
     }
 
