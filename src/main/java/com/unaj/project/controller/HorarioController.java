@@ -5,11 +5,14 @@ import com.unaj.project.model.*;
 import com.unaj.project.service.CicloService;
 import com.unaj.project.service.CursoService;
 import com.unaj.project.service.HorarioService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/horarios")
@@ -26,85 +29,92 @@ public class HorarioController {
         this.cicloService = cicloService;
         this.cursoService = cursoService;
     }
-    // Grilla filtrable por ciclo + turno
-    @GetMapping
-    public String listar(@RequestParam(required = false) Long cicloId,
-                         @RequestParam(required = false) Turno turno,
-                         Model model) {
 
-        Ciclo cicloSel = (cicloId != null) ? cicloService.buscarPorId(cicloId)
-                : cicloService.obtenerActivo();
-        Turno turnoSel = (turno != null) ? turno : Turno.MANANA;
+    // Grilla completa del ciclo: 6 días x 3 turnos
+    @GetMapping
+    public String listar(@RequestParam(required = false) Long cicloId, Model model) {
+        Ciclo cicloSel = (cicloId != null) ? cicloService.buscarPorId(cicloId) : cicloService.obtenerActivo();
 
         model.addAttribute("ciclos", cicloService.listarTodos());
         model.addAttribute("turnos", Turno.values());
         model.addAttribute("dias", DiaSemana.values());
         model.addAttribute("cicloSel", cicloSel);
-        model.addAttribute("turnoSel", turnoSel);
 
         if (cicloSel != null) {
-            model.addAttribute("horariosPorDia",
-                    horarioService.agruparPorDia(cicloSel.getId(), turnoSel));
+            model.addAttribute("grilla", horarioService.agruparParaGrilla(cicloSel.getId()));
         }
         return "horarios/lista";
     }
 
+    // Decide entre "nueva jornada" (pide horas + cursos) o "agregar curso" (la jornada ya existe)
     @GetMapping("/nuevo")
-    public String nuevo(Model model) {
-        prepararForm(model, new Horario());
-        return "horarios/formulario";
-    }
-
-    @GetMapping("/editar/{id}")
-    public String editar(@PathVariable Long id, Model model) {
-        prepararForm(model, horarioService.buscarPorId(id));
+    public String nuevo(@RequestParam Long cicloId, @RequestParam DiaSemana dia, @RequestParam Turno turno,
+                        Model model) {
+        prepararForm(model, cicloId, dia, turno);
         return "horarios/formulario";
     }
 
     @PostMapping("/guardar")
-    public String guardar(@RequestParam(required = false) Long id,
-                          @RequestParam Long cursoId,
-                          @RequestParam Long cicloId,
+    public String guardar(@RequestParam Long cicloId,
+                          @RequestParam DiaSemana dia,
                           @RequestParam Turno turno,
-                          @RequestParam DiaSemana diaSemana,
-                          @RequestParam String horaInicio,
-                          @RequestParam String horaFin,
-                          @RequestParam(required = false) String aula,
+                          @RequestParam(required = false) String horaInicio,
+                          @RequestParam(required = false) String horaFin,
+                          @RequestParam(required = false) List<Long> cursoIds,
                           Model model,
                           RedirectAttributes ra) {
-
-        Horario h = (id != null) ? horarioService.buscarPorId(id) : new Horario();
-        h.setCurso(cursoService.buscarPorId(cursoId));
-        h.setCiclo(cicloService.buscarPorId(cicloId));
-        h.setTurno(turno);
-        h.setDiaSemana(diaSemana);
-        h.setHoraInicio(java.time.LocalTime.parse(horaInicio));
-        h.setHoraFin(java.time.LocalTime.parse(horaFin));
-        h.setAula(aula);
-
         try {
-            horarioService.guardar(h);
+            horarioService.guardarJornada(cicloId, dia, turno,
+                    horaInicio != null && !horaInicio.isBlank() ? LocalTime.parse(horaInicio) : null,
+                    horaFin != null && !horaFin.isBlank() ? LocalTime.parse(horaFin) : null,
+                    cursoIds);
         } catch (IllegalArgumentException | IllegalStateException ex) {
             model.addAttribute("error", ex.getMessage());
-            prepararForm(model, h);
+            prepararForm(model, cicloId, dia, turno);
             return "horarios/formulario";
         }
         ra.addFlashAttribute("mensajeExito", "Horario guardado correctamente.");
-        return "redirect:/horarios?cicloId=" + cicloId + "&turno=" + turno;
+        return "redirect:/horarios?cicloId=" + cicloId;
     }
 
-    @PostMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Long id, RedirectAttributes ra) {
-        horarioService.eliminar(id);
+    @PostMapping("/{jornadaId}/editar-horas")
+    public String editarHoras(@PathVariable Long jornadaId,
+                              @RequestParam String horaInicio,
+                              @RequestParam String horaFin,
+                              @RequestParam Long cicloId,
+                              RedirectAttributes ra) {
+        horarioService.editarHoras(jornadaId, LocalTime.parse(horaInicio), LocalTime.parse(horaFin));
+        ra.addFlashAttribute("mensajeExito", "Horario actualizado correctamente.");
+        return "redirect:/horarios?cicloId=" + cicloId;
+    }
+
+    @PostMapping("/{jornadaId}/quitar-curso/{horarioId}")
+    public String quitarCurso(@PathVariable Long jornadaId, @PathVariable Long horarioId,
+                              @RequestParam Long cicloId, RedirectAttributes ra) {
+        horarioService.quitarCurso(horarioId);
+        ra.addFlashAttribute("mensajeExito", "Curso quitado del horario.");
+        return "redirect:/horarios?cicloId=" + cicloId;
+    }
+
+    @PostMapping("/eliminar/{jornadaId}")
+    public String eliminar(@PathVariable Long jornadaId, @RequestParam Long cicloId, RedirectAttributes ra) {
+        horarioService.eliminarJornada(jornadaId);
         ra.addFlashAttribute("mensajeExito", "Horario eliminado correctamente.");
-        return "redirect:/horarios";
+        return "redirect:/horarios?cicloId=" + cicloId;
     }
 
-    private void prepararForm(Model model, Horario horario) {
-        model.addAttribute("horario", horario);
+    private void prepararForm(Model model, Long cicloId, DiaSemana dia, Turno turno) {
+        Jornada jornada = horarioService.buscarJornada(cicloId, dia, turno);
+        model.addAttribute("jornada", jornada);
+        model.addAttribute("ciclo", cicloService.buscarPorId(cicloId));
+        model.addAttribute("cicloId", cicloId);
+        model.addAttribute("dia", dia);
+        model.addAttribute("turno", turno);
         model.addAttribute("cursos", cursoService.listarTodos());
-        model.addAttribute("ciclos", cicloService.listarTodos());
-        model.addAttribute("turnos", Turno.values());
-        model.addAttribute("dias", DiaSemana.values());
+
+        List<Long> yaAgregados = (jornada != null)
+                ? jornada.getHorarios().stream().map(h -> h.getCurso().getId()).collect(Collectors.toList())
+                : List.of();
+        model.addAttribute("cursoIdsAgregados", yaAgregados);
     }
 }

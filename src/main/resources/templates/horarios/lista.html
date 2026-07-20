@@ -6,9 +6,7 @@
 <head><title>Horarios</title></head>
 <div layout:fragment="contenido">
     <div class="card-head" style="border:none;padding:0 0 6px">
-        <div><h2 style="font-family:'Fraunces',serif;font-weight:500;font-size:20px">Horarios</h2><p style="font-size:12px;color:var(--ink-faint)">Grilla semanal por ciclo y turno</p></div>
-        <a th:href="@{/horarios/nuevo}" sec:authorize="hasRole('ADMIN')" class="btn btn-primary btn-sm">
-            <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nueva sesión</a>
+        <div><h2 style="font-family:'Fraunces',serif;font-weight:500;font-size:20px">Horarios</h2><p style="font-size:12px;color:var(--ink-faint)">Horario completo de la semana, por día y turno</p></div>
     </div>
 
     <form th:action="@{/horarios}" method="get" class="filters">
@@ -16,25 +14,33 @@
             <option th:each="c : ${ciclos}" th:value="${c.id}" th:text="${c.nombre}"
                     th:selected="${cicloSel != null and cicloSel.id == c.id}"></option>
         </select>
-        <select name="turno" onchange="this.form.submit()">
-            <option th:each="t : ${turnos}" th:value="${t}" th:text="${t.etiqueta}"
-                    th:selected="${turnoSel == t}"></option>
-        </select>
     </form>
 
     <div class="hgrid">
         <div class="hday" th:each="dia : ${dias}">
             <div class="hd" th:text="${dia.etiqueta}"></div>
-            <div class="hb">
-                <div class="hcell" th:each="h : ${horariosPorDia != null ? horariosPorDia.get(dia) : null}">
-                    <div class="ht" th:text="${h.curso.nombre}"></div>
-                    <div class="hh" th:text="${h.horaInicio} + ' - ' + ${h.horaFin}"></div>
-                    <div class="ha" th:text="${h.aula != null} ? 'Aula ' + ${h.aula} : ''"></div>
-                    <form class="tform" th:action="@{/horarios/eliminar/{id}(id=${h.id})}" method="post" sec:authorize="hasRole('ADMIN')" style="margin-top:4px">
-                        <button type="submit" class="logout-btn" style="color:var(--rose-strong)" onclick="return confirm('¿Eliminar sesión?')">Eliminar</button>
-                    </form>
+            <div class="hturno" th:each="turno : ${turnos}"
+                 th:with="jornada=${grilla != null ? grilla.get(dia).get(turno) : null}">
+                <div class="ht-label">
+                    <span th:text="${turno.etiqueta}"></span>
+                    <span th:if="${jornada != null}" class="ht-horas"
+                          th:text="' · ' + ${jornada.horaInicio} + '-' + ${jornada.horaFin}"></span>
                 </div>
-                <div th:if="${horariosPorDia == null or #lists.isEmpty(horariosPorDia.get(dia))}" style="text-align:center;color:var(--ink-faint);font-size:11px;padding:8px">—</div>
+                <div class="hb">
+                    <div class="hcell" th:each="h : ${jornada != null ? jornada.horarios : null}">
+                        <div class="ht" th:text="${h.curso.nombre}"></div>
+                        <div class="ha" th:text="${h.aula != null and !h.aula.isEmpty()} ? 'Aula ' + ${h.aula} : ''"></div>
+                        <form class="tform" sec:authorize="hasRole('ADMIN')"
+                              th:action="@{/horarios/{jid}/quitar-curso/{hid}(jid=${jornada.id},hid=${h.id},cicloId=${cicloSel.id})}"
+                              method="post" style="margin-top:2px">
+                            <button type="submit" class="logout-btn" style="color:var(--rose-strong);font-size:10.5px"
+                                    onclick="return confirm('¿Quitar este curso del horario?')">Quitar</button>
+                        </form>
+                    </div>
+                    <a th:if="${cicloSel != null}" sec:authorize="hasRole('ADMIN')"
+                       th:href="@{/horarios/nuevo(cicloId=${cicloSel.id},dia=${dia},turno=${turno})}"
+                       class="hcell-add" th:text="${jornada != null} ? '+ Agregar curso' : '+ Agregar'"></a>
+                </div>
             </div>
         </div>
     </div>

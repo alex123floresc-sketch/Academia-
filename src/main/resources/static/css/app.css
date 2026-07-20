@@ -174,11 +174,17 @@ td .strong,td.strong{color:var(--ink);font-weight:500}
 .hgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
 .hday{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
 .hday .hd{background:var(--surface-2);border-bottom:1px solid var(--line-soft);padding:10px;text-align:center;font-size:12.5px;font-weight:600;color:var(--ink)}
-.hday .hb{padding:8px;display:flex;flex-direction:column;gap:8px;min-height:80px}
-.hcell{background:var(--sage-soft);border:1px solid #D7E5DF;border-radius:8px;padding:8px 10px}
+.hturno{border-top:1px solid var(--line-soft)}
+.hturno:first-child{border-top:none}
+.hturno .ht-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);font-weight:700;padding:9px 9px 2px}
+.hturno .ht-horas{text-transform:none;letter-spacing:0;font-weight:500;color:var(--ink-soft)}
+.hday .hb{padding:6px 8px 9px;display:flex;flex-direction:column;gap:7px;min-height:44px}
+.hcell{background:var(--sage-soft);border:1px solid #D7E5DF;border-radius:8px;padding:7px 9px}
 .hcell .ht{font-size:12px;font-weight:600;color:var(--sage-strong)}
 .hcell .hh{font-size:11px;color:var(--sage-strong);margin-top:2px}
 .hcell .ha{font-size:11px;color:var(--ink-faint)}
+.hcell-add{display:block;text-align:center;font-size:10.5px;color:var(--sage-strong);text-decoration:none;padding:7px 4px;border:1px dashed var(--line);border-radius:8px;font-weight:600}
+.hcell-add:hover{background:var(--sage-soft);border-color:#D7E5DF}
 .filters{display:flex;gap:10px;margin-bottom:22px}
 .filters select{padding:9px 13px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface);font-family:inherit;font-size:13px}
 

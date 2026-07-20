@@ -2,86 +2,79 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout}">
-<head><title>Nueva sesión</title></head>
+<head><title>Horario</title></head>
 <div layout:fragment="contenido">
-    <a th:href="@{/horarios}" class="page-back">← Volver a la grilla</a>
-    <h2 class="page-title" th:text="${horario.id} ? 'Editar sesión' : 'Nueva sesión'"></h2>
+    <a th:href="@{/horarios(cicloId=${cicloId})}" class="page-back">&larr; Volver a la grilla</a>
+    <h2 class="page-title" th:text="${jornada != null} ? 'Agregar curso al horario' : 'Nueva jornada'"></h2>
 
     <div class="form-card">
         <div th:if="${error}" class="alert-error" th:text="${error}"></div>
+
+        <div class="note">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M12 8v8m-3-5h6M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"/></svg>
+            <div th:text="${ciclo.nombre} + ' · ' + ${dia.etiqueta} + ' · ' + ${turno.etiqueta}"></div>
+        </div>
+
         <form th:action="@{/horarios/guardar}" method="post">
-            <input type="hidden" name="id" th:value="${horario.id}">
-            <div class="field">
-                <label>Curso</label>
-                <div class="combo" id="comboCurso" th:attr="data-selected=${horario.curso != null ? horario.curso.id : null}">
-                    <input type="text" class="combo-input" placeholder="Buscar por código o nombre..." autocomplete="off" required>
-                    <button type="button" class="combo-clear" aria-label="Quitar selección">&times;</button>
-                    <input type="hidden" name="cursoId" class="combo-value">
-                    <div class="combo-panel">
-                        <div class="combo-row" th:each="c : ${cursos}"
-                             th:attr="data-valor=${c.id},data-texto=${c.codigo + ' - ' + c.nombre},data-buscar=${#strings.toLowerCase(c.codigo + ' ' + c.nombre)}">
-                            <div class="cn" th:text="${c.nombre}"></div>
-                            <span class="ch" th:text="${c.codigo}"></span>
-                        </div>
-                        <p class="combo-empty" style="display:none">Sin resultados.</p>
-                    </div>
-                </div>
-            </div>
+            <input type="hidden" name="cicloId" th:value="${cicloId}">
+            <input type="hidden" name="dia" th:value="${dia}">
+            <input type="hidden" name="turno" th:value="${turno}">
 
-            <div class="grid-2">
-                <div class="field">
-                    <label>Ciclo</label>
-                    <div class="combo" id="comboCiclo" th:attr="data-selected=${horario.ciclo != null ? horario.ciclo.id : null}">
-                        <input type="text" class="combo-input" placeholder="Buscar ciclo..." autocomplete="off" required>
-                        <button type="button" class="combo-clear" aria-label="Quitar selección">&times;</button>
-                        <input type="hidden" name="cicloId" class="combo-value">
-                        <div class="combo-panel">
-                            <div class="combo-row" th:each="c : ${ciclos}"
-                                 th:attr="data-valor=${c.id},data-texto=${c.nombre},data-buscar=${#strings.toLowerCase(c.nombre)}">
-                                <div class="cn" th:text="${c.nombre}"></div>
-                            </div>
-                            <p class="combo-empty" style="display:none">Sin resultados.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="field">
-                    <label>Turno</label>
-                    <select name="turno" required>
-                        <option th:each="t : ${turnos}" th:value="${t}" th:text="${t.etiqueta}"
-                                th:selected="${horario.turno == t}"></option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="grid-3">
-                <div class="field">
-                    <label>Día</label>
-                    <select name="diaSemana" required>
-                        <option th:each="d : ${dias}" th:value="${d}" th:text="${d.etiqueta}"
-                                th:selected="${horario.diaSemana == d}"></option>
-                    </select>
-                </div>
-                <div class="field"><label>Inicio</label><input type="time" name="horaInicio" id="horaInicio" required th:value="${horario.horaInicio}"></div>
-                <div class="field"><label>Fin</label><input type="time" name="horaFin" id="horaFin" required th:value="${horario.horaFin}"></div>
+            <div class="grid-2" th:if="${jornada == null}">
+                <div class="field"><label>Inicio</label><input type="time" name="horaInicio" id="horaInicio" required></div>
+                <div class="field"><label>Fin</label><input type="time" name="horaFin" id="horaFin" required></div>
             </div>
             <p class="field-error" id="rangoError" style="display:none">La hora de fin debe ser posterior a la hora de inicio.</p>
 
-            <div class="field"><label>Aula <span class="hint">opcional</span></label><input type="text" name="aula" th:value="${horario.aula}" placeholder="Ej. 3"></div>
+            <div class="field" th:if="${jornada != null}">
+                <label>Horario de esta jornada</label>
+                <p class="hint" style="margin:0" th:text="${jornada.horaInicio} + ' - ' + ${jornada.horaFin}"></p>
+            </div>
+
+            <div class="field" th:if="${jornada != null and !#lists.isEmpty(jornada.horarios)}">
+                <label>Cursos ya agregados</label>
+                <div class="courselist">
+                    <div class="courserow" th:each="h : ${jornada.horarios}" style="cursor:default">
+                        <div>
+                            <div class="cn" th:text="${h.curso.nombre}"></div>
+                            <div class="cm" th:text="${h.curso.codigo} + (${h.aula != null and !h.aula.isEmpty()} ? ' · Aula ' + ${h.aula} : '')"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label th:text="${jornada != null} ? 'Agregar más cursos' : 'Cursos de esta jornada'"></label>
+                <input type="search" id="buscarCurso" placeholder="Buscar curso por nombre o código..." autocomplete="off" style="margin-bottom:8px">
+                <div class="courselist" id="courseList">
+                    <label class="courserow" th:each="curso : ${cursos}"
+                           th:if="${!cursoIdsAgregados.contains(curso.id)}"
+                           th:attr="data-buscar=${#strings.toLowerCase(curso.nombre + ' ' + curso.codigo)}">
+                        <input type="checkbox" name="cursoIds" th:value="${curso.id}" class="js-curso">
+                        <div>
+                            <div class="cn" th:text="${curso.nombre}"></div>
+                            <div class="cm" th:text="${curso.codigo} + ' · ' + (${curso.profesor != null} ? ${curso.profesor.nombreCompleto} : 'Sin asignar')"></div>
+                        </div>
+                        <span class="ch" th:text="${curso.horas} + ' h'"></span>
+                    </label>
+                    <p class="empty" id="courseEmpty" style="display:none">Ningún curso coincide con tu búsqueda.</p>
+                </div>
+                <p class="hint" id="cursosSelCount" style="margin-top:8px">Ningún curso seleccionado.</p>
+            </div>
 
             <div class="form-foot">
-                <button type="submit" class="btn btn-primary">Guardar</button>
-                <a th:href="@{/horarios}" class="btn btn-ghost">Cancelar</a>
+                <button type="submit" class="btn btn-primary" th:text="${jornada != null} ? 'Agregar cursos' : 'Crear jornada'"></button>
+                <a th:href="@{/horarios(cicloId=${cicloId})}" class="btn btn-ghost">Cancelar</a>
             </div>
         </form>
     </div>
 
     <script th:src="@{/js/buscador-select.js}"></script>
     <script>
-        initCombo('comboCurso');
-        initCombo('comboCiclo');
+        initFiltroLista('buscarCurso', 'courseList', '.courserow', 'courseEmpty', 'js-curso', 'cursosSelCount');
     </script>
 
-    <!-- Validación en vivo del rango horario -->
+    <!-- Validación en vivo del rango horario (solo aplica cuando se está creando la jornada) -->
     <script>(function(){
         var inicio = document.getElementById('horaInicio');
         var fin = document.getElementById('horaFin');

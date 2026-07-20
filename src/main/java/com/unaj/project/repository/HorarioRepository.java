@@ -6,6 +6,7 @@ import com.unaj.project.model.Horario;
 import com.unaj.project.model.Turno;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,12 +14,14 @@ import java.util.List;
 @Repository
 public interface HorarioRepository extends JpaRepository<Horario, Long> {
 
+    // Sesiones de un ciclo+turno+día, con el curso ya cargado (usado por Asistencia para listar
+    // las jornadas de un día). Se mantiene el mismo nombre/firma que antes; ahora atraviesa
+    // la jornada porque esos campos ya no están directamente en Horario.
     @Query("SELECT h FROM Horario h " +
             "JOIN FETCH h.curso c LEFT JOIN FETCH c.profesor " +
-            "WHERE h.ciclo.id = :cicloId AND h.turno = :turno " +
-            "ORDER BY h.diaSemana ASC, h.horaInicio ASC")
-    List<Horario> findParaGrilla(Long cicloId, Turno turno);
+            "WHERE h.jornada.ciclo.id = :cicloId AND h.jornada.turno = :turno AND h.jornada.diaSemana = :diaSemana")
+    List<Horario> findByCicloIdAndTurnoAndDiaSemana(@Param("cicloId") Long cicloId, @Param("turno") Turno turno,
+                                                     @Param("diaSemana") DiaSemana diaSemana);
 
-    // Para validar cruces de hora dentro del mismo ciclo + turno + día
-    List<Horario> findByCicloIdAndTurnoAndDiaSemana(Long cicloId, Turno turno, DiaSemana diaSemana);
+    boolean existsByJornadaIdAndCursoId(Long jornadaId, Long cursoId);
 }
