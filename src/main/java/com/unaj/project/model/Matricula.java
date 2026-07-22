@@ -1,4 +1,3 @@
-// src/main/java/com/unaj/project/model/Matricula.java
 package com.unaj.project.model;
 
 import jakarta.persistence.*;
@@ -23,13 +22,12 @@ public class Matricula {
     private Ciclo semestre;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)         // nullable para no romper filas existentes
+    @Column(length = 20)
     private Turno turno;
 
     @Column(nullable = false)
     private LocalDateTime fechaMatricula;
 
-    // ACTIVA, ANULADA, RESERVADA
     @Column(nullable = false)
     private String estado;
 

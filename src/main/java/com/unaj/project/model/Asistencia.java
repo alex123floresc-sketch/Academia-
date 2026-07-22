@@ -29,7 +29,6 @@ public class Asistencia {
     @Column(nullable = false)
     private LocalDateTime horaRegistro;
 
-    // Quién escaneó (usuario Auxiliar/Admin). Nullable por si se pierde la sesión.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "registrado_por_id")
     private Usuario registradoPor;

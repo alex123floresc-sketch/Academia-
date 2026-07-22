@@ -1,4 +1,3 @@
-// src/main/java/com/unaj/project/model/Alumno.java
 package com.unaj.project.model;
 
 import jakarta.persistence.*;
@@ -32,11 +31,9 @@ public class Alumno {
     @Column(name = "telefono_padre")
     private String telefonoPadre;
 
-    // Área a la que postula (Ingenierías, Biomédicas, Sociales).
     @Column(name = "area")
     private String area;
 
-    // Borrado lógico: true = registro "eliminado" (oculto de los listados)
     @Column(nullable = false)
     private boolean eliminado = false;
 

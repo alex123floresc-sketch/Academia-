@@ -32,6 +32,5 @@ public interface MatriculaService {
 
     void eliminar(Long id);
 
-    /** Agrega una nueva cuota (Pago) a una matrícula ya existente, p. ej. la pensión del siguiente mes. */
     Pago agregarCuota(Long matriculaId, String concepto, BigDecimal monto, LocalDate vencimiento);
 }

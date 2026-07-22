@@ -14,7 +14,6 @@ import java.util.Optional;
 @Repository
 public interface MatriculaRepository extends JpaRepository<Matricula, Long> {
 
-    // Búsqueda paginada por alumno o ciclo (q vacío = todas)
     @Query(value = "SELECT m FROM Matricula m JOIN FETCH m.estudiante e JOIN FETCH m.semestre s " +
             "WHERE (:q IS NULL OR :q = '' " +
             "OR LOWER(e.nombre) LIKE LOWER(CONCAT('%', :q, '%')) " +
@@ -33,16 +32,14 @@ public interface MatriculaRepository extends JpaRepository<Matricula, Long> {
 
     List<Matricula> findBySemestreId(Long semestreId);
 
-    // Carga completa para mostrar la ficha (evita LazyInitializationException)
     @Query("SELECT DISTINCT m FROM Matricula m " +
             "JOIN FETCH m.estudiante " +
             "JOIN FETCH m.semestre " +
             "LEFT JOIN FETCH m.detalles d " +
             "LEFT JOIN FETCH d.curso c " +
-            "LEFT JOIN FETCH c.profesor " +      // antes: c.docente
+            "LEFT JOIN FETCH c.profesor " +
             "WHERE m.id = :id")
     Optional<Matricula> findByIdConDetalle(Long id);
-    // Para el listado general, con estudiante, semestre, detalles y curso (para totalCreditos)
     @Query("SELECT DISTINCT m FROM Matricula m " +
            "JOIN FETCH m.estudiante " +
            "JOIN FETCH m.semestre " +
@@ -50,14 +47,12 @@ public interface MatriculaRepository extends JpaRepository<Matricula, Long> {
            "LEFT JOIN FETCH d.curso")
     List<Matricula> findAllConEstudianteYSemestre();
 
-    // Reporte: cantidad de alumnos matriculados (activos) por ciclo y turno
     @Query("SELECT m.semestre.nombre, m.turno, COUNT(DISTINCT m.estudiante.id) " +
            "FROM Matricula m WHERE m.estado = 'ACTIVA' " +
            "GROUP BY m.semestre.nombre, m.turno " +
            "ORDER BY m.semestre.nombre, m.turno")
     List<Object[]> contarAlumnosPorCicloYTurno();
 
-    // Expediente del alumno: todas sus matrículas con ciclo, detalles y curso (evita LazyInitializationException)
     @Query("SELECT DISTINCT m FROM Matricula m " +
            "JOIN FETCH m.semestre " +
            "LEFT JOIN FETCH m.detalles d " +

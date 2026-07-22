@@ -23,7 +23,6 @@ public class CursoForm {
     @Max(value = 40, message = "Las horas no pueden superar 40")
     private Integer horas;
 
-    // Opcional: null = "Sin asignar"
     private Long profesorId;
 
     public CursoForm() {}

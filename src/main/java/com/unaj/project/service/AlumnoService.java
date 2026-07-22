@@ -10,7 +10,7 @@ public interface AlumnoService {
     List<Alumno> listarTodos();
     Page<Alumno> buscarPagina(String q, Pageable pageable);
     Alumno buscarPorId(Long id);
-    AlumnoForm buscarFormPorId(Long id);   // para rellenar el formulario de edición
+    AlumnoForm buscarFormPorId(Long id);
     void guardar(AlumnoForm form);
     void eliminar(Long id);
 }

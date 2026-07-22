@@ -1,4 +1,3 @@
-// src/main/java/com/unaj/project/model/Turno.java
 package com.unaj.project.model;
 
 public enum Turno {

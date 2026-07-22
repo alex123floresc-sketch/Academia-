@@ -66,12 +66,9 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Rol no encontrado: " + form.getRolId()));
         usuario.setRoles(Set.of(rol));
 
-        // Solo cifrar si escribieron una contraseña nueva
         if (form.getPasswordPlano() != null && !form.getPasswordPlano().isBlank()) {
             usuario.setPassword(encoder.encode(form.getPasswordPlano()));
         }
-        // Si viene vacía en edición, conserva la actual (ya está en el objeto cargado).
-        // Si viene vacía en creación, el controller ya lo habrá bloqueado con validación.
 
         usuarioRepository.save(usuario);
     }
@@ -86,11 +83,9 @@ public class UsuarioServiceImpl implements UsuarioService {
         form.setUsername(u.getUsername());
         form.setNombre(u.getNombre());
         form.setActivo(u.isActivo());
-        // El rol: tomamos el primero (tu modelo usa un rol por usuario en la práctica)
         if (u.getRoles() != null && !u.getRoles().isEmpty()) {
             form.setRolId(u.getRoles().iterator().next().getId());
         }
-        // passwordPlano se deja vacío a propósito (no se muestra la contraseña actual)
         return form;
     }
 }

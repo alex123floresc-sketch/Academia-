@@ -18,7 +18,6 @@ public interface ProfesorRepository extends JpaRepository<Profesor, Long> {
 
     boolean existsByEmailIgnoreCase(String email);
 
-    // Búsqueda paginada por nombre, apellido, correo o especialidad (q vacío = todos los no eliminados)
     @Query(value = "SELECT p FROM Profesor p WHERE p.eliminado = false AND (:q IS NULL OR :q = '' " +
             "OR LOWER(p.nombre) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(p.apellido) LIKE LOWER(CONCAT('%', :q, '%')) " +

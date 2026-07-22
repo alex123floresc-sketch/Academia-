@@ -13,12 +13,10 @@ import java.util.List;
 @Repository
 public interface CicloRepository extends JpaRepository<Ciclo, Long> {
 
-    // Solo el ciclo vigente (activo) que no esté eliminado
     Ciclo findFirstByActivoTrueAndEliminadoFalse();
 
     List<Ciclo> findByEliminadoFalse();
 
-    // Búsqueda paginada por nombre (q vacío = todos los no eliminados)
     @Query(value = "SELECT c FROM Ciclo c WHERE c.eliminado = false AND (:q IS NULL OR :q = '' " +
             "OR LOWER(c.nombre) LIKE LOWER(CONCAT('%', :q, '%')))",
             countQuery = "SELECT COUNT(c) FROM Ciclo c WHERE c.eliminado = false AND (:q IS NULL OR :q = '' " +

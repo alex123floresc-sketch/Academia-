@@ -6,8 +6,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-// Un bloque de horas para un ciclo+día+turno (ej. "Lunes, verano-2026, Mañana, 7:30-13:00")
-// dentro del cual pueden dictarse varios cursos en paralelo (aulas distintas).
 @Entity
 @Table(name = "jornadas")
 public class Jornada {

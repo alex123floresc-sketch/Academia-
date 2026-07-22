@@ -44,7 +44,6 @@ public class CicloController {
     public String guardar(@Valid @ModelAttribute("cicloForm") CicloForm cicloForm,
                           BindingResult result,
                           RedirectAttributes ra) {
-        // Validación cruzada: la fecha de fin debe ser posterior a la de inicio
         if (cicloForm.getFechaInicio() != null && cicloForm.getFechaFin() != null
                 && !cicloForm.getFechaFin().isAfter(cicloForm.getFechaInicio())) {
             result.rejectValue("fechaFin", "error.fechaFin",

@@ -17,11 +17,9 @@ public class AlumnoForm {
     @Size(min = 2, max = 50, message = "El apellido debe tener entre 2 y 50 caracteres")
     private String apellido;
 
-    // Opcional
     @Email(message = "El correo no tiene un formato válido")
     private String email;
 
-    // Opcional; si se llena, debe ser 9 dígitos
     @Pattern(regexp = "^$|^[0-9]{9}$", message = "El celular debe tener 9 dígitos")
     private String celular;
 
@@ -29,10 +27,8 @@ public class AlumnoForm {
     @Pattern(regexp = "^[0-9]{8}$", message = "El DNI debe tener 8 dígitos")
     private String dni;
 
-    // Opcional
     private String nombrePadre;
 
-    // Opcional; si se llena, debe ser 9 dígitos
     @Pattern(regexp = "^$|^[0-9]{9}$", message = "El teléfono del padre debe tener 9 dígitos")
     private String telefonoPadre;
 

@@ -16,8 +16,6 @@ public class UsuarioForm {
     @Size(min = 2, max = 60, message = "El nombre debe tener entre 2 y 60 caracteres")
     private String nombre;
 
-    // Contraseña en texto plano. En creación es obligatoria; en edición, vacío = no cambiar.
-    // La obligatoriedad en creación se valida en el controller.
     @Size(max = 60, message = "La contraseña no puede superar 60 caracteres")
     private String passwordPlano;
 

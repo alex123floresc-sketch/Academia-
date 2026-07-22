@@ -74,7 +74,6 @@
                 <p class="hint" id="cursosSelCount" style="margin-top:8px">Ningún curso seleccionado.</p>
             </div>
 
-            <!-- Bloque de pagos editable -->
             <div class="pay-box">
                 <div class="pt">
                     <svg style="width:17px;height:17px;stroke:currentColor;stroke-width:1.9;fill:none" viewBox="0 0 24 24">
@@ -119,7 +118,6 @@
         </form>
     </div>
 
-    <!-- Script de cálculo del total en tiempo real -->
     <script>(function(){  var montos = document.querySelectorAll('.js-monto');  var out = document.getElementById('totalPago');  function calc(){    var t = 0;    montos.forEach(function(i){ t += parseFloat(i.value) || 0; });    out.textContent = 'S/ ' + t.toFixed(2);  }  montos.forEach(function(i){ i.addEventListener('input', calc); });  calc();})();</script>
 
     <script th:src="@{/js/buscador-select.js}"></script>

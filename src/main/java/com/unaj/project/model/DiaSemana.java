@@ -1,4 +1,3 @@
-// src/main/java/com/unaj/project/model/DiaSemana.java
 package com.unaj.project.model;
 
 import java.time.DayOfWeek;
@@ -11,7 +10,6 @@ public enum DiaSemana {
     DiaSemana(String etiqueta) { this.etiqueta = etiqueta; }
     public String getEtiqueta() { return etiqueta; }
 
-    /** Mapea un java.time.DayOfWeek al DiaSemana equivalente. Devuelve null para DOMINGO (sin clases). */
     public static DiaSemana desde(DayOfWeek dow) {
         return switch (dow) {
             case MONDAY -> LUNES;

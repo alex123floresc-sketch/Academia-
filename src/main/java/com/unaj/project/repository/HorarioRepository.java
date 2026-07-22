@@ -1,4 +1,3 @@
-// src/main/java/com/unaj/project/repository/HorarioRepository.java
 package com.unaj.project.repository;
 
 import com.unaj.project.model.DiaSemana;
@@ -14,9 +13,6 @@ import java.util.List;
 @Repository
 public interface HorarioRepository extends JpaRepository<Horario, Long> {
 
-    // Sesiones de un ciclo+turno+día, con el curso ya cargado (usado por Asistencia para listar
-    // las jornadas de un día). Se mantiene el mismo nombre/firma que antes; ahora atraviesa
-    // la jornada porque esos campos ya no están directamente en Horario.
     @Query("SELECT h FROM Horario h " +
             "JOIN FETCH h.curso c LEFT JOIN FETCH c.profesor " +
             "WHERE h.jornada.ciclo.id = :cicloId AND h.jornada.turno = :turno AND h.jornada.diaSemana = :diaSemana")

@@ -1,4 +1,3 @@
-// src/main/java/com/unaj/project/model/Ciclo.java
 package com.unaj.project.model;
 
 import jakarta.persistence.*;
@@ -12,7 +11,6 @@ public class Ciclo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Ejemplo: "Verano 2026", "Anual UNI 2026", "Repaso Intensivo"
     @Column(nullable = false, unique = true)
     private String nombre;
 
@@ -22,11 +20,9 @@ public class Ciclo {
     @Column(nullable = false)
     private LocalDate fechaFin;
 
-    // "activo" = ciclo vigente para matricular (NO confundir con borrado lógico)
     @Column(nullable = false)
     private boolean activo;
 
-    // Borrado lógico
     @Column(nullable = false)
     private boolean eliminado = false;
 

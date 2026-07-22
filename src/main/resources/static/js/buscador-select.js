@@ -1,7 +1,4 @@
-// Helpers reutilizables para los buscadores en vivo de selects/listas de formularios.
 
-// Filtra las filas de una lista (p.ej. un checklist de cursos) a partir de un atributo data-buscar,
-// y opcionalmente mantiene un contador de cuántas están marcadas (checkboxes con la clase dada).
 function initFiltroLista(inputId, listaId, filaSelector, emptyId, checkboxClass, contadorId) {
     var buscar = document.getElementById(inputId);
     var lista = document.getElementById(listaId);
@@ -34,15 +31,6 @@ function initFiltroLista(inputId, listaId, filaSelector, emptyId, checkboxClass,
     }
 }
 
-// Combobox de un clic: reemplaza un <select> largo por un campo de texto que abre una lista
-// filtrable; al hacer clic en una fila se guarda su valor en un <input type="hidden">.
-// Estructura esperada dentro de #wrapperId:
-//   .combo-input   (input de texto, SIN name, es solo visual/búsqueda)
-//   .combo-value   (input hidden con el name real que se envía en el form)
-//   .combo-panel   (contenedor de las filas, con .combo-row hijos con data-valor/data-texto/data-buscar)
-//   .combo-clear   (botón opcional para limpiar la selección)
-//   .combo-empty   (mensaje opcional cuando ningún resultado coincide)
-// data-selected en el wrapper precarga un valor (modo edición).
 function initCombo(wrapperId) {
     var wrapper = document.getElementById(wrapperId);
     if (!wrapper) return;

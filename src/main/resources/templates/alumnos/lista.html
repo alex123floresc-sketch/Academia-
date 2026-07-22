@@ -44,7 +44,6 @@
                 <td><span class="pill pill-lav" th:text="${alumno.area}"></span></td>
                 <td th:text="${alumno.celular} ?: '-'"></td>
 
-                <!-- Columna con el estado de pago del alumno -->
                 <td>
                         <span th:if="${deuda.containsKey(alumno.id) and deuda.get(alumno.id) > 0}"
                               class="pill pill-amber" th:text="${deuda.get(alumno.id)} + ' pend.'"></span>

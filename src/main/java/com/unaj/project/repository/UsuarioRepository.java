@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Usuario findByUsername(String username);
 
-    // Búsqueda paginada por usuario o nombre (q vacío = todos)
     @Query(value = "SELECT u FROM Usuario u WHERE (:q IS NULL OR :q = '' " +
             "OR LOWER(u.username) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(u.nombre) LIKE LOWER(CONCAT('%', :q, '%')))",

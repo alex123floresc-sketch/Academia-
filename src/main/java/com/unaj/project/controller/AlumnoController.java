@@ -68,7 +68,7 @@ public class AlumnoController {
                           BindingResult result,
                           RedirectAttributes ra) {
         if (result.hasErrors()) {
-            return "alumnos/formulario";   // remuestra con los mensajes de error
+            return "alumnos/formulario";
         }
         alumnoService.guardar(alumnoForm);
         ra.addFlashAttribute("mensajeExito", "Alumno guardado correctamente.");

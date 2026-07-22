@@ -23,11 +23,9 @@ public class Abono {
     @Column(nullable = false)
     private LocalDateTime fecha;
 
-    // EFECTIVO, YAPE, TRANSFERENCIA
     @Column(nullable = false)
     private String metodo;
 
-    // Quién registró el abono. Nullable por si se pierde la sesión.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "registrado_por_id")
     private Usuario registradoPor;

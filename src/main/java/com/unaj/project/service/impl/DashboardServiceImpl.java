@@ -50,7 +50,6 @@ public class DashboardServiceImpl implements DashboardService {
                 .map(Pago::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
         long vencidos = pagos.stream().filter(p -> "VENCIDO".equals(p.getEstado())).count();
 
-        // Aforo por turno (matrículas activas)
         Map<String, Integer> aforo = new LinkedHashMap<>();
         aforo.put("Mañana", 0);
         aforo.put("Tarde", 0);

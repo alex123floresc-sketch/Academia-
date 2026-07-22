@@ -69,7 +69,6 @@ public class MatriculaServiceImpl implements MatriculaService {
     }
 
 
-    // Sobrecarga de 4 parámetros delegando en el nuevo método de 8 parámetros
     @Override
     @Transactional
     public Matricula matricular(Long estudianteId, Long semestreId, Turno turno, List<Long> cursoIds) {
@@ -78,7 +77,6 @@ public class MatriculaServiceImpl implements MatriculaService {
                 "Pensión (1ra cuota)", MONTO_PENSION);
     }
 
-    // Nuevo método implementado con lógica dinámica para pagos personalizados
     @Override
     @Transactional
     public Matricula matricular(Long estudianteId, Long semestreId, Turno turno, List<Long> cursoIds,
@@ -120,7 +118,6 @@ public class MatriculaServiceImpl implements MatriculaService {
         if (existente.isPresent()) {
             matricula = existente.get();
 
-            // Borrar detalles viejos DIRECTO en la BD (por matricula_id) y forzar el DELETE
             matriculaDetalleRepository.deleteByMatriculaId(matricula.getId());
             matriculaDetalleRepository.flush();
             matricula.getDetalles().clear();
@@ -144,13 +141,11 @@ public class MatriculaServiceImpl implements MatriculaService {
         }
 
         if (esNueva) {
-            // Pago de matrícula: usa lo enviado, o el valor por defecto si viene vacío
             String cMat = (conceptoMatricula != null && !conceptoMatricula.isBlank())
                     ? conceptoMatricula : "Matrícula";
             BigDecimal mMat = (montoMatricula != null) ? montoMatricula : MONTO_MATRICULA;
             matricula.addPago(crearPago(cMat, mMat, LocalDate.now()));
 
-            // Pensión: solo se genera si el monto es mayor a 0 (así puedes omitirla)
             if (montoPension != null && montoPension.compareTo(BigDecimal.ZERO) > 0) {
                 String cPen = (conceptoPension != null && !conceptoPension.isBlank())
                         ? conceptoPension : "Pensión (1ra cuota)";

@@ -15,7 +15,6 @@ public interface MatriculaDetalleRepository extends JpaRepository<MatriculaDetal
     @Query("DELETE FROM MatriculaDetalle d WHERE d.matricula.id = :matriculaId")
     void deleteByMatriculaId(Long matriculaId);
 
-    // Confirma que el alumno tiene una matrícula ACTIVA en ese curso, ciclo y turno
     @Query("SELECT COUNT(d) > 0 FROM MatriculaDetalle d " +
             "WHERE d.curso.id = :cursoId AND d.matricula.semestre.id = :cicloId " +
             "AND d.matricula.turno = :turno AND d.matricula.estudiante.id = :alumnoId " +

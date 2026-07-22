@@ -1,4 +1,3 @@
-// src/main/java/com/unaj/project/controller/HorarioController.java
 package com.unaj.project.controller;
 
 import com.unaj.project.model.*;
@@ -30,7 +29,6 @@ public class HorarioController {
         this.cursoService = cursoService;
     }
 
-    // Grilla completa del ciclo: 6 días x 3 turnos
     @GetMapping
     public String listar(@RequestParam(required = false) Long cicloId, Model model) {
         Ciclo cicloSel = (cicloId != null) ? cicloService.buscarPorId(cicloId) : cicloService.obtenerActivo();
@@ -46,7 +44,6 @@ public class HorarioController {
         return "horarios/lista";
     }
 
-    // Decide entre "nueva jornada" (pide horas + cursos) o "agregar curso" (la jornada ya existe)
     @GetMapping("/nuevo")
     public String nuevo(@RequestParam Long cicloId, @RequestParam DiaSemana dia, @RequestParam Turno turno,
                         Model model) {

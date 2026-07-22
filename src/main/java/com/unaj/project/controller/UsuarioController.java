@@ -53,7 +53,6 @@ public class UsuarioController {
                           BindingResult result,
                           Model model,
                           RedirectAttributes ra) {
-        // Contraseña obligatoria solo al crear (id == null)
         boolean esNuevo = (usuarioForm.getId() == null);
         boolean sinPassword = (usuarioForm.getPasswordPlano() == null || usuarioForm.getPasswordPlano().isBlank());
         if (esNuevo && sinPassword) {

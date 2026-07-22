@@ -1,4 +1,3 @@
-// src/main/java/com/unaj/project/model/Profesor.java
 package com.unaj.project.model;
 
 import jakarta.persistence.*;
@@ -21,9 +20,8 @@ public class Profesor {
     private String email;
 
     @Column
-    private String especialidad;   // curso principal que dicta
+    private String especialidad;
 
-    // Borrado lógico
     @Column(nullable = false)
     private boolean eliminado = false;
 

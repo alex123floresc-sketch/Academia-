@@ -16,7 +16,6 @@ public interface JornadaRepository extends JpaRepository<Jornada, Long> {
 
     Optional<Jornada> findByCicloIdAndDiaSemanaAndTurno(Long cicloId, DiaSemana diaSemana, Turno turno);
 
-    // Todas las jornadas de un ciclo con sus cursos ya cargados, para pintar la grilla completa
     @Query("SELECT DISTINCT j FROM Jornada j " +
             "LEFT JOIN FETCH j.horarios h LEFT JOIN FETCH h.curso c LEFT JOIN FETCH c.profesor " +
             "WHERE j.ciclo.id = :cicloId")

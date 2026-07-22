@@ -111,7 +111,6 @@ public class PagoServiceImpl implements PagoService {
         return pagoRepository.save(pago);
     }
 
-    // ----- Lógica movida desde PagoController (Fase 3D) -----
 
     @Override
     public BigDecimal totalPorEstado(List<Pago> pagos, String estado) {

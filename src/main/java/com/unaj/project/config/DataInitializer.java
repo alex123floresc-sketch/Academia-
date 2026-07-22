@@ -1,4 +1,3 @@
-// src/main/java/com/unaj/project/config/DataInitializer.java
 package com.unaj.project.config;
 
 import com.unaj.project.model.Rol;

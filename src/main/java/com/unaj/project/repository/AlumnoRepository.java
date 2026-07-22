@@ -25,7 +25,6 @@ public interface AlumnoRepository extends JpaRepository<Alumno, Long> {
 
     Optional<Alumno> findByDni(String dni);
 
-    // Búsqueda paginada por nombre, apellido, DNI o correo (q vacío = todos los no eliminados)
     @Query(value = "SELECT a FROM Alumno a WHERE a.eliminado = false AND (:q IS NULL OR :q = '' " +
             "OR LOWER(a.nombre) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(a.apellido) LIKE LOWER(CONCAT('%', :q, '%')) " +

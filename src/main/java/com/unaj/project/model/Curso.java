@@ -1,4 +1,3 @@
-// src/main/java/com/unaj/project/model/Curso.java
 package com.unaj.project.model;
 
 import jakarta.persistence.*;
@@ -18,13 +17,12 @@ public class Curso {
     private String nombre;
 
     @Column(nullable = false)
-    private Integer horas;   // horas semanales (reemplaza a créditos)
+    private Integer horas;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profesor_id")
     private Profesor profesor;
 
-    // Borrado lógico
     @Column(nullable = false)
     private boolean eliminado = false;
 

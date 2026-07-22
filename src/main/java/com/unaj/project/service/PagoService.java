@@ -14,30 +14,19 @@ public interface PagoService {
     Pago buscarPorId(Long id);
     List<Pago> listarPorMatricula(Long matriculaId);
 
-    /** Alumnos con al menos un pago que coincide con la búsqueda, paginados, para agrupar el listado por alumno. */
     Page<Alumno> buscarAlumnosConPagos(String q, Pageable pageable);
 
-    /** Pagos de los alumnos dados, agrupados por id de alumno (para pintar la tarjeta de cada uno). */
     Map<Long, List<Pago>> agruparPorAlumno(List<Long> alumnoIds);
 
-    /** Abonos registrados para un pago, del más reciente al más antiguo. */
     List<Abono> listarAbonos(Long pagoId);
 
-    /**
-     * Registra un abono (pago total o parcial) sobre un Pago. Si el abono cubre el saldo
-     * restante, el Pago queda PAGADO; si no, queda PARCIAL.
-     */
     Pago registrarAbono(Long pagoId, BigDecimal monto, String metodo, String username);
 
-    /** Suma los montos de los pagos que están en el estado indicado. */
     BigDecimal totalPorEstado(List<Pago> pagos, String estado);
 
-    /** Suma el dinero realmente cobrado (montoPagado) de una lista de pagos. */
     BigDecimal totalCobrado(List<Pago> pagos);
 
-    /** Suma el saldo pendiente (monto - montoPagado) de los pagos en el estado indicado. */
     BigDecimal totalSaldo(List<Pago> pagos, String estado);
 
-    /** Marca como VENCIDO todo pago PENDIENTE o PARCIAL cuya fecha de vencimiento ya pasó. Devuelve la cantidad actualizada. */
     int marcarVencidos();
 }

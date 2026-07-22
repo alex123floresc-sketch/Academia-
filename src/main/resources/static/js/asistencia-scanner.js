@@ -28,8 +28,6 @@
         tbody.insertBefore(tr, tbody.firstChild);
     }
 
-    // Registra la entrada del alumno identificado por "codigo": el texto decodificado del QR
-    // del carnet ("ALU-{id}"), o su DNI de 8 dígitos si no lo trajo.
     function registrarCodigo(codigo) {
         if (procesando || !codigo) return;
         procesando = true;
@@ -62,13 +60,11 @@
 
     function onScanSuccess(decodedText) { registrarCodigo(decodedText); }
     function onScanFailure() {
-        // Se ignoran los frames en los que no se detecta ningún QR.
     }
 
     var scanner = new Html5QrcodeScanner('reader', { fps: 10, qrbox: 250 }, false);
     scanner.render(onScanSuccess, onScanFailure);
 
-    // Fallback manual: si el alumno no trajo su carnet, se busca por DNI.
     var dniInput = document.getElementById('dni-manual');
     var dniBtn = document.getElementById('btn-dni-manual');
     if (dniInput && dniBtn) {

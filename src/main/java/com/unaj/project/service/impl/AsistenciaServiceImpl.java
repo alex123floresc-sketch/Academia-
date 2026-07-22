@@ -49,8 +49,6 @@ public class AsistenciaServiceImpl implements AsistenciaService {
         return asistenciaRepository.countByHorarioIdAndFecha(horarioId, LocalDate.now());
     }
 
-    // Este flujo registra únicamente la ENTRADA del alumno a la sesión (no hay registro de salida);
-    // por eso basta con una fila por alumno+horario+día (ver existsByAlumnoIdAndHorarioIdAndFecha).
     @Override
     @Transactional
     public AsistenciaResultadoDTO registrar(Long horarioId, String codigoQr, String username) {
@@ -90,7 +88,6 @@ public class AsistenciaServiceImpl implements AsistenciaService {
         return new AsistenciaResultadoDTO(true, "Entrada registrada.", alumno.getNombreCompleto());
     }
 
-    // Acepta el código del QR del carnet ("ALU-{id}") o, si el alumno no lo trajo, su DNI de 8 dígitos.
     private Alumno resolverAlumno(String codigo) {
         if (codigo == null) return null;
         String limpio = codigo.trim();

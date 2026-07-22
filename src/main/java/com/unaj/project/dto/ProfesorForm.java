@@ -20,7 +20,6 @@ public class ProfesorForm {
     @Email(message = "El correo no tiene un formato válido")
     private String email;
 
-    // Opcional
     private String especialidad;
 
     public ProfesorForm() {}

@@ -17,7 +17,6 @@ public class PagoScheduler {
         this.pagoService = pagoService;
     }
 
-    // Todos los días a la 1:00 a.m., marca como VENCIDO los pagos PENDIENTE ya vencidos
     @Scheduled(cron = "0 0 1 * * *")
     public void marcarPagosVencidos() {
         int actualizados = pagoService.marcarVencidos();

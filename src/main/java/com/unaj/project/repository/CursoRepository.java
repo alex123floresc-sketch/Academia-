@@ -16,7 +16,6 @@ public interface CursoRepository extends JpaRepository<Curso, Long> {
 
     Curso findByCodigo(String codigo);
 
-    // Búsqueda paginada por nombre, código o profesor (q vacío = todos los no eliminados)
     @Query(value = "SELECT c FROM Curso c LEFT JOIN c.profesor p WHERE c.eliminado = false AND (:q IS NULL OR :q = '' " +
             "OR LOWER(c.nombre) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(c.codigo) LIKE LOWER(CONCAT('%', :q, '%')) " +
@@ -29,8 +28,6 @@ public interface CursoRepository extends JpaRepository<Curso, Long> {
             "OR LOWER(p.apellido) LIKE LOWER(CONCAT('%', :q, '%')))")
     Page<Curso> buscar(@Param("q") String q, Pageable pageable);
 
-    // Trae el profesor junto con el curso en una sola consulta (evita LazyInitializationException)
-    // Solo cursos no eliminados
     @Query("SELECT c FROM Curso c LEFT JOIN FETCH c.profesor WHERE c.eliminado = false")
     List<Curso> findAllConProfesor();
 

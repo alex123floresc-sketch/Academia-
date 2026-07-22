@@ -17,7 +17,6 @@ public class AlumnoServiceImpl implements AlumnoService {
 
     private final AlumnoRepository alumnoRepository;
 
-    // Inyección por constructor (Fase 3C aplicada ya aquí)
     public AlumnoServiceImpl(AlumnoRepository alumnoRepository) {
         this.alumnoRepository = alumnoRepository;
     }
@@ -49,9 +48,9 @@ public class AlumnoServiceImpl implements AlumnoService {
     public void guardar(AlumnoForm form) {
         Alumno alumno;
         if (form.getId() != null) {
-            alumno = buscarPorId(form.getId());   // edita el existente
+            alumno = buscarPorId(form.getId());
         } else {
-            alumno = new Alumno();                // crea uno nuevo
+            alumno = new Alumno();
         }
 
         String email = (form.getEmail() != null && !form.getEmail().isBlank()) ? form.getEmail() : null;
@@ -71,7 +70,6 @@ public class AlumnoServiceImpl implements AlumnoService {
             throw new IllegalArgumentException("Ya existe un alumno registrado con ese DNI.");
         }
 
-        // Mapeo DTO -> entidad
         alumno.setNombre(form.getNombre());
         alumno.setApellido(form.getApellido());
         alumno.setEmail(email);
@@ -93,7 +91,6 @@ public class AlumnoServiceImpl implements AlumnoService {
         });
     }
 
-    // Mapeo entidad -> DTO (para editar)
     private AlumnoForm aForm(Alumno alumno) {
         AlumnoForm form = new AlumnoForm();
         form.setId(alumno.getId());
