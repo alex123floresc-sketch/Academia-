@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-"Sistema de matrículas - Academia Horizonte" — a server-rendered Spring Boot 3.5 / Java 21 web app for managing student enrollment at an academy: students (`Alumno`), teachers (`Profesor`), courses (`Curso`), academic terms (`Ciclo`), schedules (`Horario`), enrollments (`Matricula`/`MatriculaDetalle`), and payments (`Pago`). UI text, domain names, and messages are in Spanish.
+"Sistema de matrículas - Academia Neurociencias Dennis Mansilla Marin" — a server-rendered Spring Boot 3.5 / Java 21 web app for managing student enrollment at an academy: students (`Alumno`), teachers (`Profesor`), courses (`Curso`), academic terms (`Ciclo`), schedules (`Horario`), enrollments (`Matricula`/`MatriculaDetalle`), and payments (`Pago`). UI text, domain names, and messages are in Spanish.
 
 ## Build, run, test
 
