@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +38,7 @@ public class HorarioController {
         model.addAttribute("turnos", Turno.values());
         model.addAttribute("dias", DiaSemana.values());
         model.addAttribute("cicloSel", cicloSel);
+        model.addAttribute("diaHoy", DiaSemana.desde(LocalDate.now().getDayOfWeek()));
 
         if (cicloSel != null) {
             model.addAttribute("grilla", horarioService.agruparParaGrilla(cicloSel.getId()));

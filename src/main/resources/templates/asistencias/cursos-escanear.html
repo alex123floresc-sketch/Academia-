@@ -3,7 +3,7 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout}">
 <head>
-    <title>Registrar entrada</title>
+    <title>Registrar entrada al curso</title>
     <th:block layout:fragment="estilos">
         <meta name="_csrf" th:content="${_csrf.token}">
         <meta name="_csrf_header" th:content="${_csrf.headerName}">
@@ -11,7 +11,7 @@
 </head>
 <div layout:fragment="contenido">
 
-    <a th:href="@{/asistencias}" class="page-back">&laquo; Volver</a>
+    <a th:href="@{/asistencias/cursos}" class="page-back">&laquo; Volver</a>
 
     <div class="note">
         <svg class="ic" viewBox="0 0 24 24"><path d="M12 8v8m-3-5h6M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"/></svg>

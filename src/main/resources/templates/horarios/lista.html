@@ -16,30 +16,42 @@
         </select>
     </form>
 
-    <div class="hgrid">
-        <div class="hday" th:each="dia : ${dias}">
-            <div class="hd" th:text="${dia.etiqueta}"></div>
-            <div class="hturno" th:each="turno : ${turnos}"
-                 th:with="jornada=${grilla != null ? grilla.get(dia).get(turno) : null}">
-                <div class="ht-label">
-                    <span th:text="${turno.etiqueta}"></span>
-                    <span th:if="${jornada != null}" class="ht-horas"
-                          th:text="' · ' + ${jornada.horaInicio} + '-' + ${jornada.horaFin}"></span>
+    <div class="hscroll">
+        <div class="hgrid">
+            <div class="hday" th:each="dia : ${dias}"
+                 th:classappend="${dia == diaHoy} ? 'is-today' : ''">
+                <div class="hd">
+                    <span th:text="${dia.etiqueta}"></span>
+                    <span th:if="${dia == diaHoy}" class="hd-today">Hoy</span>
                 </div>
-                <div class="hb">
-                    <div class="hcell" th:each="h : ${jornada != null ? jornada.horarios : null}">
-                        <div class="ht" th:text="${h.curso.nombre}"></div>
-                        <div class="ha" th:text="${h.aula != null and !h.aula.isEmpty()} ? 'Aula ' + ${h.aula} : ''"></div>
-                        <form class="tform" sec:authorize="hasRole('ADMIN')"
-                              th:action="@{/horarios/{jid}/quitar-curso/{hid}(jid=${jornada.id},hid=${h.id},cicloId=${cicloSel.id})}"
-                              method="post" style="margin-top:2px">
-                            <button type="submit" class="logout-btn" style="color:var(--rose-strong);font-size:10.5px"
-                                    onclick="return confirm('¿Quitar este curso del horario?')">Quitar</button>
-                        </form>
+                <div class="hturno" th:each="turno : ${turnos}"
+                     th:classappend="${'turno-' + #strings.toLowerCase(turno.name())}"
+                     th:with="jornada=${grilla != null ? grilla.get(dia).get(turno) : null}">
+                    <div class="ht-label">
+                        <span class="ht-dot"></span>
+                        <span th:text="${turno.etiqueta}"></span>
+                        <span th:if="${jornada != null}" class="ht-horas"
+                              th:text="' · ' + ${jornada.horaInicio} + '–' + ${jornada.horaFin}"></span>
                     </div>
-                    <a th:if="${cicloSel != null}" sec:authorize="hasRole('ADMIN')"
-                       th:href="@{/horarios/nuevo(cicloId=${cicloSel.id},dia=${dia},turno=${turno})}"
-                       class="hcell-add" th:text="${jornada != null} ? '+ Agregar curso' : '+ Agregar'"></a>
+                    <div class="hb">
+                        <div class="hcell" th:each="h : ${jornada != null ? jornada.horarios : null}">
+                            <form class="tform" sec:authorize="hasRole('ADMIN')"
+                                  th:action="@{/horarios/{jid}/quitar-curso/{hid}(jid=${jornada.id},hid=${h.id},cicloId=${cicloSel.id})}"
+                                  method="post">
+                                <button type="submit" class="hquitar" title="Quitar curso del horario"
+                                        onclick="return confirm('¿Quitar este curso del horario?')">&times;</button>
+                            </form>
+                            <div class="ht" th:text="${h.curso.nombre}"></div>
+                            <div class="ha-row">
+                                <span class="ha" th:if="${h.aula != null and !h.aula.isEmpty()}" th:text="'Aula ' + ${h.aula}"></span>
+                                <span class="hp" th:if="${h.curso.profesor != null}" th:text="${h.curso.profesor.nombreCompleto}"></span>
+                            </div>
+                        </div>
+                        <p class="hempty" th:if="${jornada == null}">Sin clases</p>
+                        <a th:if="${cicloSel != null}" sec:authorize="hasRole('ADMIN')"
+                           th:href="@{/horarios/nuevo(cicloId=${cicloSel.id},dia=${dia},turno=${turno})}"
+                           class="hcell-add" th:text="${jornada != null} ? '+ Agregar curso' : '+ Agregar jornada'"></a>
+                    </div>
                 </div>
             </div>
         </div>

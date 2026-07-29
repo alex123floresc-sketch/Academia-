@@ -89,26 +89,6 @@ public class AsistenciaServiceImpl implements AsistenciaService {
     }
 
     private Alumno resolverAlumno(String codigo) {
-        if (codigo == null) return null;
-        String limpio = codigo.trim();
-        if (limpio.isEmpty()) return null;
-
-        if (limpio.startsWith("ALU-")) {
-            try {
-                return alumnoRepository.findById(Long.parseLong(limpio.substring(4))).orElse(null);
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-
-        if (limpio.matches("\\d{8}")) {
-            return alumnoRepository.findByDni(limpio).orElse(null);
-        }
-
-        try {
-            return alumnoRepository.findById(Long.parseLong(limpio)).orElse(null);
-        } catch (NumberFormatException e) {
-            return null;
-        }
+        return AlumnoCodigoResolver.resolver(alumnoRepository, codigo);
     }
 }

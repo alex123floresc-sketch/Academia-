@@ -1,7 +1,7 @@
 (function () {
-    var horarioId = window.ASISTENCIA_HORARIO_ID;
     var statusEl = document.getElementById('scan-status');
     var tbody = document.getElementById('lista-registrados');
+    var totalEl = document.getElementById('total-hoy-val');
     var csrfMeta = document.querySelector('meta[name="_csrf"]');
     var csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
     var csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : null;
@@ -26,6 +26,7 @@
         tr.appendChild(tdNombre);
         tr.appendChild(tdHora);
         tbody.insertBefore(tr, tbody.firstChild);
+        if (totalEl) totalEl.textContent = String((parseInt(totalEl.textContent, 10) || 0) + 1);
     }
 
     function registrarCodigo(codigo) {
@@ -35,10 +36,10 @@
         var headers = { 'Content-Type': 'application/json' };
         if (csrfHeader && csrfToken) headers[csrfHeader] = csrfToken;
 
-        fetch('/asistencias/cursos/registrar', {
+        fetch('/asistencias/registrar', {
             method: 'POST',
             headers: headers,
-            body: JSON.stringify({ horarioId: horarioId, codigo: codigo })
+            body: JSON.stringify({ codigo: codigo })
         })
             .then(function (resp) { return resp.json(); })
             .then(function (data) {
@@ -51,7 +52,7 @@
                 }
             })
             .catch(function () {
-                mostrarEstado(false, 'Error de conexión al registrar la entrada.');
+                mostrarEstado(false, 'Error de conexión al registrar el ingreso.');
             })
             .finally(function () {
                 setTimeout(function () { procesando = false; }, 2000);

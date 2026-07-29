@@ -2,6 +2,7 @@ package com.unaj.project.controller;
 
 import com.unaj.project.dto.AsistenciaResultadoDTO;
 import com.unaj.project.dto.RegistroAsistenciaRequest;
+import com.unaj.project.dto.RegistroIngresoRequest;
 import com.unaj.project.model.Ciclo;
 import com.unaj.project.model.DiaSemana;
 import com.unaj.project.model.Horario;
@@ -9,6 +10,7 @@ import com.unaj.project.model.Turno;
 import com.unaj.project.service.AsistenciaService;
 import com.unaj.project.service.CicloService;
 import com.unaj.project.service.HorarioService;
+import com.unaj.project.service.RegistroIngresoService;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -24,22 +26,45 @@ import java.util.Map;
 @RequestMapping("/asistencias")
 public class AsistenciaController {
 
+    private final RegistroIngresoService registroIngresoService;
     private final AsistenciaService asistenciaService;
     private final CicloService cicloService;
     private final HorarioService horarioService;
 
-    public AsistenciaController(AsistenciaService asistenciaService, CicloService cicloService,
+    public AsistenciaController(RegistroIngresoService registroIngresoService,
+                                AsistenciaService asistenciaService,
+                                CicloService cicloService,
                                 HorarioService horarioService) {
+        this.registroIngresoService = registroIngresoService;
         this.asistenciaService = asistenciaService;
         this.cicloService = cicloService;
         this.horarioService = horarioService;
     }
 
+    // Registro de entrada a la institución (uso principal, pensado para auxiliares)
+
     @GetMapping
-    public String lista(@RequestParam(required = false) Long cicloId,
-                        @RequestParam(required = false) Turno turno,
-                        @RequestParam(required = false) DiaSemana dia,
-                        Model model) {
+    public String ingreso(Model model) {
+        model.addAttribute("registrosHoy", registroIngresoService.listarDeHoy());
+        model.addAttribute("totalHoy", registroIngresoService.contarDeHoy());
+        model.addAttribute("hoy", LocalDate.now());
+        return "asistencias/ingreso";
+    }
+
+    @PostMapping(value = "/registrar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public AsistenciaResultadoDTO registrar(@RequestBody RegistroIngresoRequest body, Authentication auth) {
+        String username = (auth != null) ? auth.getName() : null;
+        return registroIngresoService.registrar(body.codigo(), username);
+    }
+
+    // Asistencia por curso (histórico, ligado a los horarios de clase)
+
+    @GetMapping("/cursos")
+    public String cursosLista(@RequestParam(required = false) Long cicloId,
+                              @RequestParam(required = false) Turno turno,
+                              @RequestParam(required = false) DiaSemana dia,
+                              Model model) {
 
         Ciclo cicloSel = (cicloId != null) ? cicloService.buscarPorId(cicloId) : cicloService.obtenerActivo();
         Turno turnoSel = (turno != null) ? turno : Turno.MANANA;
@@ -63,20 +88,20 @@ public class AsistenciaController {
 
         model.addAttribute("horarios", horarios);
         model.addAttribute("conteos", conteos);
-        return "asistencias/lista";
+        return "asistencias/cursos-lista";
     }
 
-    @GetMapping("/escanear/{horarioId}")
-    public String escanear(@PathVariable Long horarioId, Model model) {
+    @GetMapping("/cursos/escanear/{horarioId}")
+    public String cursosEscanear(@PathVariable Long horarioId, Model model) {
         Horario horario = horarioService.buscarPorId(horarioId);
         model.addAttribute("horario", horario);
         model.addAttribute("registrosHoy", asistenciaService.listarDeHoy(horarioId));
-        return "asistencias/escanear";
+        return "asistencias/cursos-escanear";
     }
 
-    @PostMapping(value = "/registrar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/cursos/registrar", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public AsistenciaResultadoDTO registrar(@RequestBody RegistroAsistenciaRequest body, Authentication auth) {
+    public AsistenciaResultadoDTO cursosRegistrar(@RequestBody RegistroAsistenciaRequest body, Authentication auth) {
         String username = (auth != null) ? auth.getName() : null;
         return asistenciaService.registrar(body.horarioId(), body.codigo(), username);
     }
