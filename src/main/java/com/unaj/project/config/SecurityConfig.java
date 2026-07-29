@@ -32,8 +32,8 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/css/**", "/js/**", "/img/**").permitAll()
 
                         .requestMatchers("/profesores/**", "/ciclos/**", "/reportes/**").hasRole("ADMIN")
-                        .requestMatchers("/horarios/nuevo", "/horarios/guardar", "/horarios/editar/**", "/horarios/eliminar/**",
-                                "/horarios/*/quitar-curso/**", "/horarios/*/editar-horas")
+                        .requestMatchers("/horarios/nuevo", "/horarios/guardar", "/horarios/quitar-curso/**",
+                                "/horarios/bloques/**")
                         .hasRole("ADMIN")
                         .requestMatchers("/horarios", "/horarios/**").hasAnyRole("ADMIN", "CAJERO")
 

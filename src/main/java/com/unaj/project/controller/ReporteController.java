@@ -3,6 +3,7 @@ package com.unaj.project.controller;
 import com.unaj.project.dto.AlumnoMorosoDTO;
 import com.unaj.project.dto.AlumnosPorCicloTurnoDTO;
 import com.unaj.project.dto.IngresoMensualDTO;
+import com.unaj.project.service.PdfGeneradorService;
 import com.unaj.project.service.ReporteService;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -15,9 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
@@ -29,11 +28,11 @@ import java.util.List;
 public class ReporteController {
 
     private final ReporteService reporteService;
-    private final TemplateEngine templateEngine;
+    private final PdfGeneradorService pdfGeneradorService;
 
-    public ReporteController(ReporteService reporteService, TemplateEngine templateEngine) {
+    public ReporteController(ReporteService reporteService, PdfGeneradorService pdfGeneradorService) {
         this.reporteService = reporteService;
-        this.templateEngine = templateEngine;
+        this.pdfGeneradorService = pdfGeneradorService;
     }
 
     @GetMapping
@@ -107,15 +106,7 @@ public class ReporteController {
     }
 
     private ResponseEntity<byte[]> generarPdf(String template, Context context, String filename) throws Exception {
-        String html = templateEngine.process(template, context);
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ITextRenderer renderer = new ITextRenderer();
-        renderer.setDocumentFromString(html);
-        renderer.layout();
-        renderer.createPDF(outputStream);
-
-        byte[] pdfBytes = outputStream.toByteArray();
+        byte[] pdfBytes = pdfGeneradorService.renderizar(template, context);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData("attachment", filename);

@@ -15,9 +15,17 @@ public interface HorarioRepository extends JpaRepository<Horario, Long> {
 
     @Query("SELECT h FROM Horario h " +
             "JOIN FETCH h.curso c LEFT JOIN FETCH c.profesor " +
-            "WHERE h.jornada.ciclo.id = :cicloId AND h.jornada.turno = :turno AND h.jornada.diaSemana = :diaSemana")
+            "WHERE h.bloque.ciclo.id = :cicloId AND h.bloque.turno = :turno AND h.diaSemana = :diaSemana")
     List<Horario> findByCicloIdAndTurnoAndDiaSemana(@Param("cicloId") Long cicloId, @Param("turno") Turno turno,
                                                      @Param("diaSemana") DiaSemana diaSemana);
 
-    boolean existsByJornadaIdAndCursoId(Long jornadaId, Long cursoId);
+    @Query("SELECT h FROM Horario h JOIN FETCH h.curso c LEFT JOIN FETCH c.profesor " +
+            "WHERE h.bloque.ciclo.id = :cicloId")
+    List<Horario> findByCicloId(@Param("cicloId") Long cicloId);
+
+    @Query("SELECT h FROM Horario h JOIN FETCH h.curso c LEFT JOIN FETCH c.profesor " +
+            "WHERE h.bloque.id = :bloqueId AND h.diaSemana = :dia")
+    List<Horario> findByBloqueIdAndDiaSemana(@Param("bloqueId") Long bloqueId, @Param("dia") DiaSemana dia);
+
+    boolean existsByBloqueIdAndDiaSemanaAndCursoId(Long bloqueId, DiaSemana diaSemana, Long cursoId);
 }

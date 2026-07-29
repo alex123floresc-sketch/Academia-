@@ -5,46 +5,35 @@
 <head><title>Horario</title></head>
 <div layout:fragment="contenido">
     <a th:href="@{/horarios(cicloId=${cicloId})}" class="page-back">&larr; Volver a la grilla</a>
-    <h2 class="page-title" th:text="${jornada != null} ? 'Agregar curso al horario' : 'Nueva jornada'"></h2>
+    <h2 class="page-title">Agregar curso al horario</h2>
 
     <div class="form-card">
         <div th:if="${error}" class="alert-error" th:text="${error}"></div>
 
         <div class="note">
             <svg class="ic" viewBox="0 0 24 24"><path d="M12 8v8m-3-5h6M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"/></svg>
-            <div th:text="${ciclo.nombre} + ' · ' + ${dia.etiqueta} + ' · ' + ${turno.etiqueta}"></div>
+            <div th:text="${ciclo.nombre} + ' · ' + ${dia.etiqueta} + ' · ' + ${bloque.turno.etiqueta} + ' · ' + ${bloque.horaInicio} + '–' + ${bloque.horaFin}"></div>
         </div>
 
         <form th:action="@{/horarios/guardar}" method="post">
             <input type="hidden" name="cicloId" th:value="${cicloId}">
             <input type="hidden" name="dia" th:value="${dia}">
-            <input type="hidden" name="turno" th:value="${turno}">
+            <input type="hidden" name="bloqueId" th:value="${bloque.id}">
 
-            <div class="grid-2" th:if="${jornada == null}">
-                <div class="field"><label>Inicio</label><input type="time" name="horaInicio" id="horaInicio" required></div>
-                <div class="field"><label>Fin</label><input type="time" name="horaFin" id="horaFin" required></div>
-            </div>
-            <p class="field-error" id="rangoError" style="display:none">La hora de fin debe ser posterior a la hora de inicio.</p>
-
-            <div class="field" th:if="${jornada != null}">
-                <label>Horario de esta jornada</label>
-                <p class="hint" style="margin:0" th:text="${jornada.horaInicio} + ' - ' + ${jornada.horaFin}"></p>
-            </div>
-
-            <div class="field" th:if="${jornada != null and !#lists.isEmpty(jornada.horarios)}">
-                <label>Cursos ya agregados</label>
+            <div class="field" th:if="${!#lists.isEmpty(cursosAgregados)}">
+                <label>Cursos ya agregados en esta casilla</label>
                 <div class="courselist">
-                    <div class="courserow" th:each="h : ${jornada.horarios}" style="cursor:default">
+                    <div class="courserow" th:each="h : ${cursosAgregados}" style="cursor:default">
                         <div>
                             <div class="cn" th:text="${h.curso.nombre}"></div>
-                            <div class="cm" th:text="${h.curso.codigo} + (${h.aula != null and !h.aula.isEmpty()} ? ' · Aula ' + ${h.aula} : '')"></div>
+                            <div class="cm" th:text="${h.curso.codigo}"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="field">
-                <label th:text="${jornada != null} ? 'Agregar más cursos' : 'Cursos de esta jornada'"></label>
+                <label>Agregar curso(s)</label>
                 <input type="search" id="buscarCurso" placeholder="Buscar curso por nombre o código..." autocomplete="off" style="margin-bottom:8px">
                 <div class="courselist" id="courseList">
                     <label class="courserow" th:each="curso : ${cursos}"
@@ -63,7 +52,7 @@
             </div>
 
             <div class="form-foot">
-                <button type="submit" class="btn btn-primary" th:text="${jornada != null} ? 'Agregar cursos' : 'Crear jornada'"></button>
+                <button type="submit" class="btn btn-primary">Agregar cursos</button>
                 <a th:href="@{/horarios(cicloId=${cicloId})}" class="btn btn-ghost">Cancelar</a>
             </div>
         </form>
@@ -73,20 +62,5 @@
     <script>
         initFiltroLista('buscarCurso', 'courseList', '.courserow', 'courseEmpty', 'js-curso', 'cursosSelCount');
     </script>
-
-    <script>(function(){
-        var inicio = document.getElementById('horaInicio');
-        var fin = document.getElementById('horaFin');
-        var error = document.getElementById('rangoError');
-        if(!inicio || !fin) return;
-        function validar(){
-            var invalido = inicio.value && fin.value && fin.value <= inicio.value;
-            error.style.display = invalido ? 'block' : 'none';
-            fin.classList.toggle('input-invalid', invalido);
-        }
-        inicio.addEventListener('input', validar);
-        fin.addEventListener('input', validar);
-        validar();
-    })();</script>
 </div>
 </html>

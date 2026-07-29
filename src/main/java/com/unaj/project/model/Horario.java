@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import java.time.LocalTime;
 
 @Entity
-@Table(name = "horarios")
+@Table(name = "horarios", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"bloque_id", "dia_semana", "curso_id"})
+})
 public class Horario {
 
     @Id
@@ -12,8 +14,12 @@ public class Horario {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "jornada_id")
-    private Jornada jornada;
+    @JoinColumn(name = "bloque_id", nullable = false)
+    private BloqueHorario bloque;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "dia_semana", nullable = false, length = 20)
+    private DiaSemana diaSemana;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "curso_id", nullable = false)
@@ -27,8 +33,11 @@ public class Horario {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public Jornada getJornada() { return jornada; }
-    public void setJornada(Jornada jornada) { this.jornada = jornada; }
+    public BloqueHorario getBloque() { return bloque; }
+    public void setBloque(BloqueHorario bloque) { this.bloque = bloque; }
+
+    public DiaSemana getDiaSemana() { return diaSemana; }
+    public void setDiaSemana(DiaSemana diaSemana) { this.diaSemana = diaSemana; }
 
     public Curso getCurso() { return curso; }
     public void setCurso(Curso curso) { this.curso = curso; }
@@ -36,9 +45,8 @@ public class Horario {
     public String getAula() { return aula; }
     public void setAula(String aula) { this.aula = aula; }
 
-    public DiaSemana getDiaSemana() { return jornada != null ? jornada.getDiaSemana() : null; }
-    public Turno getTurno() { return jornada != null ? jornada.getTurno() : null; }
-    public LocalTime getHoraInicio() { return jornada != null ? jornada.getHoraInicio() : null; }
-    public LocalTime getHoraFin() { return jornada != null ? jornada.getHoraFin() : null; }
-    public Ciclo getCiclo() { return jornada != null ? jornada.getCiclo() : null; }
+    public Turno getTurno() { return bloque != null ? bloque.getTurno() : null; }
+    public LocalTime getHoraInicio() { return bloque != null ? bloque.getHoraInicio() : null; }
+    public LocalTime getHoraFin() { return bloque != null ? bloque.getHoraFin() : null; }
+    public Ciclo getCiclo() { return bloque != null ? bloque.getCiclo() : null; }
 }

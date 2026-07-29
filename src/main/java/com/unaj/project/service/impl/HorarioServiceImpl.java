@@ -1,16 +1,19 @@
 package com.unaj.project.service.impl;
 
+import com.unaj.project.dto.FilaHorarioDTO;
 import com.unaj.project.exception.RecursoNoEncontradoException;
 import com.unaj.project.model.*;
+import com.unaj.project.repository.BloqueHorarioRepository;
 import com.unaj.project.repository.CicloRepository;
 import com.unaj.project.repository.CursoRepository;
 import com.unaj.project.repository.HorarioRepository;
-import com.unaj.project.repository.JornadaRepository;
 import com.unaj.project.service.HorarioService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,14 +22,14 @@ import java.util.Map;
 public class HorarioServiceImpl implements HorarioService {
 
     private final HorarioRepository horarioRepository;
-    private final JornadaRepository jornadaRepository;
+    private final BloqueHorarioRepository bloqueHorarioRepository;
     private final CicloRepository cicloRepository;
     private final CursoRepository cursoRepository;
 
-    public HorarioServiceImpl(HorarioRepository horarioRepository, JornadaRepository jornadaRepository,
+    public HorarioServiceImpl(HorarioRepository horarioRepository, BloqueHorarioRepository bloqueHorarioRepository,
                               CicloRepository cicloRepository, CursoRepository cursoRepository) {
         this.horarioRepository = horarioRepository;
-        this.jornadaRepository = jornadaRepository;
+        this.bloqueHorarioRepository = bloqueHorarioRepository;
         this.cicloRepository = cicloRepository;
         this.cursoRepository = cursoRepository;
     }
@@ -38,97 +41,92 @@ public class HorarioServiceImpl implements HorarioService {
     }
 
     @Override
-    public Jornada buscarJornada(Long cicloId, DiaSemana dia, Turno turno) {
-        if (cicloId == null || dia == null || turno == null) return null;
-        return jornadaRepository.findByCicloIdAndDiaSemanaAndTurno(cicloId, dia, turno).orElse(null);
-    }
-
-    @Override
-    public Map<DiaSemana, Map<Turno, Jornada>> agruparParaGrilla(Long cicloId) {
-        Map<DiaSemana, Map<Turno, Jornada>> mapa = new LinkedHashMap<>();
-        for (DiaSemana d : DiaSemana.values()) {
-            Map<Turno, Jornada> porTurno = new LinkedHashMap<>();
-            for (Turno t : Turno.values()) {
-                porTurno.put(t, null);
-            }
-            mapa.put(d, porTurno);
-        }
-        if (cicloId == null) return mapa;
-
-        List<Jornada> jornadas = jornadaRepository.findParaGrilla(cicloId);
-        for (Jornada j : jornadas) {
-            mapa.get(j.getDiaSemana()).put(j.getTurno(), j);
-        }
-        return mapa;
+    public BloqueHorario buscarBloque(Long id) {
+        return bloqueHorarioRepository.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Bloque horario no encontrado (id " + id + ")."));
     }
 
     @Override
     @Transactional
-    public void guardarJornada(Long cicloId, DiaSemana dia, Turno turno, LocalTime horaInicio, LocalTime horaFin,
-                               List<Long> cursoIds) {
-        Jornada jornada = jornadaRepository.findByCicloIdAndDiaSemanaAndTurno(cicloId, dia, turno).orElse(null);
+    public void crearBloque(Long cicloId, Turno turno, LocalTime horaInicio, LocalTime horaFin, TipoBloque tipo) {
+        if (horaInicio == null || horaFin == null || !horaFin.isAfter(horaInicio)) {
+            throw new IllegalArgumentException("La hora de fin debe ser posterior a la de inicio.");
+        }
+        if (bloqueHorarioRepository.existsByCicloIdAndTurnoAndHoraInicio(cicloId, turno, horaInicio)) {
+            throw new IllegalArgumentException("Ya existe un bloque que inicia a esa hora en este turno.");
+        }
+        Ciclo ciclo = cicloRepository.findById(cicloId)
+                .orElseThrow(() -> new IllegalArgumentException("Ciclo no encontrado: " + cicloId));
 
-        if (jornada == null) {
-            if (horaInicio == null || horaFin == null) {
-                throw new IllegalArgumentException("Debes indicar la hora de inicio y fin de la jornada.");
-            }
-            if (!horaFin.isAfter(horaInicio)) {
-                throw new IllegalArgumentException("La hora de fin debe ser posterior a la de inicio.");
-            }
-            Ciclo ciclo = cicloRepository.findById(cicloId)
-                    .orElseThrow(() -> new IllegalArgumentException("Ciclo no encontrado: " + cicloId));
-            jornada = new Jornada();
-            jornada.setCiclo(ciclo);
-            jornada.setDiaSemana(dia);
-            jornada.setTurno(turno);
-            jornada.setHoraInicio(horaInicio);
-            jornada.setHoraFin(horaFin);
-            jornadaRepository.save(jornada);
+        BloqueHorario bloque = new BloqueHorario();
+        bloque.setCiclo(ciclo);
+        bloque.setTurno(turno);
+        bloque.setHoraInicio(horaInicio);
+        bloque.setHoraFin(horaFin);
+        bloque.setTipo(tipo != null ? tipo : TipoBloque.CLASE);
+        bloqueHorarioRepository.save(bloque);
+    }
+
+    @Override
+    @Transactional
+    public void eliminarBloque(Long bloqueId) {
+        bloqueHorarioRepository.deleteById(bloqueId);
+    }
+
+    @Override
+    public Map<Turno, List<FilaHorarioDTO>> agruparParaGrilla(Long cicloId) {
+        Map<Turno, List<FilaHorarioDTO>> resultado = new LinkedHashMap<>();
+        for (Turno t : Turno.values()) {
+            resultado.put(t, new ArrayList<>());
+        }
+        if (cicloId == null) return resultado;
+
+        List<BloqueHorario> bloques = bloqueHorarioRepository.findByCicloIdOrderByHoraInicioAsc(cicloId);
+        List<Horario> horarios = horarioRepository.findByCicloId(cicloId);
+
+        Map<Long, Map<DiaSemana, List<Horario>>> porBloque = new LinkedHashMap<>();
+        for (Horario h : horarios) {
+            porBloque.computeIfAbsent(h.getBloque().getId(), k -> new EnumMap<>(DiaSemana.class))
+                    .computeIfAbsent(h.getDiaSemana(), k -> new ArrayList<>())
+                    .add(h);
         }
 
+        for (BloqueHorario bloque : bloques) {
+            Map<DiaSemana, List<Horario>> porDia = porBloque.getOrDefault(bloque.getId(), Map.of());
+            resultado.get(bloque.getTurno()).add(new FilaHorarioDTO(bloque, porDia));
+        }
+        return resultado;
+    }
+
+    @Override
+    @Transactional
+    public void asignarCurso(Long bloqueId, DiaSemana dia, List<Long> cursoIds) {
+        BloqueHorario bloque = buscarBloque(bloqueId);
+        if (bloque.isReceso()) {
+            throw new IllegalArgumentException("No se pueden asignar cursos a un bloque de receso.");
+        }
         if (cursoIds == null || cursoIds.isEmpty()) {
-            if (jornada.getHorarios().isEmpty()) {
-                throw new IllegalArgumentException("Selecciona al menos un curso para la jornada.");
-            }
-            return;
+            throw new IllegalArgumentException("Selecciona al menos un curso.");
         }
 
         for (Long cursoId : cursoIds) {
-            if (horarioRepository.existsByJornadaIdAndCursoId(jornada.getId(), cursoId)) {
+            if (horarioRepository.existsByBloqueIdAndDiaSemanaAndCursoId(bloqueId, dia, cursoId)) {
                 continue;
             }
             Curso curso = cursoRepository.findById(cursoId)
                     .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado: " + cursoId));
             Horario horario = new Horario();
+            horario.setBloque(bloque);
+            horario.setDiaSemana(dia);
             horario.setCurso(curso);
-            jornada.addHorario(horario);
+            horarioRepository.save(horario);
         }
-        jornadaRepository.save(jornada);
-    }
-
-    @Override
-    @Transactional
-    public void editarHoras(Long jornadaId, LocalTime horaInicio, LocalTime horaFin) {
-        if (horaInicio == null || horaFin == null || !horaFin.isAfter(horaInicio)) {
-            throw new IllegalArgumentException("La hora de fin debe ser posterior a la de inicio.");
-        }
-        Jornada jornada = jornadaRepository.findById(jornadaId)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Jornada no encontrada (id " + jornadaId + ")."));
-        jornada.setHoraInicio(horaInicio);
-        jornada.setHoraFin(horaFin);
-        jornadaRepository.save(jornada);
     }
 
     @Override
     @Transactional
     public void quitarCurso(Long horarioId) {
         horarioRepository.deleteById(horarioId);
-    }
-
-    @Override
-    @Transactional
-    public void eliminarJornada(Long jornadaId) {
-        jornadaRepository.deleteById(jornadaId);
     }
 
     @Override

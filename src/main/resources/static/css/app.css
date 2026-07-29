@@ -170,18 +170,21 @@ td .strong,td.strong{color:var(--ink);font-weight:500}
 .tb-head.tb-manana{background:var(--amber-strong)}
 .tb-head.tb-tarde{background:var(--sky-strong)}
 .tb-head.tb-noche{background:var(--lav-strong)}
-.tb-body{border:1px solid var(--line);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:14px;background:var(--surface)}
+.tb-body{border:1px solid var(--line);border-top:none;border-radius:0 0 var(--radius) var(--radius);background:var(--surface);overflow:hidden}
+.tb-body .hscroll{overflow-x:auto;padding:14px 14px 4px}
 
-.hscroll{overflow-x:auto;padding-bottom:2px;margin:0 -2px}
-.hgrid{display:grid;grid-template-columns:repeat(6,minmax(150px,1fr));gap:12px;min-width:min-content}
-.hday{background:var(--surface-2);border:1px solid var(--line-soft);border-radius:9px;overflow:hidden;display:flex;flex-direction:column}
-.hday.is-today{border-color:var(--sage);box-shadow:0 0 0 1px var(--sage)}
-.hday .hd{background:var(--surface);border-bottom:1px solid var(--line-soft);padding:8px 9px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px}
-.hday .hd-nombre{font-size:11.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:5px}
-.hday .hd-horas{font-size:9.5px;font-weight:500;color:var(--ink-faint)}
-.hday.is-today .hd{background:var(--sage-soft)}
-.hday .hd .hd-today{font-size:8.5px;text-transform:uppercase;letter-spacing:.05em;background:var(--sage);color:#fff;padding:1.5px 5px;border-radius:20px;font-weight:700}
-.hb{padding:8px;display:flex;flex-direction:column;gap:7px;min-height:40px}
+.htable{width:100%;border-collapse:collapse;font-size:12.5px;min-width:760px}
+.htable thead th{background:var(--surface-2);padding:8px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);font-weight:700;border-bottom:1px solid var(--line-soft);text-align:center}
+.htable thead th.htable-hora-head{text-align:left;width:120px}
+.htable thead th.is-today{background:var(--sage-soft);color:var(--sage-strong)}
+.htable tbody td{border-bottom:1px solid var(--line-soft);padding:8px;vertical-align:top;min-width:130px}
+.htable tbody tr:last-child td{border-bottom:none}
+.htable-hora{display:flex;align-items:center;justify-content:space-between;gap:6px;background:var(--surface-2);font-weight:700;color:var(--ink);white-space:nowrap;font-size:11.5px}
+.hb-del{all:unset;cursor:pointer;color:var(--ink-faint);opacity:.5;font-size:13px;line-height:1;padding:3px 5px;border-radius:50%;transition:.12s}
+.hb-del:hover{opacity:1;color:var(--rose-strong);background:var(--rose-soft)}
+.fila-receso td{background:repeating-linear-gradient(135deg,var(--surface-2) 0 6px,var(--surface) 6px 12px)}
+.htable-receso{text-align:center;font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-faint)}
+.hb{display:flex;flex-direction:column;gap:7px;min-height:34px}
 .hcell{position:relative;background:var(--sage-soft);border:1px solid #D7E5DF;border-radius:9px;padding:9px 10px}
 .hcell .ht{font-size:12.5px;font-weight:600;color:var(--sage-strong);padding-right:16px}
 .hcell .ha-row{display:flex;flex-direction:column;gap:1px;margin-top:3px}
@@ -192,6 +195,9 @@ td .strong,td.strong{color:var(--ink);font-weight:500}
 .hempty{font-size:11px;color:var(--ink-faint);padding:4px 1px}
 .hcell-add{display:block;text-align:center;font-size:11px;color:var(--sage-strong);text-decoration:none;padding:8px 4px;border:1px dashed var(--line);border-radius:8px;font-weight:600;transition:.12s}
 .hcell-add:hover{background:var(--sage-soft);border-color:#D7E5DF}
+.bloque-form{display:flex;align-items:center;gap:8px;padding:12px 14px;border-top:1px solid var(--line-soft);flex-wrap:wrap}
+.bloque-form input[type=time],.bloque-form select{padding:7px 10px;border:1px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:12.5px;background:var(--surface);color:var(--ink)}
+.bloque-form .sep{color:var(--ink-faint);font-size:12px}
 .filters{display:flex;gap:10px;margin-bottom:22px}
 .filters select{padding:9px 13px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface);font-family:inherit;font-size:13px}
 
@@ -210,7 +216,6 @@ td .strong,td.strong{color:var(--ink);font-weight:500}
 
 @media(max-width:560px){
     .metrics{grid-template-columns:1fr}
-    .hgrid{grid-template-columns:repeat(6,minmax(140px,1fr))}
     .filters{flex-wrap:wrap}
     .filters select{flex:1 1 140px}
     .form-card{padding:20px 18px}
