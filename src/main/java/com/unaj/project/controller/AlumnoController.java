@@ -78,6 +78,7 @@ public class AlumnoController {
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable Long id, Model model) {
         model.addAttribute("alumnoForm", alumnoService.buscarFormPorId(id));
+        model.addAttribute("tieneFoto", alumnoService.buscarPorId(id).isFotoPresente());
         return "alumnos/formulario";
     }
 
@@ -112,9 +113,27 @@ public class AlumnoController {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(png);
     }
 
-    @GetMapping("/{id}/qr-view")
-    public String qrView(@PathVariable Long id, Model model) {
-        model.addAttribute("alumno", alumnoService.buscarPorId(id));
-        return "alumnos/qr";
+    @GetMapping("/{id}/foto")
+    @ResponseBody
+    public ResponseEntity<byte[]> foto(@PathVariable Long id) {
+        Alumno alumno = alumnoService.buscarPorId(id);
+        if (!alumno.isFotoPresente()) {
+            return ResponseEntity.notFound().build();
+        }
+        MediaType tipo = (alumno.getFotoContentType() != null)
+                ? MediaType.parseMediaType(alumno.getFotoContentType())
+                : MediaType.IMAGE_JPEG;
+        return ResponseEntity.ok().contentType(tipo).body(alumno.getFoto());
+    }
+
+    @GetMapping("/{id}/carnet")
+    public String carnet(@PathVariable Long id, Model model) {
+        Alumno alumno = alumnoService.buscarPorId(id);
+        List<Matricula> matriculas = matriculaRepository.findByEstudianteIdConDetalle(id);
+        Matricula matriculaVigente = matriculas.isEmpty() ? null : matriculas.get(0);
+
+        model.addAttribute("alumno", alumno);
+        model.addAttribute("matriculaVigente", matriculaVigente);
+        return "alumnos/carnet";
     }
 }

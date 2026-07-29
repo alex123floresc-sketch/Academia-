@@ -9,7 +9,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.List;
 
 @Service
@@ -78,6 +81,16 @@ public class AlumnoServiceImpl implements AlumnoService {
         alumno.setNombrePadre(form.getNombrePadre());
         alumno.setTelefonoPadre(form.getTelefonoPadre());
         alumno.setArea(form.getArea());
+
+        MultipartFile foto = form.getFoto();
+        if (foto != null && !foto.isEmpty()) {
+            try {
+                alumno.setFoto(foto.getBytes());
+                alumno.setFotoContentType(foto.getContentType());
+            } catch (IOException e) {
+                throw new UncheckedIOException("No se pudo leer la fotografía enviada.", e);
+            }
+        }
 
         alumnoRepository.save(alumno);
     }

@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import org.springframework.web.multipart.MultipartFile;
 
 public class AlumnoForm {
 
@@ -35,6 +36,8 @@ public class AlumnoForm {
     @NotBlank(message = "El área es obligatoria")
     private String area;
 
+    private MultipartFile foto;
+
     public AlumnoForm() {}
 
     public Long getId() { return id; }
@@ -63,4 +66,7 @@ public class AlumnoForm {
 
     public String getArea() { return area; }
     public void setArea(String area) { this.area = area; }
+
+    public MultipartFile getFoto() { return foto; }
+    public void setFoto(MultipartFile foto) { this.foto = foto; }
 }

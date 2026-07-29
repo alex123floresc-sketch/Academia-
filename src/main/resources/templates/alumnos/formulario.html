@@ -8,8 +8,18 @@
     <h2 class="page-title" th:text="${alumnoForm.id} ? 'Editar alumno' : 'Nuevo alumno'"></h2>
 
     <div class="form-card">
-        <form th:action="@{/alumnos/guardar}" th:object="${alumnoForm}" method="post">
+        <form th:action="@{/alumnos/guardar}" th:object="${alumnoForm}" method="post" enctype="multipart/form-data">
             <input type="hidden" th:field="*{id}">
+
+            <div class="field">
+                <label>Fotografía <span class="hint">opcional, para el carnet de estudiante</span></label>
+                <div style="display:flex;align-items:center;gap:14px">
+                    <img th:if="${tieneFoto}" th:src="@{/alumnos/{id}/foto(id=${alumnoForm.id})}" alt="Foto actual"
+                         style="width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)">
+                    <div th:unless="${tieneFoto}" style="width:64px;height:64px;border-radius:10px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-size:10px;text-align:center">Sin foto</div>
+                    <input type="file" th:field="*{foto}" accept="image/*" style="flex:1">
+                </div>
+            </div>
             <div class="grid-2">
                 <div class="field">
                     <label>Nombre</label>

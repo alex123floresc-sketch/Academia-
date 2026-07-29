@@ -5,9 +5,9 @@
 <body>
 <aside th:fragment="sidebar" class="sidebar">
     <a th:href="@{/}" class="brand">
-        <div class="seal">N</div>
+        <div class="seal"><svg th:replace="~{fragments/logo :: marca}" class="logo-mark"></svg></div>
         <div>
-            <div class="name">Academia Neurociencias Dennis Mansilla Marin</div>
+            <div class="name">Academia</div>
         </div>
     </a>
 

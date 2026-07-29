@@ -16,6 +16,7 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 .sidebar{width:236px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;gap:26px;position:sticky;top:0;height:100vh}
 .brand{display:flex;align-items:center;gap:11px;padding:0 6px;text-decoration:none}
 .brand .seal{width:40px;height:40px;border-radius:11px;flex-shrink:0;background:var(--sage-soft);color:var(--sage-strong);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:20px;border:1px solid #D7E5DF}
+.logo-mark{width:22px;height:22px;display:block}
 .brand .name{font-family:'Fraunces',serif;font-weight:600;font-size:16px;color:var(--ink);line-height:1.15}
 .brand .sub{font-size:11px;color:var(--ink-faint);letter-spacing:.02em}
 .nav-group-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-faint);padding:0 8px 8px;font-weight:600}
@@ -216,3 +217,47 @@ td .strong,td.strong{color:var(--ink);font-weight:500}
 }
 .field-error{display:block;color:var(--rose-strong);font-size:11.5px;margin-top:5px;font-weight:500}
 .form-card input.input-invalid,.form-card select.input-invalid{border-color:var(--rose);box-shadow:0 0 0 3px var(--rose-soft)}
+
+/* ---- Carnet de estudiante (tamaño DNI, ID-1: 85.6mm x 54mm) ---- */
+@page carnet-page{size:85.6mm 54mm;margin:0}
+.carnet-wrap{display:flex;gap:26px;flex-wrap:wrap;justify-content:center;padding:10px 0 26px}
+.carnet-col{display:flex;flex-direction:column;align-items:center;gap:8px}
+.carnet-col .cc-label{font-size:11px;font-weight:600;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.08em}
+.carnet-face{width:85.6mm;height:54mm;flex-shrink:0;border-radius:3mm;overflow:hidden;position:relative;background:#fff;box-shadow:0 14px 34px -16px rgba(49,59,55,.4);font-family:'Inter',sans-serif;color:var(--ink)}
+
+.carnet-front .cf-head{background:var(--sage-strong);color:#fff;display:flex;align-items:center;gap:2.2mm;padding:2mm 3mm}
+.carnet-front .cf-seal{width:7mm;height:7mm;border-radius:50%;background:rgba(255,255,255,.16);border:.4mm solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:3.4mm;flex-shrink:0}
+.carnet-front .cf-title{font-size:2.5mm;font-weight:700;letter-spacing:.05em;text-transform:uppercase;line-height:1.25}
+.carnet-front .cf-body{display:flex;gap:3mm;padding:2.6mm 3mm}
+.carnet-front .cf-photo{width:19mm;height:24mm;border-radius:1.6mm;border:.3mm solid var(--line);background:var(--surface-2);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.carnet-front .cf-photo img{width:100%;height:100%;object-fit:cover}
+.carnet-front .cf-photo .cf-noimg{color:var(--ink-faint);width:9mm;height:9mm;stroke:currentColor;stroke-width:1.6;fill:none}
+.carnet-front .cf-data{min-width:0;flex:1;display:flex;flex-direction:column;gap:1mm;padding-top:.5mm}
+.carnet-front .cf-name{font-size:3.1mm;font-weight:700;line-height:1.15;text-transform:uppercase;color:var(--sage-strong)}
+.carnet-front .cf-row{font-size:2.3mm;line-height:1.5;color:var(--ink-soft)}
+.carnet-front .cf-row b{color:var(--ink);font-weight:600}
+.carnet-front .cf-foot{position:absolute;left:0;right:0;bottom:0;background:var(--surface-2);border-top:.3mm solid var(--line-soft);padding:1.4mm 3mm;font-size:1.9mm;color:var(--ink-faint);text-align:center;letter-spacing:.02em}
+
+.carnet-back{background:var(--sage-soft)}
+.carnet-back .cb-pattern{position:absolute;inset:0;opacity:.5;background:repeating-linear-gradient(135deg,#D7E5DF 0 2mm,transparent 2mm 5mm)}
+.carnet-back .cb-head{position:relative;background:var(--sage-strong);color:#fff;padding:1.8mm 3mm;font-size:2.1mm;font-weight:700;letter-spacing:.08em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
+.carnet-back .cb-body{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2mm;padding:2mm 4mm 0}
+.carnet-back .cb-qr{width:19mm;height:19mm;background:#fff;border-radius:1.4mm;border:.3mm solid var(--line);padding:1mm}
+.carnet-back .cb-code{font-family:'Fraunces',serif;font-size:2.6mm;font-weight:600;letter-spacing:.05em;color:var(--sage-strong)}
+.carnet-back .cb-dni{font-size:1.9mm;color:var(--ink-soft)}
+.carnet-back .cb-note{position:relative;font-size:1.7mm;line-height:1.4;color:var(--ink-soft);text-align:center;padding:1mm 5mm 0}
+.carnet-back .cb-sign{position:absolute;left:4mm;right:4mm;bottom:2.4mm;display:flex;justify-content:space-between;align-items:flex-end;gap:2mm}
+.carnet-back .cb-sign-line{flex:1;text-align:center}
+.carnet-back .cb-sign-mark{font-family:'Fraunces',serif;font-style:italic;font-weight:600;font-size:3mm;color:var(--sage-strong);border-bottom:.25mm solid var(--ink-faint);padding:0 2mm 0.6mm}
+.carnet-back .cb-sign-label{font-size:1.5mm;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;margin-top:.6mm}
+.carnet-back .cb-serial{position:absolute;top:1.8mm;right:2.6mm;font-size:1.7mm;color:rgba(255,255,255,.85);letter-spacing:.04em}
+
+@media print{
+    .sidebar,.topbar,.sidebar-backdrop,.menu-toggle,.page-back,.carnet-col .cc-label,.carnet-actions{display:none!important}
+    .content{padding:0!important}
+    .wrap{max-width:none!important}
+    .carnet-wrap{display:block;padding:0;gap:0}
+    .carnet-col{align-items:stretch}
+    .carnet-face{page:carnet-page;box-shadow:none;border-radius:0;break-after:page}
+    .carnet-face:last-of-type{break-after:auto}
+}

@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.thymeleaf.TemplateEngine;
@@ -19,6 +20,8 @@ import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
+import java.time.YearMonth;
 import java.util.List;
 
 @Controller
@@ -34,7 +37,27 @@ public class ReporteController {
     }
 
     @GetMapping
-    public String lista() {
+    public String lista(Model model) {
+        List<AlumnosPorCicloTurnoDTO> porCiclo = reporteService.alumnosPorCicloTurno();
+        List<IngresoMensualDTO> porMes = reporteService.ingresosPorMes();
+        List<AlumnoMorosoDTO> morosos = reporteService.alumnosMorosos();
+
+        long matriculasActivas = porCiclo.stream().mapToLong(AlumnosPorCicloTurnoDTO::cantidad).sum();
+        String mesActual = YearMonth.now().toString();
+        BigDecimal ingresosMesActual = porMes.stream()
+                .filter(fila -> fila.mes().equals(mesActual))
+                .map(IngresoMensualDTO::total)
+                .findFirst().orElse(BigDecimal.ZERO);
+        BigDecimal montoAdeudado = morosos.stream()
+                .map(AlumnoMorosoDTO::montoAdeudado)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        model.addAttribute("porCiclo", porCiclo);
+        model.addAttribute("porMes", porMes);
+        model.addAttribute("morosos", morosos);
+        model.addAttribute("matriculasActivas", matriculasActivas);
+        model.addAttribute("ingresosMesActual", ingresosMesActual);
+        model.addAttribute("montoAdeudado", montoAdeudado);
         return "reportes/lista";
     }
 

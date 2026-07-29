@@ -34,6 +34,13 @@ public class Alumno {
     @Column(name = "area")
     private String area;
 
+    @Lob
+    @Column(name = "foto", columnDefinition = "LONGBLOB")
+    private byte[] foto;
+
+    @Column(name = "foto_content_type")
+    private String fotoContentType;
+
     @Column(nullable = false)
     private boolean eliminado = false;
 
@@ -65,6 +72,14 @@ public class Alumno {
 
     public String getArea() { return area; }
     public void setArea(String area) { this.area = area; }
+
+    public byte[] getFoto() { return foto; }
+    public void setFoto(byte[] foto) { this.foto = foto; }
+
+    public String getFotoContentType() { return fotoContentType; }
+    public void setFotoContentType(String fotoContentType) { this.fotoContentType = fotoContentType; }
+
+    public boolean isFotoPresente() { return foto != null && foto.length > 0; }
 
     public boolean isEliminado() { return eliminado; }
     public void setEliminado(boolean eliminado) { this.eliminado = eliminado; }

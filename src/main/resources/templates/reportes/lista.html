@@ -5,34 +5,104 @@
 <head><title>Reportes</title></head>
 <div layout:fragment="contenido">
 
-    <div class="card">
+    <div class="card-head" style="border:none;padding:0 0 6px">
+        <div><h2 style="font-family:'Fraunces',serif;font-weight:500;font-size:20px">Reportes</h2>
+            <p style="font-size:12px;color:var(--ink-faint)">Vista rápida de los indicadores clave, con exportación a PDF o Excel</p></div>
+    </div>
+
+    <div class="metrics">
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Matrículas activas</div>
+            <div class="val" th:text="${matriculasActivas}">0</div>
+            <div class="delta">suma de todos los ciclos y turnos</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sky)"></span>Ingresos este mes</div>
+            <div class="val" th:text="'S/ ' + ${ingresosMesActual}">S/ 0</div>
+            <div class="delta">cobrado según los abonos registrados</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--rose)"></span>Alumnos morosos</div>
+            <div class="val" th:text="${#lists.size(morosos)}">0</div>
+            <div class="delta" th:classappend="${#lists.size(morosos) > 0} ? 'down' : ''">con al menos un pago vencido</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--amber)"></span>Monto adeudado</div>
+            <div class="val" th:text="'S/ ' + ${montoAdeudado}">S/ 0</div>
+            <div class="delta down">pendiente de cobro por morosidad</div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-bottom:22px">
         <div class="card-head">
-            <div><h2>Alumnos por ciclo y turno</h2><p>Cantidad de alumnos matriculados (activos) agrupados por ciclo y turno</p></div>
+            <div>
+                <h2>Alumnos por ciclo y turno</h2>
+                <p>Cantidad de alumnos matriculados (activos) agrupados por ciclo y turno</p>
+            </div>
+            <div class="rowact">
+                <a th:href="@{/reportes/alumnos-por-ciclo/pdf}" class="btn btn-primary btn-sm">Ver PDF</a>
+                <a th:href="@{/reportes/alumnos-por-ciclo/excel}" class="btn btn-ghost btn-sm">Excel</a>
+            </div>
         </div>
-        <div style="padding:16px 20px;display:flex;gap:10px">
-            <a th:href="@{/reportes/alumnos-por-ciclo/pdf}" class="btn btn-primary btn-sm">Ver PDF</a>
-            <a th:href="@{/reportes/alumnos-por-ciclo/excel}" class="btn btn-ghost btn-sm">Descargar Excel</a>
+        <table>
+            <thead><tr><th>Ciclo</th><th>Turno</th><th>Alumnos matriculados</th></tr></thead>
+            <tbody>
+            <tr th:each="fila : ${porCiclo}">
+                <td class="strong" th:text="${fila.ciclo}"></td>
+                <td th:text="${fila.turno}"></td>
+                <td th:text="${fila.cantidad}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(porCiclo)}"><td colspan="3" class="empty">No hay matrículas activas registradas.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card" style="margin-bottom:22px">
+        <div class="card-head">
+            <div>
+                <h2>Ingresos por mes</h2>
+                <p>Total cobrado (abonos) agrupado por mes de pago</p>
+            </div>
+            <div class="rowact">
+                <a th:href="@{/reportes/ingresos-mensuales/pdf}" class="btn btn-primary btn-sm">Ver PDF</a>
+                <a th:href="@{/reportes/ingresos-mensuales/excel}" class="btn btn-ghost btn-sm">Excel</a>
+            </div>
         </div>
+        <table>
+            <thead><tr><th>Mes</th><th>Total cobrado</th></tr></thead>
+            <tbody>
+            <tr th:each="fila : ${porMes}">
+                <td class="strong" th:text="${fila.mes}"></td>
+                <td th:text="'S/ ' + ${fila.total}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(porMes)}"><td colspan="2" class="empty">Aún no se han registrado abonos.</td></tr>
+            </tbody>
+        </table>
     </div>
 
     <div class="card">
         <div class="card-head">
-            <div><h2>Ingresos por mes</h2><p>Total cobrado agrupado por mes de pago</p></div>
+            <div>
+                <h2>Alumnos morosos</h2>
+                <p>Alumnos con al menos un pago vencido y el monto adeudado</p>
+            </div>
+            <div class="rowact">
+                <a th:href="@{/reportes/morosos/pdf}" class="btn btn-primary btn-sm">Ver PDF</a>
+                <a th:href="@{/reportes/morosos/excel}" class="btn btn-ghost btn-sm">Excel</a>
+            </div>
         </div>
-        <div style="padding:16px 20px;display:flex;gap:10px">
-            <a th:href="@{/reportes/ingresos-mensuales/pdf}" class="btn btn-primary btn-sm">Ver PDF</a>
-            <a th:href="@{/reportes/ingresos-mensuales/excel}" class="btn btn-ghost btn-sm">Descargar Excel</a>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-head">
-            <div><h2>Alumnos morosos</h2><p>Alumnos con al menos un pago vencido y el monto adeudado</p></div>
-        </div>
-        <div style="padding:16px 20px;display:flex;gap:10px">
-            <a th:href="@{/reportes/morosos/pdf}" class="btn btn-primary btn-sm">Ver PDF</a>
-            <a th:href="@{/reportes/morosos/excel}" class="btn btn-ghost btn-sm">Descargar Excel</a>
-        </div>
+        <table>
+            <thead><tr><th>Alumno</th><th>Correo</th><th>Pagos vencidos</th><th>Monto adeudado</th></tr></thead>
+            <tbody>
+            <tr th:each="fila : ${morosos}">
+                <td class="strong" th:text="${fila.nombre} + ' ' + ${fila.apellido}"></td>
+                <td th:text="${fila.email} ?: '-'"></td>
+                <td><span class="pill pill-rose" th:text="${fila.pagosVencidos}"></span></td>
+                <td th:text="'S/ ' + ${fila.montoAdeudado}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(morosos)}"><td colspan="4" class="empty">No hay alumnos morosos por el momento.</td></tr>
+            </tbody>
+        </table>
     </div>
 </div>
 </html>
