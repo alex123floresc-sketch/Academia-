@@ -128,12 +128,22 @@ public class AlumnoController {
 
     @GetMapping("/{id}/carnet")
     public String carnet(@PathVariable Long id, Model model) {
+        cargarDatosCarnet(id, model);
+        return "alumnos/carnet";
+    }
+
+    @GetMapping("/{id}/carnet/imprimir")
+    public String carnetImprimir(@PathVariable Long id, Model model) {
+        cargarDatosCarnet(id, model);
+        return "alumnos/carnet-imprimir";
+    }
+
+    private void cargarDatosCarnet(Long id, Model model) {
         Alumno alumno = alumnoService.buscarPorId(id);
         List<Matricula> matriculas = matriculaRepository.findByEstudianteIdConDetalle(id);
         Matricula matriculaVigente = matriculas.isEmpty() ? null : matriculas.get(0);
 
         model.addAttribute("alumno", alumno);
         model.addAttribute("matriculaVigente", matriculaVigente);
-        return "alumnos/carnet";
     }
 }
