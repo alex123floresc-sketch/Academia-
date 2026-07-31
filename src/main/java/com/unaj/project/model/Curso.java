@@ -2,6 +2,9 @@ package com.unaj.project.model;
 
 import jakarta.persistence.*;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "cursos")
 public class Curso {
@@ -26,6 +29,11 @@ public class Curso {
     @Column(nullable = false)
     private boolean eliminado = false;
 
+    @ElementCollection
+    @CollectionTable(name = "curso_areas", joinColumns = @JoinColumn(name = "curso_id"))
+    @Column(name = "area")
+    private Set<String> areas = new LinkedHashSet<>();
+
     public Curso() {}
 
     public Long getId() { return id; }
@@ -45,4 +53,9 @@ public class Curso {
 
     public boolean isEliminado() { return eliminado; }
     public void setEliminado(boolean eliminado) { this.eliminado = eliminado; }
+
+    public Set<String> getAreas() { return areas; }
+    public void setAreas(Set<String> areas) { this.areas = areas; }
+
+    public String getAreasCsv() { return String.join(" ", areas); }
 }

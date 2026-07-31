@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Áreas</title>
+</head>
+<div layout:fragment="contenido">
+    <h2 class="page-title">Áreas</h2>
+
+    <div class="ui secondary pointing menu" style="margin-bottom:20px">
+        <a class="item" th:each="a : ${areas}"
+           th:classappend="${a == areaSeleccionada} ? 'active' : ''"
+           th:href="@{/areas(area=${a})}" th:text="${a}"></a>
+    </div>
+
+    <div class="form-card">
+        <p class="hint" style="margin-top:-6px;margin-bottom:16px">
+            Marca los cursos que pertenecen a <b th:text="${areaSeleccionada}"></b>. Un curso puede pertenecer a más de un área.
+        </p>
+
+        <form th:action="@{/areas/guardar}" method="post">
+            <input type="hidden" name="area" th:value="${areaSeleccionada}">
+
+            <input type="search" id="buscarCursoArea" placeholder="Buscar curso por nombre o código..." autocomplete="off" style="margin-bottom:8px">
+            <div class="courselist" id="courseListArea">
+                <label class="courserow" th:each="curso : ${cursos}"
+                       th:attr="data-buscar=${#strings.toLowerCase(curso.nombre + ' ' + curso.codigo)}">
+                    <input type="checkbox" name="cursoIds" th:value="${curso.id}" class="js-curso-area"
+                           th:checked="${curso.areas.contains(areaSeleccionada)}">
+                    <div>
+                        <div class="cn" th:text="${curso.nombre}"></div>
+                        <div class="cm" th:text="${curso.codigo} + ' · ' + (${curso.profesor != null} ? ${curso.profesor.nombreCompleto} : 'Sin asignar')"></div>
+                    </div>
+                    <span class="ch">
+                        <span th:if="${curso.areas.isEmpty()}">Sin área</span>
+                        <span th:each="a, iter : ${curso.areas}" th:text="${a} + (${iter.last} ? '' : ', ')"></span>
+                    </span>
+                </label>
+                <p class="empty" id="courseEmptyArea" style="display:none">Ningún curso coincide con tu búsqueda.</p>
+            </div>
+            <p class="hint" id="cursosSelCountArea" style="margin-top:8px">Ningún curso seleccionado.</p>
+
+            <div class="form-foot">
+                <button type="submit" class="ui primary button">
+                    <svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+                    Guardar cambios
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script th:src="@{/js/buscador-select.js}"></script>
+    <script>
+        initFiltroLista('buscarCursoArea', 'courseListArea', '.courserow', 'courseEmptyArea', 'js-curso-area', 'cursosSelCountArea');
+    </script>
+</div>
+</html>

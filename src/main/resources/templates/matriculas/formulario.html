@@ -13,25 +13,14 @@
         <div th:if="${error}" class="ui negative message" th:text="${error}"></div>
 
         <form th:action="@{/matriculas/guardar}" method="post">
+            <div class="field">
+                <label>Área <span class="hint">filtra los cursos y alumnos de abajo</span></label>
+                <select id="areaFiltro">
+                    <option th:each="a : ${areas}" th:value="${a}" th:text="${a}"></option>
+                </select>
+            </div>
+
             <div class="grid-2">
-                <div class="field">
-                    <label>Alumno</label>
-                    <div class="combo" id="comboAlumno">
-                        <input type="text" class="combo-input" placeholder="Buscar por nombre..." autocomplete="off" required>
-                        <button type="button" class="combo-clear" aria-label="Quitar selección">&times;</button>
-                        <input type="hidden" name="estudianteId" class="combo-value">
-                        <div class="combo-panel">
-                            <div class="combo-row" th:each="al : ${alumnos}"
-                                 th:attr="data-valor=${al.id},data-texto=${al.nombre + ' ' + al.apellido + ' — ' + al.area},data-buscar=${#strings.toLowerCase(al.nombre + ' ' + al.apellido)}">
-                                <div>
-                                    <div class="cn" th:text="${al.nombre + ' ' + al.apellido}"></div>
-                                    <div class="cm" th:text="${al.area}"></div>
-                                </div>
-                            </div>
-                            <p class="combo-empty" style="display:none">Sin resultados.</p>
-                        </div>
-                    </div>
-                </div>
                 <div class="field">
                     <label>Ciclo</label>
                     <div class="combo" id="comboCiclo" th:attr="data-selected=${cicloActivo != null ? cicloActivo.id : null}">
@@ -47,21 +36,20 @@
                         </div>
                     </div>
                 </div>
+                <div class="field">
+                    <label>Turno</label>
+                    <select name="turno" required>
+                        <option th:each="t : ${turnos}" th:value="${t}" th:text="${t.etiqueta}"></option>
+                    </select>
+                </div>
             </div>
 
             <div class="field">
-                <label>Turno</label>
-                <select name="turno" required>
-                    <option th:each="t : ${turnos}" th:value="${t}" th:text="${t.etiqueta}"></option>
-                </select>
-            </div>
-
-            <div class="field">
-                <label>Cursos a matricular <span class="hint">selecciona los del plan del alumno</span></label>
+                <label>Cursos a matricular <span class="hint">se filtran según el área elegida</span></label>
                 <input type="search" id="buscarCurso" placeholder="Buscar curso por nombre o código..." autocomplete="off" style="margin-bottom:8px">
                 <div class="courselist" id="courseList">
                     <label class="courserow" th:each="curso : ${cursos}"
-                           th:attr="data-buscar=${#strings.toLowerCase(curso.nombre + ' ' + curso.codigo)}">
+                           th:attr="data-buscar=${#strings.toLowerCase(curso.nombre + ' ' + curso.codigo)},data-area=${curso.areasCsv}">
                         <input type="checkbox" name="cursoIds" th:value="${curso.id}" class="js-curso">
                         <div>
                             <div class="cn" th:text="${curso.nombre}"></div>
@@ -69,9 +57,30 @@
                         </div>
                         <span class="ch" th:text="${curso.horas} + ' h'"></span>
                     </label>
-                    <p class="empty" id="courseEmpty" style="display:none">Ningún curso coincide con tu búsqueda.</p>
+                    <p class="empty" id="courseEmpty" style="display:none">Ningún curso coincide en esta área.</p>
                 </div>
                 <p class="hint" id="cursosSelCount" style="margin-top:8px">Ningún curso seleccionado.</p>
+            </div>
+
+            <div class="field">
+                <label>Alumnos a matricular <span class="hint">se filtran según el área elegida — marca varios a la vez</span></label>
+                <input type="search" id="buscarAlumno" placeholder="Buscar alumno por nombre..." autocomplete="off" style="margin-bottom:8px">
+                <label class="courserow" style="cursor:pointer">
+                    <input type="checkbox" id="selAllAlumnos">
+                    <div><div class="cn">Seleccionar todos los alumnos visibles</div></div>
+                </label>
+                <div class="courselist" id="alumnoList" style="margin-top:8px">
+                    <label class="courserow" th:each="al : ${alumnos}"
+                           th:attr="data-buscar=${#strings.toLowerCase(al.nombre + ' ' + al.apellido)},data-area=${al.area}">
+                        <input type="checkbox" name="alumnoIds" th:value="${al.id}" class="js-alumno">
+                        <div>
+                            <div class="cn" th:text="${al.nombre + ' ' + al.apellido}"></div>
+                            <div class="cm" th:text="${al.area}"></div>
+                        </div>
+                    </label>
+                    <p class="empty" id="alumnoEmpty" style="display:none">Ningún alumno coincide en esta área.</p>
+                </div>
+                <p class="hint" id="alumnosSelCount" style="margin-top:8px">Ningún alumno seleccionado.</p>
             </div>
 
             <div class="pay-box">
@@ -79,7 +88,7 @@
                     <svg style="width:17px;height:17px;stroke:currentColor;stroke-width:1.9;fill:none" viewBox="0 0 24 24">
                         <path d="M2 7h20v12H2zM2 11h20"/>
                     </svg>
-                    Pago de matrícula
+                    Pago de matrícula <span class="hint">se aplica a cada alumno seleccionado</span>
                 </div>
                 <div class="grid-2">
                     <div class="field" style="margin-bottom:12px">
@@ -103,7 +112,7 @@
                 </div>
                 <p class="hint" style="color:var(--sage-strong);margin:0 0 4px">Deja el monto de pensión en 0 si no quieres generarla.</p>
                 <div class="pay-row total">
-                    <span>Total a cobrar hoy</span>
+                    <span>Total por alumno hoy</span>
                     <span id="totalPago">S/ 330.00</span>
                 </div>
             </div>
@@ -122,9 +131,38 @@
 
     <script th:src="@{/js/buscador-select.js}"></script>
     <script>
-        initCombo('comboAlumno');
         initCombo('comboCiclo');
-        initFiltroLista('buscarCurso', 'courseList', '.courserow', 'courseEmpty', 'js-curso', 'cursosSelCount');
+
+        var areaFiltro = document.getElementById('areaFiltro');
+        function filtroPorArea(fila) {
+            var areas = (fila.getAttribute('data-area') || '').split(' ');
+            return areas.indexOf(areaFiltro.value) !== -1;
+        }
+
+        var resultCursos = initFiltroLista('buscarCurso', 'courseList', '.courserow', 'courseEmpty', 'js-curso', 'cursosSelCount', filtroPorArea, 'curso');
+        var resultAlumnos = initFiltroLista('buscarAlumno', 'alumnoList', '.courserow', 'alumnoEmpty', 'js-alumno', 'alumnosSelCount', filtroPorArea, 'alumno');
+
+        var selAll = document.getElementById('selAllAlumnos');
+        selAll.addEventListener('change', function () {
+            var marcar = this.checked;
+            resultAlumnos.filas.forEach(function (fila) {
+                if (fila.style.display !== 'none') {
+                    var cb = fila.querySelector('.js-alumno');
+                    if (cb) cb.checked = marcar;
+                }
+            });
+            resultAlumnos.actualizarContador();
+        });
+
+        areaFiltro.addEventListener('change', function () {
+            resultCursos.checks.forEach(function (c) { c.checked = false; });
+            resultAlumnos.checks.forEach(function (c) { c.checked = false; });
+            selAll.checked = false;
+            resultCursos.refiltrar();
+            resultAlumnos.refiltrar();
+            resultCursos.actualizarContador();
+            resultAlumnos.actualizarContador();
+        });
     </script>
 </div>
 </html>

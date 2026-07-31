@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -154,6 +155,28 @@ public class MatriculaServiceImpl implements MatriculaService {
         }
 
         return matriculaRepository.save(matricula);
+    }
+
+    @Override
+    @Transactional
+    public List<Matricula> matricularEnLote(List<Long> alumnoIds, Long semestreId, Turno turno, List<Long> cursoIds,
+                                            String conceptoMatricula, BigDecimal montoMatricula,
+                                            String conceptoPension, BigDecimal montoPension) {
+        if (alumnoIds == null || alumnoIds.isEmpty()) {
+            throw new IllegalArgumentException("Debe seleccionar al menos un alumno.");
+        }
+
+        Set<Long> idsUnicos = new LinkedHashSet<>(alumnoIds);
+        if (idsUnicos.size() != alumnoIds.size()) {
+            throw new IllegalArgumentException("La lista de alumnos contiene duplicados.");
+        }
+
+        List<Matricula> resultado = new ArrayList<>();
+        for (Long alumnoId : idsUnicos) {
+            resultado.add(matricular(alumnoId, semestreId, turno, cursoIds,
+                    conceptoMatricula, montoMatricula, conceptoPension, montoPension));
+        }
+        return resultado;
     }
 
     private Pago crearPago(String concepto, BigDecimal monto, LocalDate vencimiento) {

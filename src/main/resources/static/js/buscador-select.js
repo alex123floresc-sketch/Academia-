@@ -1,34 +1,40 @@
 
-function initFiltroLista(inputId, listaId, filaSelector, emptyId, checkboxClass, contadorId) {
+function initFiltroLista(inputId, listaId, filaSelector, emptyId, checkboxClass, contadorId, extraFiltroFn, etiqueta) {
     var buscar = document.getElementById(inputId);
     var lista = document.getElementById(listaId);
-    if (!lista) return;
+    if (!lista) return { refiltrar: function () {}, actualizarContador: function () {} };
     var vacio = emptyId ? document.getElementById(emptyId) : null;
     var filas = Array.prototype.slice.call(lista.querySelectorAll(filaSelector));
+    var palabra = etiqueta || 'curso';
+    var contador = contadorId ? document.getElementById(contadorId) : null;
+    var checks = checkboxClass ? Array.prototype.slice.call(lista.querySelectorAll('.' + checkboxClass)) : [];
 
-    if (buscar) {
-        buscar.addEventListener('input', function () {
-            var q = buscar.value.trim().toLowerCase();
-            var visibles = 0;
-            filas.forEach(function (fila) {
-                var coincide = q === '' || (fila.getAttribute('data-buscar') || '').indexOf(q) !== -1;
-                fila.style.display = coincide ? '' : 'none';
-                if (coincide) visibles++;
-            });
-            if (vacio) vacio.style.display = visibles === 0 ? 'block' : 'none';
+    function actualizarContador() {
+        if (!contador) return;
+        var n = checks.filter(function (c) { return c.checked; }).length;
+        contador.textContent = n === 0 ? ('Ningún ' + palabra + ' seleccionado.')
+            : (n === 1 ? ('1 ' + palabra + ' seleccionado.') : (n + ' ' + palabra + 's seleccionados.'));
+    }
+
+    function aplicarFiltro() {
+        var q = buscar ? buscar.value.trim().toLowerCase() : '';
+        var visibles = 0;
+        filas.forEach(function (fila) {
+            var coincideTexto = q === '' || (fila.getAttribute('data-buscar') || '').indexOf(q) !== -1;
+            var coincideExtra = !extraFiltroFn || extraFiltroFn(fila);
+            var coincide = coincideTexto && coincideExtra;
+            fila.style.display = coincide ? '' : 'none';
+            if (coincide) visibles++;
         });
+        if (vacio) vacio.style.display = visibles === 0 ? 'block' : 'none';
     }
 
-    if (checkboxClass && contadorId) {
-        var contador = document.getElementById(contadorId);
-        var checks = Array.prototype.slice.call(lista.querySelectorAll('.' + checkboxClass));
-        function actualizarContador() {
-            var n = checks.filter(function (c) { return c.checked; }).length;
-            contador.textContent = n === 0 ? 'Ningún curso seleccionado.' : (n === 1 ? '1 curso seleccionado.' : n + ' cursos seleccionados.');
-        }
-        checks.forEach(function (c) { c.addEventListener('change', actualizarContador); });
-        actualizarContador();
-    }
+    if (buscar) buscar.addEventListener('input', aplicarFiltro);
+    checks.forEach(function (c) { c.addEventListener('change', actualizarContador); });
+    aplicarFiltro();
+    actualizarContador();
+
+    return { refiltrar: aplicarFiltro, actualizarContador: actualizarContador, filas: filas, checks: checks };
 }
 
 function initCombo(wrapperId) {

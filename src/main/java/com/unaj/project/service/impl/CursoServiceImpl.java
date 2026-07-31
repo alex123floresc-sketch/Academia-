@@ -12,7 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class CursoServiceImpl implements CursoService {
@@ -71,6 +73,23 @@ public class CursoServiceImpl implements CursoService {
             c.setEliminado(true);
             cursoRepository.save(c);
         });
+    }
+
+    @Override
+    @Transactional
+    public void establecerCursosDeArea(String area, List<Long> cursoIds) {
+        Set<Long> idsSeleccionados = new HashSet<>(cursoIds == null ? List.of() : cursoIds);
+        for (Curso curso : cursoRepository.findAllConProfesor()) {
+            boolean debeEstar = idsSeleccionados.contains(curso.getId());
+            boolean estaba = curso.getAreas().contains(area);
+            if (debeEstar && !estaba) {
+                curso.getAreas().add(area);
+                cursoRepository.save(curso);
+            } else if (!debeEstar && estaba) {
+                curso.getAreas().remove(area);
+                cursoRepository.save(curso);
+            }
+        }
     }
 
     private CursoForm aForm(Curso c) {

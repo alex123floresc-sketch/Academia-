@@ -13,4 +13,5 @@ public interface CursoService {
     CursoForm buscarFormPorId(Long id);
     void guardar(CursoForm form);
     void eliminar(Long id);
+    void establecerCursosDeArea(String area, List<Long> cursoIds);
 }

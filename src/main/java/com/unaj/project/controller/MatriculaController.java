@@ -1,6 +1,7 @@
 package com.unaj.project.controller;
 
 import com.unaj.project.model.Alumno;
+import com.unaj.project.model.Areas;
 import com.unaj.project.model.Curso;
 import com.unaj.project.model.Matricula;
 import com.unaj.project.model.Turno;
@@ -65,11 +66,12 @@ public class MatriculaController {
         model.addAttribute("ciclos", cicloService.listarTodos());
         model.addAttribute("cicloActivo", cicloService.obtenerActivo());
         model.addAttribute("turnos", Turno.values());
+        model.addAttribute("areas", Areas.TODAS);
         return "matriculas/formulario";
     }
 
     @PostMapping("/guardar")
-    public String guardar(@RequestParam Long estudianteId,
+    public String guardar(@RequestParam(required = false) List<Long> alumnoIds,
                           @RequestParam Long cicloId,
                           @RequestParam Turno turno,
                           @RequestParam(required = false) List<Long> cursoIds,
@@ -80,11 +82,14 @@ public class MatriculaController {
                           Model model,
                           RedirectAttributes ra) {
         try {
-            Matricula matricula = matriculaService.matricular(
-                    estudianteId, cicloId, turno, cursoIds,
+            List<Matricula> matriculas = matriculaService.matricularEnLote(
+                    alumnoIds, cicloId, turno, cursoIds,
                     conceptoMatricula, montoMatricula, conceptoPension, montoPension);
-            ra.addFlashAttribute("mensajeExito", "Matrícula guardada correctamente.");
-            return "redirect:/matriculas/ficha/" + matricula.getId();
+            String mensaje = matriculas.size() == 1
+                    ? "Matrícula guardada correctamente."
+                    : "Se matricularon " + matriculas.size() + " alumnos correctamente.";
+            ra.addFlashAttribute("mensajeExito", mensaje);
+            return "redirect:/matriculas";
         } catch (IllegalArgumentException | IllegalStateException ex) {
             model.addAttribute("error", ex.getMessage());
             model.addAttribute("alumnos", alumnoService.listarTodos());
@@ -92,6 +97,7 @@ public class MatriculaController {
             model.addAttribute("ciclos", cicloService.listarTodos());
             model.addAttribute("cicloActivo", cicloService.obtenerActivo());
             model.addAttribute("turnos", Turno.values());
+            model.addAttribute("areas", Areas.TODAS);
             return "matriculas/formulario";
         }
     }
