@@ -71,10 +71,10 @@ public class MatriculaController {
     }
 
     @PostMapping("/guardar")
-    public String guardar(@RequestParam(required = false) List<Long> alumnoIds,
+    public String guardar(@RequestParam Long estudianteId,
                           @RequestParam Long cicloId,
                           @RequestParam Turno turno,
-                          @RequestParam(required = false) List<Long> cursoIds,
+                          @RequestParam String area,
                           @RequestParam(required = false) String conceptoMatricula,
                           @RequestParam(required = false) java.math.BigDecimal montoMatricula,
                           @RequestParam(required = false) String conceptoPension,
@@ -82,13 +82,10 @@ public class MatriculaController {
                           Model model,
                           RedirectAttributes ra) {
         try {
-            List<Matricula> matriculas = matriculaService.matricularEnLote(
-                    alumnoIds, cicloId, turno, cursoIds,
+            matriculaService.matricular(
+                    estudianteId, cicloId, turno, area,
                     conceptoMatricula, montoMatricula, conceptoPension, montoPension);
-            String mensaje = matriculas.size() == 1
-                    ? "Matrícula guardada correctamente."
-                    : "Se matricularon " + matriculas.size() + " alumnos correctamente.";
-            ra.addFlashAttribute("mensajeExito", mensaje);
+            ra.addFlashAttribute("mensajeExito", "Matrícula guardada correctamente.");
             return "redirect:/matriculas";
         } catch (IllegalArgumentException | IllegalStateException ex) {
             model.addAttribute("error", ex.getMessage());

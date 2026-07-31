@@ -37,7 +37,7 @@ function initFiltroLista(inputId, listaId, filaSelector, emptyId, checkboxClass,
     return { refiltrar: aplicarFiltro, actualizarContador: actualizarContador, filas: filas, checks: checks };
 }
 
-function initCombo(wrapperId) {
+function initCombo(wrapperId, extraFiltroFn) {
     var wrapper = document.getElementById(wrapperId);
     if (!wrapper) return;
     var input = wrapper.querySelector('.combo-input');
@@ -46,7 +46,7 @@ function initCombo(wrapperId) {
     var clearBtn = wrapper.querySelector('.combo-clear');
     var empty = wrapper.querySelector('.combo-empty');
     var rows = Array.prototype.slice.call(wrapper.querySelectorAll('.combo-row'));
-    if (!input || !hidden || !panel) return;
+    if (!input || !hidden || !panel) return { refiltrar: function () {}, limpiar: function () {} };
 
     function actualizarValidez() {
         if (input.hasAttribute('required')) {
@@ -66,7 +66,9 @@ function initCombo(wrapperId) {
         var q = input.value.trim().toLowerCase();
         var visibles = 0;
         rows.forEach(function (r) {
-            var coincide = q === '' || (r.getAttribute('data-buscar') || '').indexOf(q) !== -1;
+            var coincideTexto = q === '' || (r.getAttribute('data-buscar') || '').indexOf(q) !== -1;
+            var coincideExtra = !extraFiltroFn || extraFiltroFn(r);
+            var coincide = coincideTexto && coincideExtra;
             r.style.display = coincide ? '' : 'none';
             if (coincide) visibles++;
         });
@@ -144,4 +146,10 @@ function initCombo(wrapperId) {
         if (match) marcarValor(preId, match.getAttribute('data-texto'));
     }
     actualizarValidez();
+    filtrar();
+
+    return {
+        refiltrar: filtrar,
+        limpiar: function () { marcarValor('', ''); }
+    };
 }

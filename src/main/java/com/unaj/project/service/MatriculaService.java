@@ -22,15 +22,11 @@ public interface MatriculaService {
 
     List<Matricula> listarPorEstudiante(Long estudianteId);
 
-    Matricula matricular(Long estudianteId, Long semestreId, Turno turno, List<Long> cursoIds);
+    Matricula matricular(Long estudianteId, Long semestreId, Turno turno, String area);
 
-    Matricula matricular(Long estudianteId, Long semestreId, Turno turno, List<Long> cursoIds,
+    Matricula matricular(Long estudianteId, Long semestreId, Turno turno, String area,
                          String conceptoMatricula, BigDecimal montoMatricula,
                          String conceptoPension, BigDecimal montoPension);
-
-    List<Matricula> matricularEnLote(List<Long> alumnoIds, Long semestreId, Turno turno, List<Long> cursoIds,
-                                     String conceptoMatricula, BigDecimal montoMatricula,
-                                     String conceptoPension, BigDecimal montoPension);
 
     void anular(Long matriculaId);
 

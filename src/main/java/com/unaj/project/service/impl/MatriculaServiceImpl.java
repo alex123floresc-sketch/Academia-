@@ -15,11 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class MatriculaServiceImpl implements MatriculaService {
@@ -72,25 +69,20 @@ public class MatriculaServiceImpl implements MatriculaService {
 
     @Override
     @Transactional
-    public Matricula matricular(Long estudianteId, Long semestreId, Turno turno, List<Long> cursoIds) {
-        return matricular(estudianteId, semestreId, turno, cursoIds,
+    public Matricula matricular(Long estudianteId, Long semestreId, Turno turno, String area) {
+        return matricular(estudianteId, semestreId, turno, area,
                 "Matrícula", MONTO_MATRICULA,
                 "Pensión (1ra cuota)", MONTO_PENSION);
     }
 
     @Override
     @Transactional
-    public Matricula matricular(Long estudianteId, Long semestreId, Turno turno, List<Long> cursoIds,
+    public Matricula matricular(Long estudianteId, Long semestreId, Turno turno, String area,
                                 String conceptoMatricula, BigDecimal montoMatricula,
                                 String conceptoPension, BigDecimal montoPension) {
 
-        if (cursoIds == null || cursoIds.isEmpty()) {
-            throw new IllegalArgumentException("Debe seleccionar al menos un curso.");
-        }
-
-        Set<Long> idsUnicos = new LinkedHashSet<>(cursoIds);
-        if (idsUnicos.size() != cursoIds.size()) {
-            throw new IllegalArgumentException("La lista de cursos contiene duplicados.");
+        if (area == null || area.isBlank()) {
+            throw new IllegalArgumentException("Debe seleccionar un área.");
         }
 
         if (montoMatricula != null && montoMatricula.compareTo(BigDecimal.ZERO) <= 0) {
@@ -106,9 +98,10 @@ public class MatriculaServiceImpl implements MatriculaService {
         Ciclo ciclo = cicloRepository.findById(semestreId)
                 .orElseThrow(() -> new IllegalArgumentException("Ciclo no encontrado: " + semestreId));
 
-        List<Curso> cursos = cursoRepository.findAllById(idsUnicos);
-        if (cursos.size() != idsUnicos.size()) {
-            throw new IllegalArgumentException("Uno o más cursos seleccionados no existen.");
+        List<Curso> cursos = cursoRepository.findByArea(area);
+        if (cursos.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "El área " + area + " todavía no tiene cursos asignados. Ve a Áreas para agregarlos.");
         }
 
         Optional<Matricula> existente =
@@ -155,28 +148,6 @@ public class MatriculaServiceImpl implements MatriculaService {
         }
 
         return matriculaRepository.save(matricula);
-    }
-
-    @Override
-    @Transactional
-    public List<Matricula> matricularEnLote(List<Long> alumnoIds, Long semestreId, Turno turno, List<Long> cursoIds,
-                                            String conceptoMatricula, BigDecimal montoMatricula,
-                                            String conceptoPension, BigDecimal montoPension) {
-        if (alumnoIds == null || alumnoIds.isEmpty()) {
-            throw new IllegalArgumentException("Debe seleccionar al menos un alumno.");
-        }
-
-        Set<Long> idsUnicos = new LinkedHashSet<>(alumnoIds);
-        if (idsUnicos.size() != alumnoIds.size()) {
-            throw new IllegalArgumentException("La lista de alumnos contiene duplicados.");
-        }
-
-        List<Matricula> resultado = new ArrayList<>();
-        for (Long alumnoId : idsUnicos) {
-            resultado.add(matricular(alumnoId, semestreId, turno, cursoIds,
-                    conceptoMatricula, montoMatricula, conceptoPension, montoPension));
-        }
-        return resultado;
     }
 
     private Pago crearPago(String concepto, BigDecimal monto, LocalDate vencimiento) {

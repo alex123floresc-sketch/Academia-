@@ -13,11 +13,29 @@
         <div th:if="${error}" class="ui negative message" th:text="${error}"></div>
 
         <form th:action="@{/matriculas/guardar}" method="post">
-            <div class="field">
-                <label>Área <span class="hint">filtra los cursos y alumnos de abajo</span></label>
-                <select id="areaFiltro">
-                    <option th:each="a : ${areas}" th:value="${a}" th:text="${a}"></option>
-                </select>
+            <div class="grid-2">
+                <div class="field">
+                    <label>Alumno</label>
+                    <div class="combo" id="comboAlumno">
+                        <input type="text" class="combo-input" placeholder="Buscar alumno por nombre..." autocomplete="off" required>
+                        <button type="button" class="combo-clear" aria-label="Quitar selección">&times;</button>
+                        <input type="hidden" name="estudianteId" class="combo-value">
+                        <div class="combo-panel">
+                            <div class="combo-row" th:each="al : ${alumnos}"
+                                 th:attr="data-valor=${al.id},data-texto=${al.nombre + ' ' + al.apellido},data-buscar=${#strings.toLowerCase(al.nombre + ' ' + al.apellido)},data-area=${al.area}">
+                                <div class="cn" th:text="${al.nombre + ' ' + al.apellido}"></div>
+                                <div class="cm" th:text="${al.area}"></div>
+                            </div>
+                            <p class="combo-empty" style="display:none">Ningún alumno coincide en esta área.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Área <span class="hint">matricula al alumno en todos los cursos de esta área</span></label>
+                    <select id="areaFiltro" name="area">
+                        <option th:each="a : ${areas}" th:value="${a}" th:text="${a}"></option>
+                    </select>
+                </div>
             </div>
 
             <div class="grid-2">
@@ -44,51 +62,32 @@
                 </div>
             </div>
 
+            <div class="form-divider">Cursos incluidos</div>
             <div class="field">
-                <label>Cursos a matricular <span class="hint">se filtran según el área elegida</span></label>
-                <input type="search" id="buscarCurso" placeholder="Buscar curso por nombre o código..." autocomplete="off" style="margin-bottom:8px">
+                <p class="hint" style="margin:-4px 0 10px 0">Se asignan automáticamente según el área elegida — no requiere selección manual.</p>
                 <div class="courselist" id="courseList">
-                    <label class="courserow" th:each="curso : ${cursos}"
-                           th:attr="data-buscar=${#strings.toLowerCase(curso.nombre + ' ' + curso.codigo)},data-area=${curso.areasCsv}">
-                        <input type="checkbox" name="cursoIds" th:value="${curso.id}" class="js-curso">
+                    <div class="courserow" th:each="curso : ${cursos}" style="cursor:default"
+                         th:attr="data-area=${curso.areasCsv}">
                         <div>
                             <div class="cn" th:text="${curso.nombre}"></div>
                             <div class="cm" th:text="${curso.codigo} + ' · ' + (${curso.profesor != null} ? ${curso.profesor.nombreCompleto} : 'Sin asignar')"></div>
                         </div>
                         <span class="ch" th:text="${curso.horas} + ' h'"></span>
-                    </label>
-                    <p class="empty" id="courseEmpty" style="display:none">Ningún curso coincide en esta área.</p>
+                    </div>
+                    <p class="empty" id="courseEmpty" style="display:none">
+                        Esta área todavía no tiene cursos asignados. Ve a <a th:href="@{/areas}">Áreas</a> para agregarlos.
+                    </p>
                 </div>
-                <p class="hint" id="cursosSelCount" style="margin-top:8px">Ningún curso seleccionado.</p>
+                <p class="hint" id="cursosSelCount" style="margin-top:8px"></p>
             </div>
 
-            <div class="field">
-                <label>Alumnos a matricular <span class="hint">se filtran según el área elegida — marca varios a la vez</span></label>
-                <input type="search" id="buscarAlumno" placeholder="Buscar alumno por nombre..." autocomplete="off" style="margin-bottom:8px">
-                <label class="courserow" style="cursor:pointer">
-                    <input type="checkbox" id="selAllAlumnos">
-                    <div><div class="cn">Seleccionar todos los alumnos visibles</div></div>
-                </label>
-                <div class="courselist" id="alumnoList" style="margin-top:8px">
-                    <label class="courserow" th:each="al : ${alumnos}"
-                           th:attr="data-buscar=${#strings.toLowerCase(al.nombre + ' ' + al.apellido)},data-area=${al.area}">
-                        <input type="checkbox" name="alumnoIds" th:value="${al.id}" class="js-alumno">
-                        <div>
-                            <div class="cn" th:text="${al.nombre + ' ' + al.apellido}"></div>
-                            <div class="cm" th:text="${al.area}"></div>
-                        </div>
-                    </label>
-                    <p class="empty" id="alumnoEmpty" style="display:none">Ningún alumno coincide en esta área.</p>
-                </div>
-                <p class="hint" id="alumnosSelCount" style="margin-top:8px">Ningún alumno seleccionado.</p>
-            </div>
-
+            <div class="form-divider">Pago</div>
             <div class="pay-box">
                 <div class="pt">
                     <svg style="width:17px;height:17px;stroke:currentColor;stroke-width:1.9;fill:none" viewBox="0 0 24 24">
                         <path d="M2 7h20v12H2zM2 11h20"/>
                     </svg>
-                    Pago de matrícula <span class="hint">se aplica a cada alumno seleccionado</span>
+                    Pago de matrícula
                 </div>
                 <div class="grid-2">
                     <div class="field" style="margin-bottom:12px">
@@ -112,7 +111,7 @@
                 </div>
                 <p class="hint" style="color:var(--sage-strong);margin:0 0 4px">Deja el monto de pensión en 0 si no quieres generarla.</p>
                 <div class="pay-row total">
-                    <span>Total por alumno hoy</span>
+                    <span>Total a cobrar hoy</span>
                     <span id="totalPago">S/ 330.00</span>
                 </div>
             </div>
@@ -131,38 +130,40 @@
 
     <script th:src="@{/js/buscador-select.js}"></script>
     <script>
-        initCombo('comboCiclo');
-
         var areaFiltro = document.getElementById('areaFiltro');
         function filtroPorArea(fila) {
             var areas = (fila.getAttribute('data-area') || '').split(' ');
             return areas.indexOf(areaFiltro.value) !== -1;
         }
 
-        var resultCursos = initFiltroLista('buscarCurso', 'courseList', '.courserow', 'courseEmpty', 'js-curso', 'cursosSelCount', filtroPorArea, 'curso');
-        var resultAlumnos = initFiltroLista('buscarAlumno', 'alumnoList', '.courserow', 'alumnoEmpty', 'js-alumno', 'alumnosSelCount', filtroPorArea, 'alumno');
+        var comboCiclo = initCombo('comboCiclo');
+        var comboAlumno = initCombo('comboAlumno', filtroPorArea);
 
-        var selAll = document.getElementById('selAllAlumnos');
-        selAll.addEventListener('change', function () {
-            var marcar = this.checked;
-            resultAlumnos.filas.forEach(function (fila) {
-                if (fila.style.display !== 'none') {
-                    var cb = fila.querySelector('.js-alumno');
-                    if (cb) cb.checked = marcar;
+        var courseRows = Array.prototype.slice.call(document.querySelectorAll('#courseList .courserow'));
+        var courseEmpty = document.getElementById('courseEmpty');
+        var cursosSelCount = document.getElementById('cursosSelCount');
+        function actualizarCursos() {
+            var visibles = 0, horas = 0;
+            courseRows.forEach(function (fila) {
+                var coincide = filtroPorArea(fila);
+                fila.style.display = coincide ? '' : 'none';
+                if (coincide) {
+                    visibles++;
+                    horas += parseInt(fila.querySelector('.ch').textContent, 10) || 0;
                 }
             });
-            resultAlumnos.actualizarContador();
-        });
+            courseEmpty.style.display = visibles === 0 ? 'block' : 'none';
+            cursosSelCount.textContent = visibles === 0 ? ''
+                : (visibles === 1 ? '1 curso incluido' : (visibles + ' cursos incluidos')) + ' · ' + horas + ' h en total';
+        }
 
         areaFiltro.addEventListener('change', function () {
-            resultCursos.checks.forEach(function (c) { c.checked = false; });
-            resultAlumnos.checks.forEach(function (c) { c.checked = false; });
-            selAll.checked = false;
-            resultCursos.refiltrar();
-            resultAlumnos.refiltrar();
-            resultCursos.actualizarContador();
-            resultAlumnos.actualizarContador();
+            comboAlumno.limpiar();
+            comboAlumno.refiltrar();
+            actualizarCursos();
         });
+
+        actualizarCursos();
     </script>
 </div>
 </html>
