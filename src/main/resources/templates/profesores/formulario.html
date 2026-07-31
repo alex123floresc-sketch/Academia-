@@ -24,12 +24,19 @@
             </div>
             <div class="field">
                 <label>Correo</label>
-                <input type="email" th:field="*{email}" placeholder="profesor@neurocienciasdennismansillamarin.edu.pe" autocomplete="email">
+                <input type="email" th:field="*{email}" placeholder="profesor@lapreplus.edu.pe" autocomplete="email">
                 <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
             </div>
-            <div class="field">
-                <label>Especialidad <span class="hint">opcional</span></label>
-                <input type="text" th:field="*{especialidad}" placeholder="Ej. Matemática, Comunicación...">
+            <div class="grid-2">
+                <div class="field">
+                    <label>Especialidad <span class="hint">opcional</span></label>
+                    <input type="text" th:field="*{especialidad}" placeholder="Ej. Matemática, Comunicación...">
+                </div>
+                <div class="field">
+                    <label>Tarifa por hora (S/) <span class="hint">opcional, para el pago por horas dictadas</span></label>
+                    <input type="number" step="0.01" min="0" th:field="*{tarifaHora}" placeholder="Ej. 35.00">
+                    <span class="field-error" th:if="${#fields.hasErrors('tarifaHora')}" th:errors="*{tarifaHora}"></span>
+                </div>
             </div>
             <div class="form-foot">
                 <button type="submit" class="ui primary button">Guardar</button>

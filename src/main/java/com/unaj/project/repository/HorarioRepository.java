@@ -28,4 +28,8 @@ public interface HorarioRepository extends JpaRepository<Horario, Long> {
     List<Horario> findByBloqueIdAndDiaSemana(@Param("bloqueId") Long bloqueId, @Param("dia") DiaSemana dia);
 
     boolean existsByBloqueIdAndDiaSemanaAndCursoId(Long bloqueId, DiaSemana diaSemana, Long cursoId);
+
+    @Query("SELECT h FROM Horario h JOIN FETCH h.curso c JOIN FETCH h.bloque b " +
+            "WHERE c.profesor.id = :profesorId AND c.eliminado = false")
+    List<Horario> findByCursoProfesorId(@Param("profesorId") Long profesorId);
 }

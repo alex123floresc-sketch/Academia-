@@ -18,7 +18,7 @@
                 <svg class="ic" viewBox="0 0 24 24"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6V11h-6v9Zm0-16v5h6V4h-6Z"/></svg>Resumen</a>
             <a class="item" th:href="@{/alumnos}" data-group="Gestión" data-title="Alumnos">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg>Alumnos</a>
-            <a class="item" th:href="@{/profesores}" sec:authorize="hasRole('ADMIN')" data-group="Gestión" data-title="Profesores">
+            <a class="item" th:href="@{/profesores}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" data-group="Gestión" data-title="Profesores">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M12 14 2 9l10-5 10 5-10 5Zm0 0v7M6 10.6V16c0 1 2.7 3 6 3s6-2 6-3v-5.4"/></svg>Profesores</a>
             <a class="item" th:href="@{/cursos}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" data-group="Gestión" data-title="Cursos">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>Cursos</a>
@@ -42,6 +42,8 @@
                 <svg class="ic" viewBox="0 0 24 24"><path d="M2 7h20v12H2zM2 11h20M6 15h4"/></svg>Pagos</a>
             <a class="item" th:href="@{/asistencias}" sec:authorize="hasAnyRole('ADMIN','AUXILIAR')" data-group="Operación" data-title="Asistencia">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M3 7h4v4H3zM3 13h4v4H3zM9 7h12M9 13h12M9 19h12"/></svg>Asistencia</a>
+            <a class="item" th:href="@{/horas-docentes}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" data-group="Operación" data-title="Horas docentes">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M20 7h-4V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2ZM10 5h4v2h-4V5Z"/></svg>Horas docentes</a>
             <a class="item" th:href="@{/usuarios}" sec:authorize="hasRole('ADMIN')" data-group="Operación" data-title="Usuarios">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg>Usuarios</a>
         </nav>

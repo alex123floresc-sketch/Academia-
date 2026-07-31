@@ -31,7 +31,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/css/**", "/js/**", "/img/**").permitAll()
 
-                        .requestMatchers("/profesores/**", "/ciclos/**", "/reportes/**").hasRole("ADMIN")
+                        .requestMatchers("/ciclos/**", "/reportes/**").hasRole("ADMIN")
+                        .requestMatchers("/profesores/nuevo", "/profesores/guardar", "/profesores/editar/**",
+                                "/profesores/eliminar/**")
+                        .hasRole("ADMIN")
+                        .requestMatchers("/profesores", "/profesores/**").hasAnyRole("ADMIN", "CAJERO")
+
+                        .requestMatchers("/horas-docentes/**").hasAnyRole("ADMIN", "CAJERO")
                         .requestMatchers("/horarios/nuevo", "/horarios/guardar", "/horarios/quitar-curso/**",
                                 "/horarios/bloques/**")
                         .hasRole("ADMIN")

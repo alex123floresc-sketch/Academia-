@@ -58,6 +58,7 @@ public class ProfesorServiceImpl implements ProfesorService {
         profesor.setApellido(form.getApellido());
         profesor.setEmail(form.getEmail());
         profesor.setEspecialidad(form.getEspecialidad());
+        profesor.setTarifaHora(form.getTarifaHora());
         profesorRepository.save(profesor);
     }
 
@@ -77,6 +78,7 @@ public class ProfesorServiceImpl implements ProfesorService {
         form.setApellido(p.getApellido());
         form.setEmail(p.getEmail());
         form.setEspecialidad(p.getEspecialidad());
+        form.setTarifaHora(p.getTarifaHora());
         return form;
     }
 }

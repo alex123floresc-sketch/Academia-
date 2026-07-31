@@ -1,8 +1,11 @@
 package com.unaj.project.dto;
 
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+
+import java.math.BigDecimal;
 
 public class ProfesorForm {
 
@@ -22,6 +25,9 @@ public class ProfesorForm {
 
     private String especialidad;
 
+    @DecimalMin(value = "0.0", message = "La tarifa no puede ser negativa")
+    private BigDecimal tarifaHora;
+
     public ProfesorForm() {}
 
     public Long getId() { return id; }
@@ -38,4 +44,7 @@ public class ProfesorForm {
 
     public String getEspecialidad() { return especialidad; }
     public void setEspecialidad(String especialidad) { this.especialidad = especialidad; }
+
+    public BigDecimal getTarifaHora() { return tarifaHora; }
+    public void setTarifaHora(BigDecimal tarifaHora) { this.tarifaHora = tarifaHora; }
 }

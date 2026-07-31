@@ -2,6 +2,8 @@ package com.unaj.project.model;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "profesores")
 public class Profesor {
@@ -22,6 +24,9 @@ public class Profesor {
     @Column
     private String especialidad;
 
+    @Column(precision = 8, scale = 2)
+    private BigDecimal tarifaHora;
+
     @Column(nullable = false)
     private boolean eliminado = false;
 
@@ -41,6 +46,9 @@ public class Profesor {
 
     public String getEspecialidad() { return especialidad; }
     public void setEspecialidad(String especialidad) { this.especialidad = especialidad; }
+
+    public BigDecimal getTarifaHora() { return tarifaHora; }
+    public void setTarifaHora(BigDecimal tarifaHora) { this.tarifaHora = tarifaHora; }
 
     public boolean isEliminado() { return eliminado; }
     public void setEliminado(boolean eliminado) { this.eliminado = eliminado; }

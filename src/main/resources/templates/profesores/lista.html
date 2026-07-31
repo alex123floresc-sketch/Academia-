@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout}">
 <head><title>Profesores</title></head>
 <div layout:fragment="contenido">
     <div class="card">
         <div class="card-head">
             <div><h2>Profesores</h2><p>Plana docente de la academia</p></div>
-            <a th:href="@{/profesores/nuevo}" class="ui small primary button">
+            <a th:href="@{/profesores/nuevo}" sec:authorize="hasRole('ADMIN')" class="ui small primary button">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo profesor</a>
         </div>
         <div class="searchbar">
@@ -20,13 +21,14 @@
             <thead><tr><th>Profesor</th><th>Correo</th><th>Especialidad</th><th></th></tr></thead>
             <tbody>
             <tr th:each="profesor : ${profesores}">
-                <td class="strong" th:text="${profesor.nombre + ' ' + profesor.apellido}"></td>
+                <td><a class="strong" th:href="@{/profesores/{id}(id=${profesor.id})}" th:text="${profesor.nombre + ' ' + profesor.apellido}"></a></td>
                 <td th:text="${profesor.email}"></td>
                 <td><span class="pill pill-sage" th:text="${profesor.especialidad}"></span></td>
                 <td>
                     <div class="rowact">
-                        <a th:href="@{/profesores/editar/{id}(id=${profesor.id})}" class="ui small basic button">Editar</a>
-                        <form class="tform" th:action="@{/profesores/eliminar/{id}(id=${profesor.id})}" method="post">
+                        <a th:href="@{/profesores/{id}(id=${profesor.id})}" class="ui small basic button">Ver detalle</a>
+                        <a th:href="@{/profesores/editar/{id}(id=${profesor.id})}" sec:authorize="hasRole('ADMIN')" class="ui small basic button">Editar</a>
+                        <form class="tform" sec:authorize="hasRole('ADMIN')" th:action="@{/profesores/eliminar/{id}(id=${profesor.id})}" method="post">
                             <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar profesor?')">Eliminar</button>
                         </form>
                     </div>

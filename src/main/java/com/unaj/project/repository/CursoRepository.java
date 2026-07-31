@@ -39,4 +39,7 @@ public interface CursoRepository extends JpaRepository<Curso, Long> {
 
     @Query("SELECT DISTINCT c FROM Curso c LEFT JOIN FETCH c.profesor JOIN c.areas a WHERE a = :area AND c.eliminado = false")
     List<Curso> findByArea(@Param("area") String area);
+
+    @Query("SELECT c FROM Curso c LEFT JOIN FETCH c.profesor WHERE c.profesor.id = :profesorId AND c.eliminado = false")
+    List<Curso> findByProfesorIdAndEliminadoFalse(@Param("profesorId") Long profesorId);
 }

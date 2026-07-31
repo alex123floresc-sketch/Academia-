@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Registrar horas</title>
+</head>
+<div layout:fragment="contenido">
+    <a th:href="@{/horas-docentes(profesorId=${horario.curso.profesor.id})}" class="page-back">&laquo; Volver</a>
+    <h2 class="page-title">Registrar horas dictadas</h2>
+
+    <div class="card">
+        <div class="card-head">
+            <div>
+                <h2 th:text="${horario.curso.nombre}">Curso</h2>
+                <p th:text="${horario.curso.profesor.nombreCompleto} + ' · ' + ${horario.diaSemana.etiqueta} + ' · ' + ${horario.turno.etiqueta} + (${horario.aula != null} ? ' · Aula ' + ${horario.aula} : '')">-</p>
+            </div>
+        </div>
+
+        <div style="padding:24px">
+            <div class="note">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M12 6v6l4 2M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20Z"/></svg>
+                <div>Horario programado: <b th:text="${horario.horaInicio} + ' - ' + ${horario.horaFin}"></b>. Ajusta las horas si la clase real fue distinta.</div>
+            </div>
+
+            <form th:action="@{/horas-docentes/registrar}" method="post">
+                <input type="hidden" name="horarioId" th:value="${horario.id}">
+                <div class="grid-3">
+                    <div class="field">
+                        <label>Fecha de la clase</label>
+                        <input type="date" name="fecha" th:value="${fecha}" required>
+                    </div>
+                    <div class="field">
+                        <label>Hora inicio</label>
+                        <input type="time" name="horaInicio" th:value="${horario.horaInicio}" required>
+                    </div>
+                    <div class="field">
+                        <label>Hora fin</label>
+                        <input type="time" name="horaFin" th:value="${horario.horaFin}" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Observaciones <span class="hint">opcional</span></label>
+                    <input type="text" name="observaciones" placeholder="Ej. clase de recuperación, salió antes, etc.">
+                </div>
+                <div class="form-foot">
+                    <button type="submit" class="ui primary button">
+                        <svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+                        Guardar horas
+                    </button>
+                    <a th:href="@{/horas-docentes(profesorId=${horario.curso.profesor.id})}" class="ui basic button">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</html>
