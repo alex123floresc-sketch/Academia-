@@ -9,7 +9,7 @@
 
     <div class="card" style="padding:0;margin-bottom:16px">
         <div class="card-head">
-            <div><h2>Horas docentes</h2><p>Registro de horas dictadas y pagos por período</p></div>
+            <div><h2>Horas docentes</h2><p>Registro de llegada, horas dictadas y pagos por período</p></div>
         </div>
         <form method="get" th:action="@{/horas-docentes}" style="padding:0 20px 20px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
             <div class="field" style="flex:1;min-width:260px;margin:0">
@@ -44,15 +44,24 @@
 
         <div class="card" style="padding:0;margin-bottom:16px">
             <div class="card-head">
-                <div><h2 th:text="'Horarios de ' + ${profesor.nombreCompleto}"></h2><p>Elige una clase para registrar las horas dictadas</p></div>
+                <div><h2 th:text="'Horarios de ' + ${profesor.nombreCompleto}"></h2><p>Marca la llegada y registra las horas dictadas de cada clase de hoy</p></div>
             </div>
-            <div class="metrics" style="grid-template-columns:repeat(3,1fr);padding:20px;margin:0">
-                <div class="metric" th:each="h : ${horarios}">
-                    <div class="lbl"><span class="dot" style="background:var(--sage)"></span><span th:text="${h.curso.nombre}">Curso</span></div>
-                    <div class="val" style="font-size:16px" th:text="${h.diaSemana.etiqueta} + ' · ' + ${h.turno.etiqueta}"></div>
-                    <div class="delta" style="color:var(--ink-faint)" th:text="${h.horaInicio} + ' - ' + ${h.horaFin} + (${h.aula != null} ? ' · Aula ' + ${h.aula} : '')"></div>
-                    <div style="margin-top:12px">
-                        <a th:href="@{/horas-docentes/registrar/{id}(id=${h.id})}" class="ui small primary button">Registrar horas</a>
+            <div class="hd-schedule">
+                <div class="hd-card" th:each="h : ${horarios}" th:with="reg=${registrosHoyPorHorario.get(h.id)}">
+                    <div class="hd-card-curso" th:text="${h.curso.nombre}">Curso</div>
+                    <div class="hd-card-meta" th:text="${h.diaSemana.etiqueta} + ' · ' + ${h.turno.etiqueta} + ' · ' + ${h.horaInicio} + '–' + ${h.horaFin} + (${h.aula != null} ? ' · Aula ' + ${h.aula} : '')"></div>
+                    <div class="hd-card-status">
+                        <span th:if="${reg == null}" class="pill pill-gray">Sin registrar hoy</span>
+                        <span th:if="${reg != null and reg.horas == null}" class="pill pill-sky" th:text="'Llegó ' + ${#temporals.format(reg.horaLlegada, 'HH:mm')}"></span>
+                        <span th:if="${reg != null and reg.horas != null}" class="pill pill-sage" th:text="'✓ ' + ${reg.horas} + ' h registradas'"></span>
+                    </div>
+                    <div class="hd-card-actions">
+                        <form th:if="${reg == null}" th:action="@{/horas-docentes/llegada}" method="post">
+                            <input type="hidden" name="horarioId" th:value="${h.id}">
+                            <button type="submit" class="ui small basic button">Marcar llegada</button>
+                        </form>
+                        <a th:if="${reg != null and reg.horas == null}" th:href="@{/horas-docentes/registrar/{id}(id=${h.id})}" class="ui small primary button">Registrar horas</a>
+                        <a th:if="${reg != null and reg.horas != null}" th:href="@{/horas-docentes/registrar/{id}(id=${h.id})}" class="ui small basic button">Editar</a>
                     </div>
                 </div>
             </div>
@@ -61,7 +70,7 @@
 
         <div class="ui stackable two column grid">
             <div class="column">
-                <div class="card">
+                <div class="card card-accent card-accent-sage">
                     <div class="card-head">
                         <div>
                             <h2>Semana actual</h2>
@@ -87,7 +96,7 @@
                             <span class="pill" th:classappend="${pendienteSemana > 0} ? 'pill-amber' : 'pill-sage'" th:text="'S/ ' + ${pendienteSemana}"></span>
                         </div>
                         <details>
-                            <summary class="page-back" style="cursor:pointer">Registrar pago de esta semana</summary>
+                            <summary class="hd-toggle">Registrar pago de esta semana</summary>
                             <form th:action="@{/horas-docentes/pagos/registrar}" method="post" style="margin-top:14px">
                                 <input type="hidden" name="profesorId" th:value="${profesorId}">
                                 <input type="hidden" name="tipoPeriodo" value="SEMANAL">
@@ -116,7 +125,7 @@
             </div>
 
             <div class="column">
-                <div class="card">
+                <div class="card card-accent card-accent-sky">
                     <div class="card-head">
                         <div>
                             <h2>Quincena actual</h2>
@@ -142,7 +151,7 @@
                             <span class="pill" th:classappend="${pendienteQuincena > 0} ? 'pill-amber' : 'pill-sage'" th:text="'S/ ' + ${pendienteQuincena}"></span>
                         </div>
                         <details>
-                            <summary class="page-back" style="cursor:pointer">Registrar pago de esta quincena</summary>
+                            <summary class="hd-toggle">Registrar pago de esta quincena</summary>
                             <form th:action="@{/horas-docentes/pagos/registrar}" method="post" style="margin-top:14px">
                                 <input type="hidden" name="profesorId" th:value="${profesorId}">
                                 <input type="hidden" name="tipoPeriodo" value="QUINCENAL">
@@ -172,15 +181,19 @@
         </div>
 
         <div class="card" style="padding:0;margin-top:16px">
-            <div class="card-head"><div><h2>Registros de la quincena actual</h2><p>Sesiones dictadas entre el inicio y fin de la quincena mostrada arriba</p></div></div>
+            <div class="card-head"><div><h2>Registros de la quincena actual</h2><p>Sesiones de la quincena mostrada arriba — llegada y horas dictadas</p></div></div>
             <table>
-                <thead><tr><th>Fecha</th><th>Curso</th><th>Horario</th><th>Horas</th><th>Registrado por</th></tr></thead>
+                <thead><tr><th>Fecha</th><th>Curso</th><th>Llegada</th><th>Horario dictado</th><th>Horas</th><th>Registrado por</th></tr></thead>
                 <tbody>
                 <tr th:each="r : ${registrosQuincena}">
                     <td th:text="${r.fecha}"></td>
                     <td class="strong" th:text="${r.horario.curso.nombre}"></td>
-                    <td th:text="${r.horaInicio} + ' - ' + ${r.horaFin}"></td>
-                    <td th:text="${r.horas}"></td>
+                    <td th:text="${r.horaLlegada != null} ? ${#temporals.format(r.horaLlegada, 'HH:mm')} : '-'"></td>
+                    <td th:text="${r.horaInicio != null} ? (${r.horaInicio} + ' - ' + ${r.horaFin}) : '-'"></td>
+                    <td>
+                        <span th:if="${r.horas != null}" th:text="${r.horas}"></span>
+                        <span th:unless="${r.horas != null}" class="pill pill-amber">Pendiente</span>
+                    </td>
                     <td th:text="${r.registradoPor != null} ? ${r.registradoPor.username} : '-'"></td>
                 </tr>
                 </tbody>

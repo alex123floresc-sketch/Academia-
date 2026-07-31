@@ -18,6 +18,10 @@
         </div>
 
         <div style="padding:24px">
+            <div class="note" th:if="${registroDeHoy != null and registroDeHoy.horaLlegada != null}">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+                <div>El profesor marcó su llegada hoy a las <b th:text="${#temporals.format(registroDeHoy.horaLlegada, 'HH:mm')}"></b>.</div>
+            </div>
             <div class="note">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M12 6v6l4 2M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20Z"/></svg>
                 <div>Horario programado: <b th:text="${horario.horaInicio} + ' - ' + ${horario.horaFin}"></b>. Ajusta las horas si la clase real fue distinta.</div>
@@ -32,16 +36,16 @@
                     </div>
                     <div class="field">
                         <label>Hora inicio</label>
-                        <input type="time" name="horaInicio" th:value="${horario.horaInicio}" required>
+                        <input type="time" name="horaInicio" th:value="${horaInicioSel}" required>
                     </div>
                     <div class="field">
                         <label>Hora fin</label>
-                        <input type="time" name="horaFin" th:value="${horario.horaFin}" required>
+                        <input type="time" name="horaFin" th:value="${horaFinSel}" required>
                     </div>
                 </div>
                 <div class="field">
                     <label>Observaciones <span class="hint">opcional</span></label>
-                    <input type="text" name="observaciones" placeholder="Ej. clase de recuperación, salió antes, etc.">
+                    <input type="text" name="observaciones" th:value="${observacionesSel}" placeholder="Ej. clase de recuperación, salió antes, etc.">
                 </div>
                 <div class="form-foot">
                     <button type="submit" class="ui primary button">

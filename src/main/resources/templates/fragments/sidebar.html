@@ -36,10 +36,6 @@
     <div>
         <div class="nav-group-label">Operación</div>
         <nav class="ui secondary vertical fluid menu app-nav">
-            <a class="item" th:href="@{/matriculas}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" data-group="Operación" data-title="Matrículas">
-                <svg class="ic" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm0 0v6h6M9 15l2 2 4-4"/></svg>Matrículas</a>
-            <a class="item" th:href="@{/pagos}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" data-group="Operación" data-title="Pagos">
-                <svg class="ic" viewBox="0 0 24 24"><path d="M2 7h20v12H2zM2 11h20M6 15h4"/></svg>Pagos</a>
             <a class="item" th:href="@{/asistencias}" sec:authorize="hasAnyRole('ADMIN','AUXILIAR')" data-group="Operación" data-title="Asistencia">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M3 7h4v4H3zM3 13h4v4H3zM9 7h12M9 13h12M9 19h12"/></svg>Asistencia</a>
             <a class="item" th:href="@{/horas-docentes}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" data-group="Operación" data-title="Horas docentes">

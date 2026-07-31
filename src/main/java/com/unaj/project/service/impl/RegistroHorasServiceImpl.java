@@ -18,7 +18,9 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class RegistroHorasServiceImpl implements RegistroHorasService {
@@ -37,37 +39,54 @@ public class RegistroHorasServiceImpl implements RegistroHorasService {
 
     @Override
     @Transactional
-    public RegistroHoras registrar(Long horarioId, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin,
-                                   String observaciones, String username) {
+    public RegistroHoras marcarLlegada(Long horarioId, LocalDate fecha, String username) {
+        Horario horario = horarioService.buscarPorId(horarioId);
+        Profesor profesor = resolverProfesor(horario);
+        Usuario registradoPor = (username != null) ? usuarioRepository.findByUsername(username) : null;
+
+        RegistroHoras registro = registroHorasRepository.findByHorarioIdAndFecha(horarioId, fecha)
+                .orElseGet(() -> {
+                    RegistroHoras nuevo = new RegistroHoras();
+                    nuevo.setProfesor(profesor);
+                    nuevo.setHorario(horario);
+                    nuevo.setFecha(fecha);
+                    nuevo.setCreadoEn(LocalDateTime.now());
+                    return nuevo;
+                });
+        registro.setHoraLlegada(LocalDateTime.now());
+        registro.setRegistradoPor(registradoPor);
+        return registroHorasRepository.save(registro);
+    }
+
+    @Override
+    @Transactional
+    public RegistroHoras registrarHoras(Long horarioId, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin,
+                                        String observaciones, String username) {
         if (!horaFin.isAfter(horaInicio)) {
             throw new IllegalArgumentException("La hora de fin debe ser posterior a la hora de inicio.");
         }
-        if (registroHorasRepository.existsByHorarioIdAndFecha(horarioId, fecha)) {
-            throw new IllegalStateException("Ya existe un registro de horas para esa clase en esa fecha.");
-        }
 
         Horario horario = horarioService.buscarPorId(horarioId);
-        Curso curso = horario.getCurso();
-        Profesor profesor = curso.getProfesor();
-        if (profesor == null) {
-            throw new IllegalStateException("El curso \"" + curso.getNombre() + "\" no tiene profesor asignado.");
-        }
+        Profesor profesor = resolverProfesor(horario);
+        Usuario registradoPor = (username != null) ? usuarioRepository.findByUsername(username) : null;
 
         BigDecimal horas = BigDecimal.valueOf(Duration.between(horaInicio, horaFin).toMinutes())
                 .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
 
-        Usuario registradoPor = (username != null) ? usuarioRepository.findByUsername(username) : null;
-
-        RegistroHoras registro = new RegistroHoras();
-        registro.setProfesor(profesor);
-        registro.setHorario(horario);
-        registro.setFecha(fecha);
+        RegistroHoras registro = registroHorasRepository.findByHorarioIdAndFecha(horarioId, fecha)
+                .orElseGet(() -> {
+                    RegistroHoras nuevo = new RegistroHoras();
+                    nuevo.setProfesor(profesor);
+                    nuevo.setHorario(horario);
+                    nuevo.setFecha(fecha);
+                    nuevo.setCreadoEn(LocalDateTime.now());
+                    return nuevo;
+                });
         registro.setHoraInicio(horaInicio);
         registro.setHoraFin(horaFin);
         registro.setHoras(horas);
         registro.setObservaciones(observaciones);
         registro.setRegistradoPor(registradoPor);
-        registro.setCreadoEn(LocalDateTime.now());
         return registroHorasRepository.save(registro);
     }
 
@@ -79,5 +98,26 @@ public class RegistroHorasServiceImpl implements RegistroHorasService {
     @Override
     public List<RegistroHoras> listarPorProfesorEnRango(Long profesorId, LocalDate desde, LocalDate hasta) {
         return registroHorasRepository.findByProfesorIdAndFechaBetween(profesorId, desde, hasta);
+    }
+
+    @Override
+    public Map<Long, RegistroHoras> buscarDeHoyPorHorarios(List<Long> horarioIds) {
+        Map<Long, RegistroHoras> porHorario = new LinkedHashMap<>();
+        if (horarioIds.isEmpty()) {
+            return porHorario;
+        }
+        for (RegistroHoras r : registroHorasRepository.findByHorarioIdInAndFecha(horarioIds, LocalDate.now())) {
+            porHorario.put(r.getHorario().getId(), r);
+        }
+        return porHorario;
+    }
+
+    private Profesor resolverProfesor(Horario horario) {
+        Curso curso = horario.getCurso();
+        Profesor profesor = curso.getProfesor();
+        if (profesor == null) {
+            throw new IllegalStateException("El curso \"" + curso.getNombre() + "\" no tiene profesor asignado.");
+        }
+        return profesor;
     }
 }

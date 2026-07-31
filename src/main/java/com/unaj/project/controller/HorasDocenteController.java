@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/horas-docentes")
@@ -72,6 +73,8 @@ public class HorasDocenteController {
         List<RegistroHoras> registrosQuincena = registroHorasService.listarPorProfesorEnRango(
                 profesorId, rangoQuincena.inicio(), rangoQuincena.fin());
         List<PagoProfesor> pagos = pagoProfesorService.listarPorProfesor(profesorId);
+        Map<Long, RegistroHoras> registrosHoyPorHorario = registroHorasService.buscarDeHoyPorHorarios(
+                horarios.stream().map(Horario::getId).toList());
 
         BigDecimal horasSemana = sumarHoras(registrosSemana);
         BigDecimal horasQuincena = sumarHoras(registrosQuincena);
@@ -83,6 +86,7 @@ public class HorasDocenteController {
 
         model.addAttribute("profesor", profesor);
         model.addAttribute("horarios", horarios);
+        model.addAttribute("registrosHoyPorHorario", registrosHoyPorHorario);
         model.addAttribute("rangoSemana", rangoSemana);
         model.addAttribute("rangoQuincena", rangoQuincena);
         model.addAttribute("registrosSemana", registrosSemana);
@@ -111,9 +115,27 @@ public class HorasDocenteController {
                                 @RequestParam(required = false) LocalDate fecha,
                                 Model model) {
         Horario horario = horarioService.buscarPorId(horarioId);
+        LocalDate fechaSel = fecha != null ? fecha : LocalDate.now();
+        RegistroHoras registroDeHoy = registroHorasService.buscarDeHoyPorHorarios(List.of(horarioId)).get(horarioId);
+        boolean esHoyConDatos = registroDeHoy != null && fechaSel.isEqual(LocalDate.now());
+
         model.addAttribute("horario", horario);
-        model.addAttribute("fecha", fecha != null ? fecha : LocalDate.now());
+        model.addAttribute("fecha", fechaSel);
+        model.addAttribute("registroDeHoy", esHoyConDatos ? registroDeHoy : null);
+        model.addAttribute("horaInicioSel", esHoyConDatos && registroDeHoy.getHoraInicio() != null
+                ? registroDeHoy.getHoraInicio() : horario.getHoraInicio());
+        model.addAttribute("horaFinSel", esHoyConDatos && registroDeHoy.getHoraFin() != null
+                ? registroDeHoy.getHoraFin() : horario.getHoraFin());
+        model.addAttribute("observacionesSel", esHoyConDatos ? registroDeHoy.getObservaciones() : null);
         return "horas-docentes/registrar";
+    }
+
+    @PostMapping("/llegada")
+    public String marcarLlegada(@RequestParam Long horarioId, Authentication auth, RedirectAttributes ra) {
+        String username = (auth != null) ? auth.getName() : null;
+        RegistroHoras registro = registroHorasService.marcarLlegada(horarioId, LocalDate.now(), username);
+        ra.addFlashAttribute("mensajeExito", "Llegada registrada.");
+        return "redirect:/horas-docentes?profesorId=" + registro.getProfesor().getId();
     }
 
     @PostMapping("/registrar")
@@ -124,7 +146,7 @@ public class HorasDocenteController {
                             @RequestParam(required = false) String observaciones,
                             Authentication auth, RedirectAttributes ra) {
         String username = (auth != null) ? auth.getName() : null;
-        RegistroHoras registro = registroHorasService.registrar(horarioId, fecha, horaInicio, horaFin, observaciones, username);
+        RegistroHoras registro = registroHorasService.registrarHoras(horarioId, fecha, horaInicio, horaFin, observaciones, username);
         ra.addFlashAttribute("mensajeExito", "Horas registradas correctamente.");
         return "redirect:/horas-docentes?profesorId=" + registro.getProfesor().getId();
     }
@@ -148,7 +170,9 @@ public class HorasDocenteController {
     }
 
     private BigDecimal sumarHoras(List<RegistroHoras> registros) {
-        return registros.stream().map(RegistroHoras::getHoras).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return registros.stream()
+                .map(r -> r.getHoras() != null ? r.getHoras() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private BigDecimal sumarPagosDelPeriodo(List<PagoProfesor> pagos, String tipo, PeriodoUtil.Rango rango) {

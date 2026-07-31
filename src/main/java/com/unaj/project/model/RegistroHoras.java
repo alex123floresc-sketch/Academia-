@@ -28,13 +28,16 @@ public class RegistroHoras {
     @Column(nullable = false)
     private LocalDate fecha;
 
-    @Column(nullable = false)
+    @Column
+    private LocalDateTime horaLlegada;
+
+    @Column
     private LocalTime horaInicio;
 
-    @Column(nullable = false)
+    @Column
     private LocalTime horaFin;
 
-    @Column(nullable = false, precision = 6, scale = 2)
+    @Column(precision = 6, scale = 2)
     private BigDecimal horas;
 
     @Column
@@ -60,6 +63,9 @@ public class RegistroHoras {
 
     public LocalDate getFecha() { return fecha; }
     public void setFecha(LocalDate fecha) { this.fecha = fecha; }
+
+    public LocalDateTime getHoraLlegada() { return horaLlegada; }
+    public void setHoraLlegada(LocalDateTime horaLlegada) { this.horaLlegada = horaLlegada; }
 
     public LocalTime getHoraInicio() { return horaInicio; }
     public void setHoraInicio(LocalTime horaInicio) { this.horaInicio = horaInicio; }

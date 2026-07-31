@@ -8,11 +8,16 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RegistroHorasRepository extends JpaRepository<RegistroHoras, Long> {
 
     boolean existsByHorarioIdAndFecha(Long horarioId, LocalDate fecha);
+
+    Optional<RegistroHoras> findByHorarioIdAndFecha(Long horarioId, LocalDate fecha);
+
+    List<RegistroHoras> findByHorarioIdInAndFecha(List<Long> horarioIds, LocalDate fecha);
 
     @Query("SELECT r FROM RegistroHoras r " +
             "JOIN FETCH r.horario h JOIN FETCH h.curso " +

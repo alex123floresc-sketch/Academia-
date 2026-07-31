@@ -220,6 +220,25 @@ td .strong,td.strong{color:var(--ink);font-weight:500}
 .area-card-stats span{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint)}
 @media(max-width:920px){.areas-row{grid-template-columns:1fr}}
 
+/* Horas docentes */
+.hd-schedule{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;padding:20px}
+.hd-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;transition:.12s}
+.hd-card:hover{border-color:var(--sage);box-shadow:0 4px 14px -8px rgba(27,42,61,.16)}
+.hd-card-curso{font-family:'Fraunces',serif;font-weight:600;font-size:14.5px;color:var(--ink)}
+.hd-card-meta{font-size:11.5px;color:var(--ink-faint);margin-top:3px}
+.hd-card-status{margin:12px 0}
+.hd-card-actions{display:flex;gap:8px}
+.hd-card-actions form{margin:0}
+
+.card-accent{border-left-width:3px;border-left-style:solid}
+.card-accent-sage{border-left-color:var(--sage)}
+.card-accent-sky{border-left-color:var(--sky)}
+
+.hd-toggle{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:7px;color:var(--sage-strong);font-size:13px;font-weight:600;user-select:none}
+.hd-toggle::-webkit-details-marker{display:none}
+.hd-toggle::after{content:'';width:6px;height:6px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(45deg);transition:transform .15s;margin-top:-4px}
+details[open]>.hd-toggle::after{transform:rotate(-135deg);margin-top:2px}
+
 @media(max-width:920px){
     table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap}
     .menu-toggle{display:flex}

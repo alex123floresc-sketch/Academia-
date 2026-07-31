@@ -99,7 +99,8 @@ public class ProfesorController {
         List<RegistroHoras> registrosQuincena = registroHorasService.listarPorProfesorEnRango(
                 id, rangoQuincena.inicio(), rangoQuincena.fin());
         BigDecimal horasQuincena = registrosQuincena.stream()
-                .map(RegistroHoras::getHoras).reduce(BigDecimal.ZERO, BigDecimal::add);
+                .map(r -> r.getHoras() != null ? r.getHoras() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal tarifa = profesor.getTarifaHora() != null ? profesor.getTarifaHora() : BigDecimal.ZERO;
         BigDecimal montoEsperadoQuincena = horasQuincena.multiply(tarifa).setScale(2, RoundingMode.HALF_UP);
 
