@@ -1,12 +1,21 @@
 package com.unaj.project.service.impl;
 
+import com.unaj.project.dto.AlumnoMorosoDTO;
+import com.unaj.project.dto.CursoDemandaDTO;
 import com.unaj.project.dto.IngresoMensualDTO;
+import com.unaj.project.model.Alumno;
+import com.unaj.project.model.Areas;
+import com.unaj.project.model.Curso;
 import com.unaj.project.model.Matricula;
+import com.unaj.project.model.MatriculaDetalle;
 import com.unaj.project.model.Pago;
 import com.unaj.project.service.*;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +24,8 @@ import java.util.Map;
 public class DashboardServiceImpl implements DashboardService {
 
     private static final int CUPO_POR_TURNO = 60;
+    private static final String SIN_AREA = "Sin área";
+    private static final int DIAS_VENCIMIENTO_PROXIMO = 15;
 
     private final AlumnoService alumnoService;
     private final CursoService cursoService;
@@ -50,6 +61,13 @@ public class DashboardServiceImpl implements DashboardService {
                 .map(Pago::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
         long vencidos = pagos.stream().filter(p -> "VENCIDO".equals(p.getEstado())).count();
 
+        BigDecimal totalEmitido = cobrado.add(pendiente);
+        BigDecimal tasaCobradoPct = totalEmitido.compareTo(BigDecimal.ZERO) > 0
+                ? cobrado.divide(totalEmitido, 4, RoundingMode.HALF_UP)
+                        .multiply(BigDecimal.valueOf(100)).setScale(1, RoundingMode.HALF_UP)
+                : null;
+        long pagosPendientesCount = pagos.stream().filter(p -> !"PAGADO".equals(p.getEstado())).count();
+
         Map<String, Integer> aforo = new LinkedHashMap<>();
         aforo.put("Mañana", 0);
         aforo.put("Tarde", 0);
@@ -64,6 +82,60 @@ public class DashboardServiceImpl implements DashboardService {
         List<String> mesesLabels = ingresosPorMes.stream().map(IngresoMensualDTO::mes).toList();
         List<BigDecimal> mesesValores = ingresosPorMes.stream().map(IngresoMensualDTO::total).toList();
 
+        BigDecimal ingresoMesActual = mesesValores.isEmpty()
+                ? BigDecimal.ZERO : mesesValores.get(mesesValores.size() - 1);
+        BigDecimal ingresoMesAnterior = mesesValores.size() < 2
+                ? null : mesesValores.get(mesesValores.size() - 2);
+        BigDecimal deltaIngresoPct = null;
+        if (ingresoMesAnterior != null && ingresoMesAnterior.compareTo(BigDecimal.ZERO) > 0) {
+            deltaIngresoPct = ingresoMesActual.subtract(ingresoMesAnterior)
+                    .divide(ingresoMesAnterior, 4, RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100))
+                    .setScale(1, RoundingMode.HALF_UP);
+        }
+
+        Map<String, Integer> alumnosPorArea = new LinkedHashMap<>();
+        for (String area : Areas.TODAS) {
+            alumnosPorArea.put(area, 0);
+        }
+        alumnosPorArea.put(SIN_AREA, 0);
+        for (Alumno alumno : alumnoService.listarTodos()) {
+            String area = Areas.TODAS.stream()
+                    .filter(a -> a.equalsIgnoreCase(alumno.getArea()))
+                    .findFirst()
+                    .orElse(SIN_AREA);
+            alumnosPorArea.merge(area, 1, Integer::sum);
+        }
+
+        List<AlumnoMorosoDTO> morosos = reporteService.alumnosMorosos().stream().limit(5).toList();
+
+        Map<Curso, Long> demandaPorCurso = new LinkedHashMap<>();
+        for (Matricula m : matriculas) {
+            if (!"ACTIVA".equals(m.getEstado())) continue;
+            for (MatriculaDetalle d : m.getDetalles()) {
+                if (d.getCurso() != null) {
+                    demandaPorCurso.merge(d.getCurso(), 1L, Long::sum);
+                }
+            }
+        }
+        List<CursoDemandaDTO> cursosMasDemandados = demandaPorCurso.entrySet().stream()
+                .sorted(Map.Entry.<Curso, Long>comparingByValue().reversed())
+                .limit(5)
+                .map(e -> new CursoDemandaDTO(
+                        e.getKey().getNombre(),
+                        e.getKey().getProfesor() != null ? e.getKey().getProfesor().getNombreCompleto() : "Sin asignar",
+                        e.getValue()))
+                .toList();
+
+        LocalDate hoy = LocalDate.now();
+        LocalDate limiteProximo = hoy.plusDays(DIAS_VENCIMIENTO_PROXIMO);
+        List<Pago> proximosVencimientos = pagos.stream()
+                .filter(p -> "PENDIENTE".equals(p.getEstado()) || "PARCIAL".equals(p.getEstado()))
+                .filter(p -> p.getFechaVencimiento() != null && !p.getFechaVencimiento().isAfter(limiteProximo))
+                .sorted(Comparator.comparing(Pago::getFechaVencimiento))
+                .limit(5)
+                .toList();
+
         Map<String, Object> datos = new LinkedHashMap<>();
         datos.put("totalAlumnos", alumnoService.listarTodos().size());
         datos.put("totalCursos", cursoService.listarTodos().size());
@@ -77,6 +149,15 @@ public class DashboardServiceImpl implements DashboardService {
         datos.put("cupoPorTurno", CUPO_POR_TURNO);
         datos.put("mesesLabels", mesesLabels);
         datos.put("mesesValores", mesesValores);
+        datos.put("ingresoMesActual", ingresoMesActual);
+        datos.put("deltaIngresoPct", deltaIngresoPct);
+        datos.put("alumnosPorArea", alumnosPorArea);
+        datos.put("morosos", morosos);
+        datos.put("proximosVencimientos", proximosVencimientos);
+        datos.put("hoy", hoy);
+        datos.put("tasaCobradoPct", tasaCobradoPct);
+        datos.put("pagosPendientesCount", pagosPendientesCount);
+        datos.put("cursosMasDemandados", cursosMasDemandados);
         return datos;
     }
 }
