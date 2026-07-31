@@ -8,7 +8,7 @@
     <h2 class="page-title">Agregar curso al horario</h2>
 
     <div class="form-card">
-        <div th:if="${error}" class="alert-error" th:text="${error}"></div>
+        <div th:if="${error}" class="ui negative message" th:text="${error}"></div>
 
         <div class="note">
             <svg class="ic" viewBox="0 0 24 24"><path d="M12 8v8m-3-5h6M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"/></svg>
@@ -52,8 +52,8 @@
             </div>
 
             <div class="form-foot">
-                <button type="submit" class="btn btn-primary">Agregar cursos</button>
-                <a th:href="@{/horarios(cicloId=${cicloId})}" class="btn btn-ghost">Cancelar</a>
+                <button type="submit" class="ui primary button">Agregar cursos</button>
+                <a th:href="@{/horarios(cicloId=${cicloId})}" class="ui basic button">Cancelar</a>
             </div>
         </form>
     </div>

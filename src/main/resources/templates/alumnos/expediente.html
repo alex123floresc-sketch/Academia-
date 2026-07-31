@@ -25,7 +25,7 @@
                 <h2 th:text="${m.semestre.nombre}">Ciclo</h2>
                 <p th:text="'Turno: ' + (${m.turno != null} ? ${m.turno.etiqueta} : '-') + ' · Estado: ' + ${m.estado}">-</p>
             </div>
-            <a th:href="@{/matriculas/ficha/{id}(id=${m.id})}" class="btn btn-ghost btn-sm">Ver ficha</a>
+            <a th:href="@{/matriculas/ficha/{id}(id=${m.id})}" class="ui small basic button">Ver ficha</a>
         </div>
 
         <table>
@@ -80,7 +80,7 @@
                     <input type="date" name="fechaVencimiento" required>
                 </div>
                 <div style="grid-column:1/-1;margin-top:4px">
-                    <button type="submit" class="btn btn-primary btn-sm">Agregar cuota</button>
+                    <button type="submit" class="ui small primary button">Agregar cuota</button>
                 </div>
             </form>
         </details>

@@ -10,9 +10,9 @@
 </head>
 <div layout:fragment="contenido">
     <div class="no-print" style="display:flex;gap:10px;margin-bottom:18px">
-        <a th:href="@{/matriculas}" class="btn btn-ghost btn-sm">← Volver</a>
-        <a th:href="@{/matriculas/ficha/{id}/pdf(id=${matricula.id})}" class="btn btn-primary btn-sm">Descargar PDF</a>
-        <button onclick="window.print()" class="btn btn-ghost btn-sm">Imprimir</button>
+        <a th:href="@{/matriculas}" class="ui small basic button">← Volver</a>
+        <a th:href="@{/matriculas/ficha/{id}/pdf(id=${matricula.id})}" class="ui small primary button">Descargar PDF</a>
+        <button onclick="window.print()" class="ui small basic button">Imprimir</button>
     </div>
 
     <div class="constancia">

@@ -12,7 +12,7 @@
     function mostrarEstado(ok, mensaje) {
         statusEl.style.display = 'block';
         statusEl.textContent = mensaje;
-        statusEl.className = ok ? 'alert-success' : 'alert-error';
+        statusEl.className = ok ? 'ui positive message' : 'ui negative message';
     }
 
     function agregarFila(nombre, hora) {

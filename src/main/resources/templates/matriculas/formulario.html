@@ -10,7 +10,7 @@
     <h2 class="page-title">Registrar matrícula</h2>
 
     <div class="form-card">
-        <div th:if="${error}" class="alert-error" th:text="${error}"></div>
+        <div th:if="${error}" class="ui negative message" th:text="${error}"></div>
 
         <form th:action="@{/matriculas/guardar}" method="post">
             <div class="grid-2">
@@ -109,11 +109,11 @@
             </div>
 
             <div class="form-foot">
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="ui primary button">
                     <svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
                     Matricular y cobrar
                 </button>
-                <a th:href="@{/matriculas}" class="btn btn-ghost">Cancelar</a>
+                <a th:href="@{/matriculas}" class="ui basic button">Cancelar</a>
             </div>
         </form>
     </div>

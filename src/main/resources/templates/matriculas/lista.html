@@ -8,13 +8,13 @@
     <div class="card">
         <div class="card-head">
             <div><h2>Matrículas</h2><p>Matrículas registradas en la academia</p></div>
-            <a th:href="@{/matriculas/nueva}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="btn btn-primary btn-sm">
+            <a th:href="@{/matriculas/nueva}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="ui small primary button">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nueva matrícula</a>
         </div>
         <div class="searchbar">
             <form method="get" th:action="@{/matriculas}" style="display:flex;gap:8px;flex:1">
                 <input type="text" name="q" th:value="${q}" placeholder="Buscar por alumno o ciclo...">
-                <button type="submit" class="btn btn-ghost btn-sm">Buscar</button>
+                <button type="submit" class="ui small basic button">Buscar</button>
             </form>
         </div>
         <table>
@@ -30,10 +30,10 @@
                 </td>
                 <td>
                     <div class="rowact">
-                        <a th:href="@{/matriculas/ficha/{id}(id=${m.id})}" class="btn btn-ghost btn-sm">Ver constancia</a>
-                        <a th:href="@{/matriculas/ficha/{id}/pdf(id=${m.id})}" class="btn btn-ghost btn-sm">PDF</a>
+                        <a th:href="@{/matriculas/ficha/{id}(id=${m.id})}" class="ui small basic button">Ver constancia</a>
+                        <a th:href="@{/matriculas/ficha/{id}/pdf(id=${m.id})}" class="ui small basic button">PDF</a>
                         <form class="tform" th:if="${m.estado == 'ACTIVA'}" th:action="@{/matriculas/anular/{id}(id=${m.id})}" method="post" sec:authorize="hasRole('ADMIN')">
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Anular matrícula?')">Anular</button>
+                            <button type="submit" class="ui small basic red button" onclick="return confirm('¿Anular matrícula?')">Anular</button>
                         </form>
                     </div>
                 </td>

@@ -36,7 +36,7 @@
             <div class="val" style="font-size:16px" th:text="${h.horaInicio} + ' - ' + ${h.horaFin}"></div>
             <div class="delta" th:text="(${h.aula != null} ? 'Aula ' + ${h.aula} + ' · ' : '') + ${conteos.get(h.id)} + ' registrados hoy'"></div>
             <div style="margin-top:12px">
-                <a th:href="@{/asistencias/cursos/escanear/{id}(id=${h.id})}" class="btn btn-primary btn-sm">Registrar entrada</a>
+                <a th:href="@{/asistencias/cursos/escanear/{id}(id=${h.id})}" class="ui small primary button">Registrar entrada</a>
             </div>
         </div>
     </div>

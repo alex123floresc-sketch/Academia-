@@ -7,71 +7,74 @@
 </head>
 <div layout:fragment="contenido">
 
-    <div class="metrics" style="grid-template-columns:repeat(5,1fr)">
-        <div class="metric">
-            <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Alumnos</div>
-            <div class="val" th:text="${totalAlumnos}">0</div>
+    <div class="ui five stackable statistics" style="margin:0 0 26px">
+        <div class="statistic">
+            <div class="value" th:text="${totalAlumnos}">0</div>
+            <div class="label">Alumnos</div>
         </div>
-        <div class="metric">
-            <div class="lbl"><span class="dot" style="background:var(--sky)"></span>Cursos</div>
-            <div class="val" th:text="${totalCursos}">0</div>
+        <div class="statistic">
+            <div class="value" th:text="${totalCursos}">0</div>
+            <div class="label">Cursos</div>
         </div>
-        <div class="metric">
-            <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Cobrado</div>
-            <div class="val" th:text="'S/ ' + ${cobrado}">S/ 0</div>
+        <div class="statistic">
+            <div class="value" th:text="'S/ ' + ${cobrado}">S/ 0</div>
+            <div class="label">Cobrado</div>
         </div>
-        <div class="metric">
-            <div class="lbl"><span class="dot" style="background:var(--amber)"></span>Pendiente</div>
-            <div class="val" th:text="'S/ ' + ${pendiente}">S/ 0</div>
+        <div class="statistic">
+            <div class="value" th:text="'S/ ' + ${pendiente}">S/ 0</div>
+            <div class="label">Pendiente</div>
         </div>
-        <div class="metric">
-            <div class="lbl"><span class="dot" style="background:var(--rose)"></span>Vencidos</div>
-            <div class="val" th:text="${vencidos}">0</div>
-        </div>
-    </div>
-
-    <div class="card" style="margin-bottom:26px">
-        <div class="card-head"><div><h2>Ingresos por mes</h2><p>Total cobrado, agrupado por mes de pago</p></div></div>
-        <div style="padding:20px">
-            <canvas id="chartIngresos" height="90"></canvas>
+        <div class="statistic statistic-danger">
+            <div class="value" th:text="${vencidos}">0</div>
+            <div class="label">Vencidos</div>
         </div>
     </div>
 
-    <div class="two-col">
-        <div class="card">
-            <div class="card-head">
-                <div><h2>Últimas matrículas</h2><p th:text="${cicloActivo != null} ? ${cicloActivo.nombre} : 'Academia Neurociencias Dennis Mansilla Marin'"></p></div>
-                <a th:href="@{/matriculas}" class="btn btn-ghost btn-sm">Ver todas</a>
+    <div class="ui segment" style="margin-bottom:26px">
+        <div class="ui header">Ingresos por mes</div>
+        <p style="color:var(--ink-faint);font-size:12.5px;margin-bottom:14px">Total cobrado, agrupado por mes de pago</p>
+        <canvas id="chartIngresos" height="90"></canvas>
+    </div>
+
+    <div class="ui stackable two column grid">
+        <div class="column">
+            <div class="ui segment" style="padding:0">
+                <div class="card-head">
+                    <div><h2>Últimas matrículas</h2><p th:text="${cicloActivo != null} ? ${cicloActivo.nombre} : 'Sin ciclo activo'"></p></div>
+                    <a th:href="@{/matriculas}" class="ui basic tiny button">Ver todas</a>
+                </div>
+                <table class="ui very basic celled table" style="margin:0">
+                    <thead><tr><th>Alumno</th><th>Ciclo</th><th>Turno</th><th>Estado</th></tr></thead>
+                    <tbody>
+                    <tr th:each="m : ${ultimas}">
+                        <td class="strong" th:text="${m.estudiante.nombre + ' ' + m.estudiante.apellido}"></td>
+                        <td th:text="${m.semestre.nombre}"></td>
+                        <td th:text="${m.turno != null} ? ${m.turno.etiqueta} : '-'"></td>
+                        <td>
+                            <div th:if="${m.estado == 'ACTIVA'}" class="ui mini green basic label">Activa</div>
+                            <div th:unless="${m.estado == 'ACTIVA'}" class="ui mini grey basic label" th:text="${m.estado}"></div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(ultimas)}"><td colspan="4" class="empty">No hay matrículas aún.</td></tr>
+                    </tbody>
+                </table>
             </div>
-            <table>
-                <thead><tr><th>Alumno</th><th>Ciclo</th><th>Turno</th><th>Estado</th></tr></thead>
-                <tbody>
-                <tr th:each="m : ${ultimas}">
-                    <td class="strong" th:text="${m.estudiante.nombre + ' ' + m.estudiante.apellido}"></td>
-                    <td th:text="${m.semestre.nombre}"></td>
-                    <td th:text="${m.turno != null} ? ${m.turno.etiqueta} : '-'"></td>
-                    <td>
-                        <span th:if="${m.estado == 'ACTIVA'}" class="pill pill-sage"><span class="d"></span>Activa</span>
-                        <span th:unless="${m.estado == 'ACTIVA'}" class="pill pill-gray" th:text="${m.estado}"></span>
-                    </td>
-                </tr>
-                <tr th:if="${#lists.isEmpty(ultimas)}"><td colspan="4" class="empty">No hay matrículas aún.</td></tr>
-                </tbody>
-            </table>
         </div>
 
-        <div class="card">
-            <div class="card-head"><div><h2>Aforo por turno</h2><p th:text="${cicloActivo != null} ? ${cicloActivo.nombre} : ''"></p></div></div>
-            <div style="padding:20px;display:flex;flex-direction:column;gap:18px">
-                <div th:each="e : ${aforo}">
+        <div class="column">
+            <div class="ui segment">
+                <div class="ui header">Aforo por turno</div>
+                <p style="color:var(--ink-faint);font-size:12.5px;margin-bottom:16px" th:text="${cicloActivo != null} ? ${cicloActivo.nombre} : ''"></p>
+                <div th:each="e : ${aforo}" style="margin-bottom:16px">
                     <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px">
                         <span class="strong" th:text="${e.key}"></span>
                         <span style="color:var(--ink-faint)" th:text="${e.value} + ' / ' + ${cupoPorTurno}"></span>
                     </div>
-                    <div style="height:8px;background:var(--line-soft);border-radius:6px;overflow:hidden">
-                        <div th:style="'width:' + ${T(java.lang.Math).min(100, (e.value * 100) / cupoPorTurno)} + '%;height:100%;background:var(--sage);border-radius:6px'"></div>
+                    <div class="ui tiny progress aforo-bar">
+                        <div class="bar" th:style="'width:' + ${T(java.lang.Math).min(100, (e.value * 100) / cupoPorTurno)} + '%'"></div>
                     </div>
                 </div>
+                <p th:if="${#maps.isEmpty(aforo)}" class="empty">Sin datos de aforo.</p>
             </div>
         </div>
     </div>
@@ -93,7 +96,7 @@
                     datasets: [{
                         label: 'Ingresos (S/)',
                         data: valores,
-                        backgroundColor: '#6E9D91',
+                        backgroundColor: '#8C2F45',
                         borderRadius: 6
                     }]
                 },

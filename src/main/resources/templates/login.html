@@ -6,7 +6,9 @@
     <title>Ingresar · Academia</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css">
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/semantic-theme.css}">
     <style>
         body{background:var(--bg)}
         .login-wrap{
@@ -44,7 +46,7 @@
             <p>Sistema de matrículas</p>
         </div>
         <div class="login-box">
-            <div th:if="${param.error}" class="alert-error">Usuario o contraseña incorrectos.</div>
+            <div th:if="${param.error}" class="ui negative message">Usuario o contraseña incorrectos.</div>
             <div th:if="${param.logout}" class="note" style="margin-bottom:16px">Sesión cerrada correctamente.</div>
             <form th:action="@{/login}" method="post">
                 <div class="field">
@@ -60,7 +62,7 @@
                         </button>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Ingresar</button>
+                <button type="submit" class="ui primary button">Ingresar</button>
             </form>
         </div>
         <p class="login-foot">Academia · Acceso restringido a personal autorizado</p>

@@ -12,13 +12,13 @@
     <div class="card">
         <div class="card-head">
             <div><h2>Cursos</h2><p>Catálogo de cursos y profesores asignados</p></div>
-            <a th:href="@{/cursos/nuevo}" sec:authorize="hasRole('ADMIN')" class="btn btn-primary btn-sm">
+            <a th:href="@{/cursos/nuevo}" sec:authorize="hasRole('ADMIN')" class="ui small primary button">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo curso</a>
         </div>
         <div class="searchbar">
             <form method="get" th:action="@{/cursos}" style="display:flex;gap:8px;flex:1">
                 <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre, código o profesor...">
-                <button type="submit" class="btn btn-ghost btn-sm">Buscar</button>
+                <button type="submit" class="ui small basic button">Buscar</button>
             </form>
         </div>
         <table>
@@ -31,9 +31,9 @@
                 <td th:text="${curso.profesor != null} ? ${curso.profesor.nombreCompleto} : 'Sin asignar'"></td>
                 <td sec:authorize="hasRole('ADMIN')">
                     <div class="rowact">
-                        <a th:href="@{/cursos/editar/{id}(id=${curso.id})}" class="btn btn-ghost btn-sm">Editar</a>
+                        <a th:href="@{/cursos/editar/{id}(id=${curso.id})}" class="ui small basic button">Editar</a>
                         <form class="tform" th:action="@{/cursos/eliminar/{id}(id=${curso.id})}" method="post">
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar curso?')">Eliminar</button>
+                            <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar curso?')">Eliminar</button>
                         </form>
                     </div>
                 </td>

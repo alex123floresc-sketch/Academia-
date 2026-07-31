@@ -7,13 +7,13 @@
     <div class="card">
         <div class="card-head">
             <div><h2>Profesores</h2><p>Plana docente de la academia</p></div>
-            <a th:href="@{/profesores/nuevo}" class="btn btn-primary btn-sm">
+            <a th:href="@{/profesores/nuevo}" class="ui small primary button">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo profesor</a>
         </div>
         <div class="searchbar">
             <form method="get" th:action="@{/profesores}" style="display:flex;gap:8px;flex:1">
                 <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre, correo o especialidad...">
-                <button type="submit" class="btn btn-ghost btn-sm">Buscar</button>
+                <button type="submit" class="ui small basic button">Buscar</button>
             </form>
         </div>
         <table>
@@ -25,9 +25,9 @@
                 <td><span class="pill pill-sage" th:text="${profesor.especialidad}"></span></td>
                 <td>
                     <div class="rowact">
-                        <a th:href="@{/profesores/editar/{id}(id=${profesor.id})}" class="btn btn-ghost btn-sm">Editar</a>
+                        <a th:href="@{/profesores/editar/{id}(id=${profesor.id})}" class="ui small basic button">Editar</a>
                         <form class="tform" th:action="@{/profesores/eliminar/{id}(id=${profesor.id})}" method="post">
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar profesor?')">Eliminar</button>
+                            <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar profesor?')">Eliminar</button>
                         </form>
                     </div>
                 </td>

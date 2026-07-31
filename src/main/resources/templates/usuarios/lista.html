@@ -7,13 +7,13 @@
     <div class="card">
         <div class="card-head">
             <div><h2>Usuarios</h2><p>Cuentas de acceso al sistema</p></div>
-            <a th:href="@{/usuarios/nuevo}" class="btn btn-primary btn-sm">
+            <a th:href="@{/usuarios/nuevo}" class="ui small primary button">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo usuario</a>
         </div>
         <div class="searchbar">
             <form method="get" th:action="@{/usuarios}" style="display:flex;gap:8px;flex:1">
                 <input type="text" name="q" th:value="${q}" placeholder="Buscar por usuario o nombre...">
-                <button type="submit" class="btn btn-ghost btn-sm">Buscar</button>
+                <button type="submit" class="ui small basic button">Buscar</button>
             </form>
         </div>
         <table>
@@ -30,9 +30,9 @@
                 </td>
                 <td>
                     <div class="rowact">
-                        <a th:href="@{/usuarios/editar/{id}(id=${u.id})}" class="btn btn-ghost btn-sm">Editar</a>
+                        <a th:href="@{/usuarios/editar/{id}(id=${u.id})}" class="ui small basic button">Editar</a>
                         <form class="tform" th:action="@{/usuarios/eliminar/{id}(id=${u.id})}" method="post">
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar usuario?')">Eliminar</button>
+                            <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar usuario?')">Eliminar</button>
                         </form>
                     </div>
                 </td>

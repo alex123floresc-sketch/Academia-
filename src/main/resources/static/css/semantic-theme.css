@@ -1,0 +1,71 @@
+/* Reskin of Semantic UI to match the Academia garnet/red/pink palette and typography.
+   Semantic UI is loaded compiled from CDN (no LESS build available here), so colors
+   are re-themed with plain CSS overrides layered on top of semantic.min.css. */
+
+body{font-family:'Inter',system-ui,-apple-system,sans-serif}
+.ui.header,h1.ui,h2.ui,h3.ui,h4.ui{font-family:'Fraunces',serif;font-weight:600;color:var(--ink)}
+
+/* Primary brand color (garnet) */
+.ui.primary.button,.ui.primary.buttons .button{background:var(--sage);color:#fff}
+.ui.primary.button:hover,.ui.primary.buttons .button:hover{background:var(--sage-hover)}
+.ui.primary.button:active{background:var(--sage-strong)}
+.ui.primary.label{background:var(--sage)!important;color:#fff!important}
+.ui.basic.primary.label{background:var(--sage-soft)!important;color:var(--sage-strong)!important;border-color:var(--sage)!important}
+a.ui.primary.label:hover{background:var(--sage-hover)!important}
+.ui.secondary.button{background:var(--surface);color:var(--ink-soft);border:1px solid var(--line)}
+.ui.secondary.button:hover{background:var(--surface-2);color:var(--ink)}
+.ui.button .ic{width:15px;height:15px;stroke:currentColor;stroke-width:1.9;fill:none;vertical-align:-3px;margin-right:6px}
+.ui.button{font-family:'Inter',system-ui,-apple-system,sans-serif}
+
+/* Named colors remapped onto the brand palette. Only "red" (danger) and "pink" (secondary
+   brand accent) are re-themed — green/yellow/blue/grey are left as Semantic's natural
+   colors on purpose, so status meaning (success/warning/info/neutral) stays readable
+   instead of everything collapsing into one red-family hue. */
+.ui.red.button:not(.basic),.ui.red.label:not(.basic),.ui.red.buttons .button:not(.basic){background-color:var(--rose)!important;color:#fff!important}
+.ui.basic.red.label,.ui.basic.red.button{background:transparent!important;color:var(--rose-strong)!important;box-shadow:0 0 0 1px var(--rose) inset!important}
+.ui.pink.button:not(.basic),.ui.pink.label:not(.basic),.ui.pink.buttons .button:not(.basic){background-color:var(--lav)!important;color:#fff!important}
+.ui.basic.pink.label,.ui.basic.pink.button{background:transparent!important;color:var(--lav-strong)!important;box-shadow:0 0 0 1px var(--lav) inset!important}
+
+/* Links & focus */
+a{color:var(--sage-strong)}
+a:hover{color:var(--sage-hover)}
+.ui.form .field.error .input>input,.ui.form .field.error select,.ui.form .field.error textarea{border-color:var(--rose)!important}
+
+/* Menu (sidebar + topbar) */
+.ui.menu{border-color:var(--line);box-shadow:none}
+.ui.menu .item{color:var(--ink-soft)}
+.ui.menu .active.item,.ui.menu .active.item:hover{background:var(--sage-soft)!important;color:var(--sage-strong)!important;border-radius:var(--radius-sm)}
+.ui.vertical.menu .item>i.icon{color:inherit}
+.ui.menu .item:hover{color:var(--ink)}
+
+/* Table */
+.ui.table thead th{background:var(--surface-2)!important;color:var(--ink-faint);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.ui.table tbody tr:hover{background:var(--surface-2)!important}
+.ui.table{border-color:var(--line)}
+.ui.table td,.ui.table th{border-color:var(--line-soft)}
+
+/* Segment / card */
+.ui.segment{border-color:var(--line);border-radius:var(--radius)}
+.ui.card,.ui.cards>.card{border-radius:var(--radius);box-shadow:0 1px 2px 0 rgba(58,38,43,.08),0 0 0 1px var(--line)}
+.ui.card>.content>.header,.ui.cards>.card>.content>.header{font-family:'Fraunces',serif}
+
+/* Statistic */
+.ui.statistic>.value,.ui.statistics .statistic>.value{color:var(--ink)!important;font-family:'Fraunces',serif}
+.ui.statistic>.label,.ui.statistics .statistic>.label{color:var(--ink-faint)!important}
+.statistic-danger>.value{color:var(--rose)!important}
+
+/* Progress bars */
+.ui.progress .bar{background:var(--sage)!important}
+.ui.progress{background:var(--line-soft)}
+
+/* Pagination */
+.ui.pagination.menu .active.item{background:var(--sage)!important;color:#fff!important}
+
+/* Form inputs */
+.ui.form input:focus,.ui.form select:focus,.ui.form textarea:focus{border-color:var(--sage)!important}
+.ui.checkbox input:checked~.box:before,.ui.checkbox input:checked~label:before{background:var(--sage)!important;border-color:var(--sage)!important}
+.ui.checkbox input:checked~.box:after,.ui.checkbox input:checked~label:after{color:#fff!important}
+
+/* Messages keep Semantic's natural positive/warning/info colors so they stay
+   distinguishable from each other; only negative (error) maps to the brand red. */
+.ui.negative.message{background:var(--rose-soft);color:var(--rose-strong)}

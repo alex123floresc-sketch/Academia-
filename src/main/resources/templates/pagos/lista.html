@@ -31,7 +31,7 @@
         <div class="searchbar">
             <form method="get" th:action="@{/pagos}" style="display:flex;gap:8px;flex:1">
                 <input type="text" name="q" th:value="${q}" placeholder="Buscar por alumno o concepto...">
-                <button type="submit" class="btn btn-ghost btn-sm">Buscar</button>
+                <button type="submit" class="ui small basic button">Buscar</button>
             </form>
         </div>
         <div th:if="${#lists.isEmpty(alumnos)}" class="empty">No hay pagos registrados aún.</div>
@@ -43,7 +43,7 @@
                 <h2 th:text="${alumno.nombre + ' ' + alumno.apellido}">Alumno</h2>
                 <p th:text="'DNI ' + (${alumno.dni} ?: '-')">-</p>
             </div>
-            <a th:href="@{/alumnos/{id}/expediente(id=${alumno.id})}" class="btn btn-ghost btn-sm">Ver expediente</a>
+            <a th:href="@{/alumnos/{id}/expediente(id=${alumno.id})}" class="ui small basic button">Ver expediente</a>
         </div>
         <table>
             <thead><tr><th>Concepto</th><th>Vence</th><th>Monto</th><th>Estado</th><th></th></tr></thead>
@@ -76,7 +76,7 @@
                             <option value="YAPE">Yape</option>
                             <option value="TRANSFERENCIA">Transferencia</option>
                         </select>
-                        <button type="submit" class="btn btn-primary btn-sm">Cobrar</button>
+                        <button type="submit" class="ui small primary button">Cobrar</button>
                     </form>
                     <span th:if="${pago.estado == 'PAGADO'}" class="pill pill-sage" th:text="${pago.metodo}">—</span>
                 </td>
