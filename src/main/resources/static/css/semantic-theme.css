@@ -1,11 +1,11 @@
-/* Reskin of Semantic UI to match the Academia garnet/red/pink palette and typography.
+/* Reskin of Semantic UI to match the Lapreplus blue palette and typography.
    Semantic UI is loaded compiled from CDN (no LESS build available here), so colors
    are re-themed with plain CSS overrides layered on top of semantic.min.css. */
 
 body{font-family:'Inter',system-ui,-apple-system,sans-serif}
 .ui.header,h1.ui,h2.ui,h3.ui,h4.ui{font-family:'Fraunces',serif;font-weight:600;color:var(--ink)}
 
-/* Primary brand color (garnet) */
+/* Primary brand color (blue) */
 .ui.primary.button,.ui.primary.buttons .button{background:var(--sage);color:#fff}
 .ui.primary.button:hover,.ui.primary.buttons .button:hover{background:var(--sage-hover)}
 .ui.primary.button:active{background:var(--sage-strong)}
@@ -18,9 +18,9 @@ a.ui.primary.label:hover{background:var(--sage-hover)!important}
 .ui.button{font-family:'Inter',system-ui,-apple-system,sans-serif}
 
 /* Named colors remapped onto the brand palette. Only "red" (danger) and "pink" (secondary
-   brand accent) are re-themed — green/yellow/blue/grey are left as Semantic's natural
+   brand accent) are re-themed — green/yellow/grey are left as Semantic's natural
    colors on purpose, so status meaning (success/warning/info/neutral) stays readable
-   instead of everything collapsing into one red-family hue. */
+   instead of everything collapsing into one blue-family hue. */
 .ui.red.button:not(.basic),.ui.red.label:not(.basic),.ui.red.buttons .button:not(.basic){background-color:var(--rose)!important;color:#fff!important}
 .ui.basic.red.label,.ui.basic.red.button{background:transparent!important;color:var(--rose-strong)!important;box-shadow:0 0 0 1px var(--rose) inset!important}
 .ui.pink.button:not(.basic),.ui.pink.label:not(.basic),.ui.pink.buttons .button:not(.basic){background-color:var(--lav)!important;color:#fff!important}
@@ -46,7 +46,7 @@ a:hover{color:var(--sage-hover)}
 
 /* Segment / card */
 .ui.segment{border-color:var(--line);border-radius:var(--radius)}
-.ui.card,.ui.cards>.card{border-radius:var(--radius);box-shadow:0 1px 2px 0 rgba(58,38,43,.08),0 0 0 1px var(--line)}
+.ui.card,.ui.cards>.card{border-radius:var(--radius);box-shadow:0 1px 2px 0 rgba(27,42,61,.08),0 0 0 1px var(--line)}
 .ui.card>.content>.header,.ui.cards>.card>.content>.header{font-family:'Fraunces',serif}
 
 /* Statistic */
