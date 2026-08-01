@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
         String uri = request.getRequestURI();
         String[] modulos = {"/alumnos", "/cursos", "/ciclos", "/profesores",
                 "/horarios", "/matriculas", "/pagos", "/usuarios",
-                "/reportes", "/asistencias", "/areas", "/horas-docentes"};
+                "/reportes", "/asistencias", "/areas", "/horas-docentes", "/resumen"};
         for (String m : modulos) {
             if (uri.startsWith(m)) {
                 return m;

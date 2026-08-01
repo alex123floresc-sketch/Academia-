@@ -14,7 +14,9 @@
     <div>
         <div class="nav-group-label">Gestión</div>
         <nav class="ui secondary vertical fluid menu app-nav">
-            <a class="item" th:href="@{/inicio}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" data-group="Panel" data-title="Resumen general">
+            <a class="item" th:href="@{/inicio}" data-group="Panel" data-title="Inicio">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M3 11 12 3l9 8M5 10v10h5v-6h4v6h5V10"/></svg>Inicio</a>
+            <a class="item" th:href="@{/resumen}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" data-group="Panel" data-title="Resumen general">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6V11h-6v9Zm0-16v5h6V4h-6Z"/></svg>Resumen</a>
             <a class="item" th:href="@{/alumnos}" data-group="Gestión" data-title="Alumnos">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg>Alumnos</a>

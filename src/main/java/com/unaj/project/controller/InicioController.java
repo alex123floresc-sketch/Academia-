@@ -1,22 +1,32 @@
 package com.unaj.project.controller;
 
-import com.unaj.project.service.DashboardService;
+import com.unaj.project.model.Usuario;
+import com.unaj.project.repository.UsuarioRepository;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.time.LocalDate;
+
 @Controller
 public class InicioController {
 
-    private final DashboardService dashboardService;
+    private final UsuarioRepository usuarioRepository;
 
-    public InicioController(DashboardService dashboardService) {
-        this.dashboardService = dashboardService;
+    public InicioController(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
     }
 
     @GetMapping("/inicio")
-    public String inicio(Model model) {
-        model.addAllAttributes(dashboardService.resumenInicio());
+    public String inicio(Authentication auth, Model model) {
+        String nombre = null;
+        if (auth != null) {
+            Usuario usuario = usuarioRepository.findByUsername(auth.getName());
+            nombre = (usuario != null) ? usuario.getNombre() : null;
+        }
+        model.addAttribute("nombreUsuario", nombre);
+        model.addAttribute("hoy", LocalDate.now());
         return "inicio";
     }
 }

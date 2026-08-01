@@ -59,7 +59,7 @@ public class SecurityConfig {
                         .requestMatchers("/matriculas/nueva", "/matriculas/guardar").hasAnyRole("ADMIN", "CAJERO")
                         .requestMatchers("/matriculas/anular/**", "/matriculas/eliminar/**").hasRole("ADMIN")
                         .requestMatchers("/matriculas/**").hasAnyRole("ADMIN", "CAJERO")
-                        .requestMatchers("/inicio").hasAnyRole("ADMIN", "CAJERO")
+                        .requestMatchers("/resumen").hasAnyRole("ADMIN", "CAJERO")
                         .requestMatchers("/asistencias/**").hasAnyRole("ADMIN", "AUXILIAR")
                         .requestMatchers("/usuarios/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
