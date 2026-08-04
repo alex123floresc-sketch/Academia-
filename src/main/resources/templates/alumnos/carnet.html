@@ -16,7 +16,8 @@
 
     <div class="carnet-actions" style="text-align:center;margin-top:4px">
         <a th:href="@{/alumnos/{id}/carnet/imprimir(id=${alumno.id})}" target="_blank" class="ui small primary button">Imprimir carnet</a>
-        <p class="hint" style="margin-top:8px">Se abrirá una pestaña lista para imprimir, con el carnet en tamaño real (85.6 × 54 mm) y sin nada más en la hoja.</p>
+        <a th:href="@{/alumnos/{id}/carnet/pdf(id=${alumno.id})}" class="ui small basic button">Descargar PDF</a>
+        <p class="hint" style="margin-top:8px">Ambas caras se imprimen o descargan juntas, en la misma hoja.</p>
     </div>
 </div>
 </html>

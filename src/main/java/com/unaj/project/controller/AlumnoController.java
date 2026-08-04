@@ -7,11 +7,13 @@ import com.unaj.project.model.Pago;
 import com.unaj.project.repository.MatriculaRepository;
 import com.unaj.project.repository.PagoRepository;
 import com.unaj.project.service.AlumnoService;
+import com.unaj.project.service.PdfGeneradorService;
 import com.unaj.project.service.QrCodeService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -19,7 +21,9 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.thymeleaf.context.Context;
 
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,13 +36,16 @@ public class AlumnoController {
     private final PagoRepository pagoRepository;
     private final MatriculaRepository matriculaRepository;
     private final QrCodeService qrCodeService;
+    private final PdfGeneradorService pdfGeneradorService;
 
     public AlumnoController(AlumnoService alumnoService, PagoRepository pagoRepository,
-                            MatriculaRepository matriculaRepository, QrCodeService qrCodeService) {
+                            MatriculaRepository matriculaRepository, QrCodeService qrCodeService,
+                            PdfGeneradorService pdfGeneradorService) {
         this.alumnoService = alumnoService;
         this.pagoRepository = pagoRepository;
         this.matriculaRepository = matriculaRepository;
         this.qrCodeService = qrCodeService;
+        this.pdfGeneradorService = pdfGeneradorService;
     }
 
     @GetMapping
@@ -136,6 +143,35 @@ public class AlumnoController {
     public String carnetImprimir(@PathVariable Long id, Model model) {
         cargarDatosCarnet(id, model);
         return "alumnos/carnet-imprimir";
+    }
+
+    @GetMapping("/{id}/carnet/pdf")
+    public ResponseEntity<byte[]> carnetPdf(@PathVariable Long id) throws Exception {
+        Alumno alumno = alumnoService.buscarPorId(id);
+        List<Matricula> matriculas = matriculaRepository.findByEstudianteIdConDetalle(id);
+        Matricula matriculaVigente = matriculas.isEmpty() ? null : matriculas.get(0);
+
+        String fotoDataUri = null;
+        if (alumno.isFotoPresente()) {
+            String tipo = (alumno.getFotoContentType() != null) ? alumno.getFotoContentType() : "image/jpeg";
+            fotoDataUri = "data:" + tipo + ";base64," + Base64.getEncoder().encodeToString(alumno.getFoto());
+        }
+        byte[] qrPng = qrCodeService.generarPng("ALU-" + alumno.getId(), 320);
+        String qrDataUri = "data:image/png;base64," + Base64.getEncoder().encodeToString(qrPng);
+
+        Context context = new Context();
+        context.setVariable("alumno", alumno);
+        context.setVariable("matriculaVigente", matriculaVigente);
+        context.setVariable("fotoDataUri", fotoDataUri);
+        context.setVariable("qrDataUri", qrDataUri);
+
+        byte[] pdfBytes = pdfGeneradorService.renderizar("alumnos/carnet-pdf", context);
+        String filename = "carnet_" + alumno.getId() + ".pdf";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", filename);
+        return ResponseEntity.ok().headers(headers).contentLength(pdfBytes.length).body(pdfBytes);
     }
 
     private void cargarDatosCarnet(Long id, Model model) {

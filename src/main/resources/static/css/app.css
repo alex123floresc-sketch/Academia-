@@ -26,13 +26,6 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 .app-nav.ui.menu .item:hover{background:var(--surface-2);color:var(--ink)}
 .app-nav.ui.menu .item.active{background:var(--sage-soft)!important;color:var(--sage-strong)!important}
 .app-nav.ui.menu .item .ic{width:17px;height:17px;flex-shrink:0;stroke:currentColor;stroke-width:1.7;fill:none}
-.side-foot{margin-top:auto;border-top:1px solid var(--line-soft);padding-top:14px}
-.userchip{display:flex;align-items:center;gap:10px;padding:6px 8px}
-.userchip .av{width:32px;height:32px;border-radius:50%;background:var(--lav-soft);color:var(--lav-strong);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px}
-.userchip .un{font-size:12.5px;font-weight:500;line-height:1.2}
-.userchip .ur{font-size:11px;color:var(--ink-faint)}
-.userchip form{margin:0}
-.logout-btn{margin-top:6px!important}
 
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 34px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.7);backdrop-filter:blur(6px);position:sticky;top:0;z-index:5;gap:14px}
@@ -271,7 +264,6 @@ details[open]>.hd-toggle::after{transform:rotate(-135deg);margin-top:2px}
     .two-col,.grid-2,.grid-3{grid-template-columns:1fr}
     .content,.topbar{padding-left:16px;padding-right:16px}
     .topbar h1{font-size:18px}
-    .btn-label{display:none}
     .top-actions .btn{padding:9px 11px}
 }
 
@@ -286,7 +278,7 @@ details[open]>.hd-toggle::after{transform:rotate(-135deg);margin-top:2px}
 .form-card input.input-invalid,.form-card select.input-invalid{border-color:var(--rose);box-shadow:0 0 0 3px var(--rose-soft)}
 
 /* ---- Carnet de estudiante (tamaño DNI, ID-1: 85.6mm x 54mm) ---- */
-@page carnet-page{size:85.6mm 54mm;margin:0}
+@page{margin:14mm}
 .carnet-wrap{display:flex;gap:26px;flex-wrap:wrap;justify-content:center;padding:10px 0 26px}
 .carnet-col{display:flex;flex-direction:column;align-items:center;gap:8px}
 .carnet-col .cc-label{font-size:11px;font-weight:600;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.08em}
@@ -325,8 +317,6 @@ details[open]>.hd-toggle::after{transform:rotate(-135deg);margin-top:2px}
     .sidebar,.topbar,.sidebar-backdrop,.menu-toggle,.page-back,.carnet-col .cc-label,.carnet-actions{display:none!important}
     .content{padding:0!important}
     .wrap{max-width:none!important}
-    .carnet-wrap{display:block;padding:0;gap:0}
-    .carnet-col{align-items:stretch}
-    .carnet-face{page:carnet-page;box-shadow:none;border-radius:0;break-after:page;page-break-after:always}
-    .carnet-face:last-of-type{break-after:auto;page-break-after:auto}
+    .carnet-wrap{display:flex;flex-wrap:nowrap;justify-content:center;align-items:flex-start;padding:0;gap:12mm}
+    .carnet-face{box-shadow:none;border-radius:2mm}
 }

@@ -40,10 +40,6 @@
                         <div class="topbar-dropdown-title">Accesos rápidos</div>
                         <a th:href="@{/alumnos/nuevo}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="topbar-dropdown-item">
                             <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg>Nuevo alumno</a>
-                        <a th:href="@{/matriculas/nueva}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="topbar-dropdown-item">
-                            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm0 0v6h6M9 15l2 2 4-4"/></svg>Nueva matrícula</a>
-                        <a th:href="@{/pagos}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="topbar-dropdown-item">
-                            <svg viewBox="0 0 24 24"><path d="M2 7h20v12H2zM2 11h20M6 15h4"/></svg>Registrar pago</a>
                         <a th:href="@{/profesores/nuevo}" sec:authorize="hasRole('ADMIN')" class="topbar-dropdown-item">
                             <svg viewBox="0 0 24 24"><path d="M12 14 2 9l10-5 10 5-10 5Zm0 0v7M6 10.6V16c0 1 2.7 3 6 3s6-2 6-3v-5.4"/></svg>Nuevo profesor</a>
                         <a th:href="@{/horas-docentes}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="topbar-dropdown-item">
@@ -77,9 +73,6 @@
                         <p th:if="${#lists.isEmpty(notificaciones)}" class="empty" style="padding:16px 10px">Sin notificaciones nuevas.</p>
                     </div>
                 </div>
-                <a th:href="@{/pagos}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="ui basic small button">Ver pagos</a>
-                <a th:href="@{/matriculas/nueva}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="ui primary small button">
-                    <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span class="btn-label">Nueva matrícula</span></a>
                 <div class="topbar-dropdown">
                     <button type="button" class="av topbar-avatar-btn" id="profileMenuBtn" aria-label="Cuenta" th:attr="data-name=${#authentication?.name}">U</button>
                     <div class="topbar-dropdown-panel" id="profileMenuPanel" style="min-width:200px">

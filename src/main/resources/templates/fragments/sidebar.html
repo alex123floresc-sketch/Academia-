@@ -47,17 +47,6 @@
         </nav>
     </div>
 
-    <div class="side-foot">
-        <div class="userchip">
-            <div class="av" id="av" th:attr="data-name=${#authentication?.name}">U</div>
-            <div>
-                <div class="un" sec:authentication="name">usuario</div>
-                <form th:action="@{/logout}" method="post">
-                    <button type="submit" class="ui mini basic red button logout-btn">Cerrar sesión</button>
-                </form>
-            </div>
-        </div>
-    </div>
 </aside>
 </body>
 </html>
