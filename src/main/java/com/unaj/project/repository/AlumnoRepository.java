@@ -25,15 +25,19 @@ public interface AlumnoRepository extends JpaRepository<Alumno, Long> {
 
     Optional<Alumno> findByDni(String dni);
 
-    @Query(value = "SELECT a FROM Alumno a WHERE a.eliminado = false AND (:q IS NULL OR :q = '' " +
+    @Query(value = "SELECT a FROM Alumno a WHERE a.eliminado = false " +
+            "AND (:area IS NULL OR :area = '' OR LOWER(a.area) = LOWER(:area)) " +
+            "AND (:q IS NULL OR :q = '' " +
             "OR LOWER(a.nombre) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(a.apellido) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(a.email) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(a.dni) LIKE LOWER(CONCAT('%', :q, '%')))",
-            countQuery = "SELECT COUNT(a) FROM Alumno a WHERE a.eliminado = false AND (:q IS NULL OR :q = '' " +
+            countQuery = "SELECT COUNT(a) FROM Alumno a WHERE a.eliminado = false " +
+            "AND (:area IS NULL OR :area = '' OR LOWER(a.area) = LOWER(:area)) " +
+            "AND (:q IS NULL OR :q = '' " +
             "OR LOWER(a.nombre) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(a.apellido) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(a.email) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(a.dni) LIKE LOWER(CONCAT('%', :q, '%')))")
-    Page<Alumno> buscar(@Param("q") String q, Pageable pageable);
+    Page<Alumno> buscar(@Param("q") String q, @Param("area") String area, Pageable pageable);
 }

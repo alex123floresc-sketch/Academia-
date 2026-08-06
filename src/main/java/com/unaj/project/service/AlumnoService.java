@@ -9,8 +9,9 @@ import java.util.List;
 public interface AlumnoService {
     List<Alumno> listarTodos();
     Page<Alumno> buscarPagina(String q, Pageable pageable);
+    Page<Alumno> buscarPagina(String q, String area, Pageable pageable);
     Alumno buscarPorId(Long id);
     AlumnoForm buscarFormPorId(Long id);
-    void guardar(AlumnoForm form);
+    Alumno guardar(AlumnoForm form);
     void eliminar(Long id);
 }

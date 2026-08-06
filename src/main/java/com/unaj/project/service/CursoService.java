@@ -8,7 +8,6 @@ import java.util.List;
 
 public interface CursoService {
     List<Curso> listarTodos();
-    List<Curso> listarPorArea(String area);
     Page<Curso> buscarPagina(String q, Pageable pageable);
     Curso buscarPorId(Long id);
     CursoForm buscarFormPorId(Long id);

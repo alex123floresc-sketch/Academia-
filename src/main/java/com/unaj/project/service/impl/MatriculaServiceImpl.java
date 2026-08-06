@@ -6,6 +6,7 @@ import com.unaj.project.repository.AlumnoRepository;
 import com.unaj.project.repository.MatriculaDetalleRepository;
 import com.unaj.project.repository.MatriculaRepository;
 import com.unaj.project.repository.CicloRepository;
+import com.unaj.project.service.ConfiguracionService;
 import com.unaj.project.service.MatriculaService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,25 +22,25 @@ import java.util.Optional;
 @Service
 public class MatriculaServiceImpl implements MatriculaService {
 
-    private static final BigDecimal MONTO_MATRICULA = new BigDecimal("150.00");
-    private static final BigDecimal MONTO_PENSION   = new BigDecimal("180.00");
-
     private final MatriculaRepository matriculaRepository;
     private final MatriculaDetalleRepository matriculaDetalleRepository;
     private final AlumnoRepository alumnoRepository;
     private final CicloRepository cicloRepository;
     private final CursoRepository cursoRepository;
+    private final ConfiguracionService configuracionService;
 
     public MatriculaServiceImpl(MatriculaRepository matriculaRepository,
                                 MatriculaDetalleRepository matriculaDetalleRepository,
                                 AlumnoRepository alumnoRepository,
                                 CicloRepository cicloRepository,
-                                CursoRepository cursoRepository) {
+                                CursoRepository cursoRepository,
+                                ConfiguracionService configuracionService) {
         this.matriculaRepository = matriculaRepository;
         this.matriculaDetalleRepository = matriculaDetalleRepository;
         this.alumnoRepository = alumnoRepository;
         this.cicloRepository = cicloRepository;
         this.cursoRepository = cursoRepository;
+        this.configuracionService = configuracionService;
     }
     @Override
     public List<Matricula> listarTodos() {
@@ -70,9 +71,10 @@ public class MatriculaServiceImpl implements MatriculaService {
     @Override
     @Transactional
     public Matricula matricular(Long estudianteId, Long semestreId, Turno turno, String area) {
+        Configuracion configuracion = configuracionService.obtener();
         return matricular(estudianteId, semestreId, turno, area,
-                "Matrícula", MONTO_MATRICULA,
-                "Pensión (1ra cuota)", MONTO_PENSION);
+                "Matrícula", configuracion.getMontoMatricula(),
+                "Pensión (1ra cuota)", configuracion.getMontoPension());
     }
 
     @Override
@@ -137,7 +139,7 @@ public class MatriculaServiceImpl implements MatriculaService {
         if (esNueva) {
             String cMat = (conceptoMatricula != null && !conceptoMatricula.isBlank())
                     ? conceptoMatricula : "Matrícula";
-            BigDecimal mMat = (montoMatricula != null) ? montoMatricula : MONTO_MATRICULA;
+            BigDecimal mMat = (montoMatricula != null) ? montoMatricula : configuracionService.obtener().getMontoMatricula();
             matricula.addPago(crearPago(cMat, mMat, LocalDate.now()));
 
             if (montoPension != null && montoPension.compareTo(BigDecimal.ZERO) > 0) {

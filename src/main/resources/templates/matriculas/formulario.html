@@ -96,7 +96,7 @@
                     </div>
                     <div class="field" style="margin-bottom:12px">
                         <label style="color:var(--sage-strong)">Monto (S/)</label>
-                        <input type="number" step="0.01" min="0" name="montoMatricula" value="150.00" class="js-monto">
+                        <input type="number" step="0.01" min="0" name="montoMatricula" th:value="${configuracion.montoMatricula}" class="js-monto">
                     </div>
                 </div>
                 <div class="grid-2">
@@ -106,10 +106,13 @@
                     </div>
                     <div class="field" style="margin-bottom:6px">
                         <label style="color:var(--sage-strong)">Monto (S/)</label>
-                        <input type="number" step="0.01" min="0" name="montoPension" value="180.00" class="js-monto">
+                        <input type="number" step="0.01" min="0" name="montoPension" th:value="${configuracion.montoPension}" class="js-monto">
                     </div>
                 </div>
-                <p class="hint" style="color:var(--sage-strong);margin:0 0 4px">Deja el monto de pensión en 0 si no quieres generarla.</p>
+                <p class="hint" style="color:var(--sage-strong);margin:0 0 4px">
+                    Deja el monto de pensión en 0 si no quieres generarla. Estos montos vienen de
+                    <a th:href="@{/configuracion}">Configuración de precios</a> y se pueden cambiar aquí solo para esta matrícula.
+                </p>
                 <div class="pay-row total">
                     <span>Total a cobrar hoy</span>
                     <span id="totalPago">S/ 330.00</span>

@@ -33,11 +33,6 @@ public class CursoServiceImpl implements CursoService {
     }
 
     @Override
-    public List<Curso> listarPorArea(String area) {
-        return cursoRepository.findByArea(area);
-    }
-
-    @Override
     public Page<Curso> buscarPagina(String q, Pageable pageable) {
         return cursoRepository.buscar(q, pageable);
     }

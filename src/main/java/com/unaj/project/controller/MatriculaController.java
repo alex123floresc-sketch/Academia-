@@ -33,6 +33,7 @@ public class MatriculaController {
     private final CicloService cicloService;
     private final CursoService cursoService;
     private final PagoService pagoService;
+    private final ConfiguracionService configuracionService;
     private final TemplateEngine templateEngine;
 
     public MatriculaController(MatriculaService matriculaService,
@@ -40,12 +41,14 @@ public class MatriculaController {
                                CicloService cicloService,
                                CursoService cursoService,
                                PagoService pagoService,
+                               ConfiguracionService configuracionService,
                                TemplateEngine templateEngine) {
         this.matriculaService = matriculaService;
         this.alumnoService = alumnoService;
         this.cicloService = cicloService;
         this.cursoService = cursoService;
         this.pagoService = pagoService;
+        this.configuracionService = configuracionService;
         this.templateEngine = templateEngine;
     }
     @GetMapping
@@ -67,6 +70,7 @@ public class MatriculaController {
         model.addAttribute("cicloActivo", cicloService.obtenerActivo());
         model.addAttribute("turnos", Turno.values());
         model.addAttribute("areas", Areas.TODAS);
+        model.addAttribute("configuracion", configuracionService.obtener());
         return "matriculas/formulario";
     }
 
@@ -95,6 +99,7 @@ public class MatriculaController {
             model.addAttribute("cicloActivo", cicloService.obtenerActivo());
             model.addAttribute("turnos", Turno.values());
             model.addAttribute("areas", Areas.TODAS);
+            model.addAttribute("configuracion", configuracionService.obtener());
             return "matriculas/formulario";
         }
     }

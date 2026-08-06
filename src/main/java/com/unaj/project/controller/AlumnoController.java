@@ -2,11 +2,17 @@ package com.unaj.project.controller;
 
 import com.unaj.project.dto.AlumnoForm;
 import com.unaj.project.model.Alumno;
+import com.unaj.project.model.Areas;
 import com.unaj.project.model.Matricula;
 import com.unaj.project.model.Pago;
+import com.unaj.project.model.Turno;
 import com.unaj.project.repository.MatriculaRepository;
 import com.unaj.project.repository.PagoRepository;
 import com.unaj.project.service.AlumnoService;
+import com.unaj.project.service.CicloService;
+import com.unaj.project.service.ConfiguracionService;
+import com.unaj.project.service.CursoService;
+import com.unaj.project.service.MatriculaService;
 import com.unaj.project.service.PdfGeneradorService;
 import com.unaj.project.service.QrCodeService;
 import jakarta.validation.Valid;
@@ -37,48 +43,83 @@ public class AlumnoController {
     private final MatriculaRepository matriculaRepository;
     private final QrCodeService qrCodeService;
     private final PdfGeneradorService pdfGeneradorService;
+    private final MatriculaService matriculaService;
+    private final CicloService cicloService;
+    private final CursoService cursoService;
+    private final ConfiguracionService configuracionService;
 
     public AlumnoController(AlumnoService alumnoService, PagoRepository pagoRepository,
                             MatriculaRepository matriculaRepository, QrCodeService qrCodeService,
-                            PdfGeneradorService pdfGeneradorService) {
+                            PdfGeneradorService pdfGeneradorService, MatriculaService matriculaService,
+                            CicloService cicloService, CursoService cursoService,
+                            ConfiguracionService configuracionService) {
         this.alumnoService = alumnoService;
         this.pagoRepository = pagoRepository;
         this.matriculaRepository = matriculaRepository;
         this.qrCodeService = qrCodeService;
         this.pdfGeneradorService = pdfGeneradorService;
+        this.matriculaService = matriculaService;
+        this.cicloService = cicloService;
+        this.cursoService = cursoService;
+        this.configuracionService = configuracionService;
     }
 
     @GetMapping
     public String listar(@RequestParam(required = false) String q,
+                         @RequestParam(required = false) String area,
                          @PageableDefault(size = 15, sort = "apellido") Pageable pageable,
                          Model model) {
         java.util.Map<Long, Long> deuda = new java.util.HashMap<>();
         for (Object[] fila : pagoRepository.contarDeudaPorAlumno()) {
             deuda.put((Long) fila[0], (Long) fila[1]);
         }
-        Page<Alumno> pagina = alumnoService.buscarPagina(q, pageable);
+        Page<Alumno> pagina = alumnoService.buscarPagina(q, area, pageable);
         model.addAttribute("pagina", pagina);
         model.addAttribute("alumnos", pagina.getContent());
         model.addAttribute("deuda", deuda);
         model.addAttribute("q", q);
+        model.addAttribute("area", area);
+        model.addAttribute("areas", com.unaj.project.model.Areas.TODAS);
         return "alumnos/lista";
     }
 
     @GetMapping("/nuevo")
     public String nuevo(Model model) {
         model.addAttribute("alumnoForm", new AlumnoForm());
+        cargarDatosMatricula(model);
         return "alumnos/formulario";
     }
 
     @PostMapping("/guardar")
     public String guardar(@Valid @ModelAttribute("alumnoForm") AlumnoForm alumnoForm,
                           BindingResult result,
+                          @RequestParam(required = false) boolean matricular,
+                          @RequestParam(required = false) Long cicloId,
+                          @RequestParam(required = false) Turno turno,
+                          @RequestParam(required = false) String conceptoMatricula,
+                          @RequestParam(required = false) java.math.BigDecimal montoMatricula,
+                          @RequestParam(required = false) String conceptoPension,
+                          @RequestParam(required = false) java.math.BigDecimal montoPension,
+                          Model model,
                           RedirectAttributes ra) {
         if (result.hasErrors()) {
+            if (alumnoForm.getId() == null) {
+                cargarDatosMatricula(model);
+            }
             return "alumnos/formulario";
         }
-        alumnoService.guardar(alumnoForm);
-        ra.addFlashAttribute("mensajeExito", "Alumno guardado correctamente.");
+        Alumno alumno = alumnoService.guardar(alumnoForm);
+        if (matricular && alumnoForm.getId() == null) {
+            if (cicloId == null || turno == null) {
+                throw new IllegalArgumentException(
+                        "El alumno se guardó, pero para matricularlo debes elegir ciclo y turno.");
+            }
+            matriculaService.matricular(alumno.getId(), cicloId, turno, alumnoForm.getArea(),
+                    conceptoMatricula, montoMatricula, conceptoPension, montoPension);
+            ra.addFlashAttribute("mensajeExito", "Alumno guardado y matriculado correctamente.");
+        } else {
+            ra.addFlashAttribute("mensajeExito", "Alumno guardado correctamente.");
+        }
         return "redirect:/alumnos";
     }
 
@@ -86,7 +127,17 @@ public class AlumnoController {
     public String editar(@PathVariable Long id, Model model) {
         model.addAttribute("alumnoForm", alumnoService.buscarFormPorId(id));
         model.addAttribute("tieneFoto", alumnoService.buscarPorId(id).isFotoPresente());
+        model.addAttribute("areas", Areas.TODAS);
         return "alumnos/formulario";
+    }
+
+    private void cargarDatosMatricula(Model model) {
+        model.addAttribute("areas", Areas.TODAS);
+        model.addAttribute("ciclos", cicloService.listarTodos());
+        model.addAttribute("cicloActivo", cicloService.obtenerActivo());
+        model.addAttribute("turnos", Turno.values());
+        model.addAttribute("cursos", cursoService.listarTodos());
+        model.addAttribute("configuracion", configuracionService.obtener());
     }
 
     @PostMapping("/eliminar/{id}")

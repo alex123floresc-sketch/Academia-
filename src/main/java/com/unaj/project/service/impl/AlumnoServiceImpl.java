@@ -31,7 +31,12 @@ public class AlumnoServiceImpl implements AlumnoService {
 
     @Override
     public Page<Alumno> buscarPagina(String q, Pageable pageable) {
-        return alumnoRepository.buscar(q, pageable);
+        return alumnoRepository.buscar(q, null, pageable);
+    }
+
+    @Override
+    public Page<Alumno> buscarPagina(String q, String area, Pageable pageable) {
+        return alumnoRepository.buscar(q, area, pageable);
     }
 
     @Override
@@ -48,7 +53,7 @@ public class AlumnoServiceImpl implements AlumnoService {
 
     @Override
     @Transactional
-    public void guardar(AlumnoForm form) {
+    public Alumno guardar(AlumnoForm form) {
         Alumno alumno;
         if (form.getId() != null) {
             alumno = buscarPorId(form.getId());
@@ -92,7 +97,7 @@ public class AlumnoServiceImpl implements AlumnoService {
             }
         }
 
-        alumnoRepository.save(alumno);
+        return alumnoRepository.save(alumno);
     }
 
     @Override
