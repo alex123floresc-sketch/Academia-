@@ -37,7 +37,8 @@ public class SecurityConfig {
                         .hasRole("ADMIN")
                         .requestMatchers("/profesores", "/profesores/**").hasAnyRole("ADMIN", "CAJERO")
 
-                        .requestMatchers("/horas-docentes/**").hasAnyRole("ADMIN", "CAJERO")
+                        .requestMatchers("/horas-docentes/pagos/**").hasAnyRole("ADMIN", "CAJERO")
+                        .requestMatchers("/horas-docentes/**").hasAnyRole("ADMIN", "CAJERO", "AUXILIAR")
                         .requestMatchers("/horarios/nuevo", "/horarios/guardar", "/horarios/quitar-curso/**",
                                 "/horarios/bloques/**")
                         .hasRole("ADMIN")

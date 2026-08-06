@@ -7,16 +7,24 @@
 <div layout:fragment="contenido">
     <div class="card-head" style="border:none;padding:0 0 6px">
         <div><h2 style="font-family:'Fraunces',serif;font-weight:500;font-size:20px">Horarios</h2><p style="font-size:12px;color:var(--ink-faint)">Grilla semanal por turno: define las horas primero y luego asigna los cursos a cada casilla</p></div>
-        <a th:if="${cicloSel != null}" th:href="@{/horarios/pdf(cicloId=${cicloSel.id})}" class="ui basic small button">
+        <a th:if="${cicloSel != null}" th:href="@{/horarios/pdf(cicloId=${cicloSel.id}, area=${area})}" class="ui basic small button">
             <svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>Descargar PDF</a>
     </div>
 
-    <form th:action="@{/horarios}" method="get" class="ui form" style="margin-bottom:22px;max-width:280px">
+    <form th:action="@{/horarios}" method="get" class="ui form" style="margin-bottom:14px;max-width:280px">
+        <input type="hidden" name="area" th:value="${area}">
         <select name="cicloId" onchange="this.form.submit()">
             <option th:each="c : ${ciclos}" th:value="${c.id}" th:text="${c.nombre}"
                     th:selected="${cicloSel != null and cicloSel.id == c.id}"></option>
         </select>
     </form>
+
+    <div class="area-tabs" style="padding:0 0 18px">
+        <a class="area-tab" th:classappend="${area == null or area == ''} ? ' active'"
+           th:href="@{/horarios(cicloId=${cicloSel != null ? cicloSel.id : null})}">Todas las áreas</a>
+        <a class="area-tab" th:each="a : ${areas}" th:classappend="${a == area} ? ' active'"
+           th:href="@{/horarios(cicloId=${cicloSel != null ? cicloSel.id : null}, area=${a})}" th:text="${a}"></a>
+    </div>
 
     <div class="turno-block" th:each="turno : ${turnos}"
          th:with="claseTurno='tb-' + ${#strings.toLowerCase(turno.name())}">

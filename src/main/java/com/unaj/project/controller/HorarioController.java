@@ -44,7 +44,9 @@ public class HorarioController {
     }
 
     @GetMapping
-    public String listar(@RequestParam(required = false) Long cicloId, Model model) {
+    public String listar(@RequestParam(required = false) Long cicloId,
+                         @RequestParam(required = false) String area,
+                         Model model) {
         Ciclo cicloSel = (cicloId != null) ? cicloService.buscarPorId(cicloId) : cicloService.obtenerActivo();
 
         model.addAttribute("ciclos", cicloService.listarTodos());
@@ -52,26 +54,31 @@ public class HorarioController {
         model.addAttribute("dias", DiaSemana.values());
         model.addAttribute("cicloSel", cicloSel);
         model.addAttribute("diaHoy", DiaSemana.desde(LocalDate.now().getDayOfWeek()));
+        model.addAttribute("areas", Areas.TODAS);
+        model.addAttribute("area", area);
 
         if (cicloSel != null) {
-            model.addAttribute("grilla", horarioService.agruparParaGrilla(cicloSel.getId()));
+            model.addAttribute("grilla", horarioService.agruparParaGrilla(cicloSel.getId(), area));
         }
         return "horarios/lista";
     }
 
     @GetMapping("/pdf")
-    public ResponseEntity<byte[]> pdf(@RequestParam Long cicloId) {
+    public ResponseEntity<byte[]> pdf(@RequestParam Long cicloId, @RequestParam(required = false) String area) {
         Ciclo ciclo = cicloService.buscarPorId(cicloId);
+        String titulo = "Horario de clases · " + ciclo.getNombre()
+                + ((area != null && !area.isBlank()) ? " · " + area : "");
         Context context = new Context();
-        context.setVariable("ciclo", ciclo);
+        context.setVariable("titulo", titulo);
         context.setVariable("turnos", Turno.values());
         context.setVariable("dias", DiaSemana.values());
-        context.setVariable("grilla", horarioService.agruparParaGrilla(cicloId));
+        context.setVariable("grilla", horarioService.agruparParaGrilla(cicloId, area));
 
         byte[] pdfBytes = pdfGeneradorService.renderizar("horarios/horario-pdf", context);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDispositionFormData("attachment", "horario_" + ciclo.getNombre() + ".pdf");
+        String sufijoArea = (area != null && !area.isBlank()) ? "_" + area : "";
+        headers.setContentDispositionFormData("attachment", "horario_" + ciclo.getNombre() + sufijoArea + ".pdf");
         return ResponseEntity.ok().headers(headers).contentLength(pdfBytes.length).body(pdfBytes);
     }
 

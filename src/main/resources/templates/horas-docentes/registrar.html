@@ -33,7 +33,7 @@
                 <div>La fecha elegida no cae un <span th:text="${horario.diaSemana.etiqueta}"></span>. Elige otra fecha antes de guardar.</div>
             </div>
 
-            <form th:action="@{/horas-docentes/registrar}" method="post" id="formRegistrarHoras">
+            <form class="ui form" th:action="@{/horas-docentes/registrar}" method="post" id="formRegistrarHoras">
                 <input type="hidden" name="horarioId" th:value="${horario.id}">
                 <div class="grid-3">
                     <div class="field">

@@ -74,7 +74,7 @@ public class MatriculaServiceImpl implements MatriculaService {
         Configuracion configuracion = configuracionService.obtener();
         return matricular(estudianteId, semestreId, turno, area,
                 "Matrícula", configuracion.getMontoMatricula(),
-                "Pensión (1ra cuota)", configuracion.getMontoPension());
+                "Pensión", configuracion.getMontoPension());
     }
 
     @Override
@@ -137,15 +137,23 @@ public class MatriculaServiceImpl implements MatriculaService {
         }
 
         if (esNueva) {
+            Configuracion configuracion = configuracionService.obtener();
             String cMat = (conceptoMatricula != null && !conceptoMatricula.isBlank())
                     ? conceptoMatricula : "Matrícula";
-            BigDecimal mMat = (montoMatricula != null) ? montoMatricula : configuracionService.obtener().getMontoMatricula();
+            BigDecimal mMat = (montoMatricula != null) ? montoMatricula : configuracion.getMontoMatricula();
             matricula.addPago(crearPago(cMat, mMat, LocalDate.now()));
 
             if (montoPension != null && montoPension.compareTo(BigDecimal.ZERO) > 0) {
-                String cPen = (conceptoPension != null && !conceptoPension.isBlank())
-                        ? conceptoPension : "Pensión (1ra cuota)";
-                matricula.addPago(crearPago(cPen, montoPension, LocalDate.now().plusDays(30)));
+                String baseConcepto = (conceptoPension != null && !conceptoPension.isBlank())
+                        ? conceptoPension : "Pensión";
+                int numeroCuotas = configuracion.getNumeroCuotasPension();
+                int diasEntreCuotas = configuracion.getDiasEntreCuotas();
+
+                for (int n = 1; n <= numeroCuotas; n++) {
+                    String cPen = (numeroCuotas > 1) ? baseConcepto + " (cuota " + n + "/" + numeroCuotas + ")" : baseConcepto;
+                    LocalDate vencimiento = LocalDate.now().plusDays((long) diasEntreCuotas * n);
+                    matricula.addPago(crearPago(cPen, montoPension, vencimiento));
+                }
             }
         }
 

@@ -12,7 +12,7 @@
                 <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo profesor</a>
         </div>
         <div class="searchbar">
-            <form method="get" th:action="@{/profesores}" style="display:flex;gap:8px;flex:1">
+            <form class="ui form" method="get" th:action="@{/profesores}" style="display:flex;gap:8px;flex:1">
                 <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre, correo o especialidad...">
                 <button type="submit" class="ui small basic button">Buscar</button>
             </form>

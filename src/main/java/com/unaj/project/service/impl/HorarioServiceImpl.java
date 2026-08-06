@@ -75,6 +75,11 @@ public class HorarioServiceImpl implements HorarioService {
 
     @Override
     public Map<Turno, List<FilaHorarioDTO>> agruparParaGrilla(Long cicloId) {
+        return agruparParaGrilla(cicloId, null);
+    }
+
+    @Override
+    public Map<Turno, List<FilaHorarioDTO>> agruparParaGrilla(Long cicloId, String area) {
         Map<Turno, List<FilaHorarioDTO>> resultado = new LinkedHashMap<>();
         for (Turno t : Turno.values()) {
             resultado.put(t, new ArrayList<>());
@@ -83,6 +88,11 @@ public class HorarioServiceImpl implements HorarioService {
 
         List<BloqueHorario> bloques = bloqueHorarioRepository.findByCicloIdOrderByHoraInicioAsc(cicloId);
         List<Horario> horarios = horarioRepository.findByCicloId(cicloId);
+        if (area != null && !area.isBlank()) {
+            horarios = horarios.stream()
+                    .filter(h -> h.getCurso().getAreas().contains(area))
+                    .toList();
+        }
 
         Map<Long, Map<DiaSemana, List<Horario>>> porBloque = new LinkedHashMap<>();
         for (Horario h : horarios) {

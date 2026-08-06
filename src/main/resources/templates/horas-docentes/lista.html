@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout}">
 <head>
     <title>Horas docentes</title>
@@ -11,7 +12,7 @@
         <div class="card-head">
             <div><h2>Horas docentes</h2><p>Registro de llegada, horas dictadas y pagos por período</p></div>
         </div>
-        <form method="get" th:action="@{/horas-docentes}" style="padding:0 20px 20px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+        <form class="ui form" method="get" th:action="@{/horas-docentes}" style="padding:0 20px 20px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
             <div class="field" style="flex:1;min-width:260px;margin:0">
                 <label>Profesor</label>
                 <div class="combo" id="comboProfesor" th:attr="data-selected=${profesorId}">
@@ -95,7 +96,7 @@
                             <span class="strong">Pendiente</span>
                             <span class="pill" th:classappend="${pendienteSemana > 0} ? 'pill-amber' : 'pill-sage'" th:text="'S/ ' + ${pendienteSemana}"></span>
                         </div>
-                        <details>
+                        <details sec:authorize="hasAnyRole('ADMIN','CAJERO')">
                             <summary class="hd-toggle">Registrar pago de esta semana</summary>
                             <form th:action="@{/horas-docentes/pagos/registrar}" method="post" style="margin-top:14px">
                                 <input type="hidden" name="profesorId" th:value="${profesorId}">
@@ -150,7 +151,7 @@
                             <span class="strong">Pendiente</span>
                             <span class="pill" th:classappend="${pendienteQuincena > 0} ? 'pill-amber' : 'pill-sage'" th:text="'S/ ' + ${pendienteQuincena}"></span>
                         </div>
-                        <details>
+                        <details sec:authorize="hasAnyRole('ADMIN','CAJERO')">
                             <summary class="hd-toggle">Registrar pago de esta quincena</summary>
                             <form th:action="@{/horas-docentes/pagos/registrar}" method="post" style="margin-top:14px">
                                 <input type="hidden" name="profesorId" th:value="${profesorId}">

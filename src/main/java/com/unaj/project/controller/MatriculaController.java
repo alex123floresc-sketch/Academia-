@@ -17,11 +17,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import org.xhtmlrenderer.pdf.ITextRenderer;
 
-import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 @Controller
@@ -34,7 +31,7 @@ public class MatriculaController {
     private final CursoService cursoService;
     private final PagoService pagoService;
     private final ConfiguracionService configuracionService;
-    private final TemplateEngine templateEngine;
+    private final PdfGeneradorService pdfGeneradorService;
 
     public MatriculaController(MatriculaService matriculaService,
                                AlumnoService alumnoService,
@@ -42,14 +39,14 @@ public class MatriculaController {
                                CursoService cursoService,
                                PagoService pagoService,
                                ConfiguracionService configuracionService,
-                               TemplateEngine templateEngine) {
+                               PdfGeneradorService pdfGeneradorService) {
         this.matriculaService = matriculaService;
         this.alumnoService = alumnoService;
         this.cicloService = cicloService;
         this.cursoService = cursoService;
         this.pagoService = pagoService;
         this.configuracionService = configuracionService;
-        this.templateEngine = templateEngine;
+        this.pdfGeneradorService = pdfGeneradorService;
     }
     @GetMapping
     public String listar(@RequestParam(required = false) String q,
@@ -129,7 +126,7 @@ public class MatriculaController {
     }
 
     @GetMapping("/ficha/{id}/pdf")
-    public ResponseEntity<byte[]> fichaPdf(@PathVariable Long id) throws Exception {
+    public ResponseEntity<byte[]> fichaPdf(@PathVariable Long id) {
         Matricula matricula = matriculaService.buscarFichaPorId(id);
         if (matricula == null) {
             return ResponseEntity.notFound().build();
@@ -139,15 +136,7 @@ public class MatriculaController {
         context.setVariable("matricula", matricula);
         context.setVariable("pagos", pagoService.listarPorMatricula(id));
 
-        String html = templateEngine.process("matriculas/ficha-pdf", context);
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ITextRenderer renderer = new ITextRenderer();
-        renderer.setDocumentFromString(html);
-        renderer.layout();
-        renderer.createPDF(outputStream);
-
-        byte[] pdfBytes = outputStream.toByteArray();
+        byte[] pdfBytes = pdfGeneradorService.renderizar("matriculas/ficha-pdf", context);
         String filename = "constancia_matricula_" + matricula.getEstudiante().getId() + "_" + matricula.getId() + ".pdf";
 
         HttpHeaders headers = new HttpHeaders();

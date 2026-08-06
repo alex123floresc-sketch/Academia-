@@ -40,7 +40,7 @@
         <nav class="ui secondary vertical fluid menu app-nav">
             <a class="item" th:href="@{/asistencias}" sec:authorize="hasAnyRole('ADMIN','AUXILIAR')" data-group="Operación" data-title="Asistencia">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M3 7h4v4H3zM3 13h4v4H3zM9 7h12M9 13h12M9 19h12"/></svg>Asistencia</a>
-            <a class="item" th:href="@{/horas-docentes}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" data-group="Operación" data-title="Horas docentes">
+            <a class="item" th:href="@{/horas-docentes}" sec:authorize="hasAnyRole('ADMIN','CAJERO','AUXILIAR')" data-group="Operación" data-title="Horas docentes">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M20 7h-4V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2ZM10 5h4v2h-4V5Z"/></svg>Horas docentes</a>
             <a class="item" th:href="@{/usuarios}" sec:authorize="hasRole('ADMIN')" data-group="Operación" data-title="Usuarios">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg>Usuarios</a>

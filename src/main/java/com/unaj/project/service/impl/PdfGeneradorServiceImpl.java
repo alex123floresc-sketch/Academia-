@@ -7,6 +7,7 @@ import org.thymeleaf.context.Context;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDate;
 
 @Service
 public class PdfGeneradorServiceImpl implements PdfGeneradorService {
@@ -19,6 +20,7 @@ public class PdfGeneradorServiceImpl implements PdfGeneradorService {
 
     @Override
     public byte[] renderizar(String template, Context context) {
+        context.setVariable("fechaGeneracion", LocalDate.now());
         String html = templateEngine.process(template, context);
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

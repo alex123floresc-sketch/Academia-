@@ -30,9 +30,13 @@ public class ConfiguracionController {
     @PostMapping("/guardar")
     public String guardar(@RequestParam BigDecimal montoMatricula,
                           @RequestParam BigDecimal montoPension,
+                          @RequestParam Integer numeroCuotasPension,
+                          @RequestParam Integer diasEntreCuotas,
+                          @RequestParam Integer diasGraciaVencimiento,
                           RedirectAttributes ra) {
-        configuracionService.actualizar(montoMatricula, montoPension);
-        ra.addFlashAttribute("mensajeExito", "Precios actualizados correctamente.");
+        configuracionService.actualizar(montoMatricula, montoPension,
+                numeroCuotasPension, diasEntreCuotas, diasGraciaVencimiento);
+        ra.addFlashAttribute("mensajeExito", "Configuración actualizada correctamente.");
         return "redirect:/configuracion";
     }
 }

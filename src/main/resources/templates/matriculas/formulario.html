@@ -102,7 +102,7 @@
                 <div class="grid-2">
                     <div class="field" style="margin-bottom:12px">
                         <label style="color:var(--sage-strong)">Concepto pensión</label>
-                        <input type="text" name="conceptoPension" value="Pensión (1ra cuota)">
+                        <input type="text" name="conceptoPension" value="Pensión">
                     </div>
                     <div class="field" style="margin-bottom:6px">
                         <label style="color:var(--sage-strong)">Monto (S/)</label>
@@ -110,8 +110,10 @@
                     </div>
                 </div>
                 <p class="hint" style="color:var(--sage-strong);margin:0 0 4px">
-                    Deja el monto de pensión en 0 si no quieres generarla. Estos montos vienen de
-                    <a th:href="@{/configuracion}">Configuración de precios</a> y se pueden cambiar aquí solo para esta matrícula.
+                    Deja el monto de pensión en 0 si no quieres generarla. Se generarán
+                    <b th:text="${configuracion.numeroCuotasPension}"></b> cuota(s) de pensión, cada
+                    <b th:text="${configuracion.diasEntreCuotas}"></b> días. Estos montos y cuotas vienen de
+                    <a th:href="@{/configuracion}">Configuración de precios</a> y se pueden ajustar aquí solo para esta matrícula.
                 </p>
                 <div class="pay-row total">
                     <span>Total a cobrar hoy</span>

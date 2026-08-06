@@ -6,5 +6,6 @@ import java.math.BigDecimal;
 
 public interface ConfiguracionService {
     Configuracion obtener();
-    void actualizar(BigDecimal montoMatricula, BigDecimal montoPension);
+    void actualizar(BigDecimal montoMatricula, BigDecimal montoPension,
+                    Integer numeroCuotasPension, Integer diasEntreCuotas, Integer diasGraciaVencimiento);
 }

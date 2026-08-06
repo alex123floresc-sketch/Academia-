@@ -23,6 +23,7 @@ public interface HorarioService {
 
     /** Bloques y cursos asignados de un ciclo, agrupados por turno y ordenados por hora. */
     Map<Turno, List<FilaHorarioDTO>> agruparParaGrilla(Long cicloId);
+    Map<Turno, List<FilaHorarioDTO>> agruparParaGrilla(Long cicloId, String area);
 
     void asignarCurso(Long bloqueId, DiaSemana dia, List<Long> cursoIds);
 

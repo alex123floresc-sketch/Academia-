@@ -4,14 +4,15 @@
       layout:decorate="~{layout}">
 <head><title>Configuración de precios</title></head>
 <div layout:fragment="contenido">
-    <h2 class="page-title">Configuración de precios</h2>
+    <h2 class="page-title">Configuración</h2>
 
     <div class="form-card">
-        <p class="hint" style="margin:-4px 0 18px 0">
-            Estos son los montos que se usarán como precio por defecto al matricular a un alumno.
-            Se pueden ajustar en cada matrícula si un caso particular lo requiere.
-        </p>
-        <form th:action="@{/configuracion/guardar}" method="post">
+        <form class="ui form" th:action="@{/configuracion/guardar}" method="post">
+            <div class="form-divider">Precios de matrícula</div>
+            <p class="hint" style="margin:-4px 0 18px 0">
+                Estos son los montos que se usarán como precio por defecto al matricular a un alumno.
+                Se pueden ajustar en cada matrícula si un caso particular lo requiere.
+            </p>
             <div class="grid-2">
                 <div class="field">
                     <label>Precio de matrícula (S/)</label>
@@ -24,6 +25,32 @@
                            th:value="${configuracion.montoPension}" required>
                 </div>
             </div>
+
+            <div class="form-divider">Cuotas de pensión</div>
+            <p class="hint" style="margin:-4px 0 18px 0">
+                Al matricular a un alumno se generan automáticamente estas cuotas de pensión, espaciadas por los días indicados.
+            </p>
+            <div class="grid-2">
+                <div class="field">
+                    <label>Número de cuotas</label>
+                    <input type="number" step="1" min="1" name="numeroCuotasPension"
+                           th:value="${configuracion.numeroCuotasPension}" required>
+                </div>
+                <div class="field">
+                    <label>Días entre cada cuota</label>
+                    <input type="number" step="1" min="1" name="diasEntreCuotas"
+                           th:value="${configuracion.diasEntreCuotas}" required>
+                </div>
+            </div>
+
+            <div class="form-divider">Vencimientos</div>
+            <div class="field">
+                <label>Días de gracia antes de marcar un pago como vencido <span class="hint">opcional, 0 = sin gracia</span></label>
+                <input type="number" step="1" min="0" name="diasGraciaVencimiento"
+                       th:value="${configuracion.diasGraciaVencimiento}" required style="max-width:220px">
+                <p class="hint" style="margin-top:6px">El proceso automático diario que marca pagos vencidos esperará estos días extra después de la fecha de vencimiento antes de marcarlos como VENCIDO.</p>
+            </div>
+
             <div class="form-foot">
                 <button type="submit" class="ui primary button">Guardar</button>
             </div>

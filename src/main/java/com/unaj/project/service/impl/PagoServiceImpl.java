@@ -8,6 +8,7 @@ import com.unaj.project.model.Usuario;
 import com.unaj.project.repository.AbonoRepository;
 import com.unaj.project.repository.PagoRepository;
 import com.unaj.project.repository.UsuarioRepository;
+import com.unaj.project.service.ConfiguracionService;
 import com.unaj.project.service.PagoService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,12 +29,14 @@ public class PagoServiceImpl implements PagoService {
     private final PagoRepository pagoRepository;
     private final AbonoRepository abonoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final ConfiguracionService configuracionService;
 
     public PagoServiceImpl(PagoRepository pagoRepository, AbonoRepository abonoRepository,
-                           UsuarioRepository usuarioRepository) {
+                           UsuarioRepository usuarioRepository, ConfiguracionService configuracionService) {
         this.pagoRepository = pagoRepository;
         this.abonoRepository = abonoRepository;
         this.usuarioRepository = usuarioRepository;
+        this.configuracionService = configuracionService;
     }
 
     @Override
@@ -138,6 +141,7 @@ public class PagoServiceImpl implements PagoService {
     @Override
     @Transactional
     public int marcarVencidos() {
-        return pagoRepository.marcarVencidos(LocalDate.now());
+        int diasGracia = configuracionService.obtener().getDiasGraciaVencimiento();
+        return pagoRepository.marcarVencidos(LocalDate.now().minusDays(diasGracia));
     }
 }

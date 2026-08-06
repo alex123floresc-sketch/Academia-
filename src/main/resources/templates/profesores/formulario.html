@@ -7,10 +7,11 @@
     <a th:href="@{/profesores}" class="page-back">← Volver a la lista</a>
     <h2 class="page-title" th:text="${profesorForm.id} ? 'Editar profesor' : 'Nuevo profesor'"></h2>
 
-    <div class="ui stackable two column grid">
-        <div class="column" style="flex:1.6">
+    <div class="ui stackable grid">
+      <div class="row">
+        <div class="ten wide column">
             <div class="form-card" style="max-width:100%">
-                <form th:action="@{/profesores/guardar}" th:object="${profesorForm}" method="post" id="profesorForm">
+                <form class="ui form" th:action="@{/profesores/guardar}" th:object="${profesorForm}" method="post" id="profesorForm">
                     <input type="hidden" th:field="*{id}">
 
                     <div class="form-divider">Datos personales</div>
@@ -57,7 +58,7 @@
             </div>
         </div>
 
-        <div class="column">
+        <div class="six wide column">
             <div class="card" style="padding:24px">
                 <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px">
                     <div class="profile-avatar" id="previewAvatar">--</div>
@@ -78,6 +79,7 @@
                 <p class="hint" style="margin-top:2px">Este resumen se actualiza mientras completas el formulario y es lo que verán el resto de módulos (horas dictadas, pagos).</p>
             </div>
         </div>
+      </div>
     </div>
 
     <script th:inline="javascript">
