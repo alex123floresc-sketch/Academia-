@@ -127,6 +127,11 @@ public class HorasDocenteController {
         model.addAttribute("horaFinSel", esHoyConDatos && registroDeHoy.getHoraFin() != null
                 ? registroDeHoy.getHoraFin() : horario.getHoraFin());
         model.addAttribute("observacionesSel", esHoyConDatos ? registroDeHoy.getObservaciones() : null);
+        model.addAttribute("diaSemanaJs", horario.getDiaSemana().ordinal() + 1);
+        if (horario.getHoraInicio() != null && horario.getHoraFin() != null) {
+            model.addAttribute("horaInicioMin", horario.getHoraInicio().minusMinutes(30));
+            model.addAttribute("horaFinMax", horario.getHoraFin().plusMinutes(30));
+        }
         return "horas-docentes/registrar";
     }
 

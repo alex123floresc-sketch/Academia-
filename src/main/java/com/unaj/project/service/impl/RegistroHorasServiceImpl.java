@@ -1,6 +1,7 @@
 package com.unaj.project.service.impl;
 
 import com.unaj.project.model.Curso;
+import com.unaj.project.model.DiaSemana;
 import com.unaj.project.model.Horario;
 import com.unaj.project.model.Profesor;
 import com.unaj.project.model.RegistroHoras;
@@ -24,6 +25,8 @@ import java.util.Map;
 
 @Service
 public class RegistroHorasServiceImpl implements RegistroHorasService {
+
+    private static final int TOLERANCIA_MINUTOS = 30;
 
     private final RegistroHorasRepository registroHorasRepository;
     private final HorarioService horarioService;
@@ -67,6 +70,7 @@ public class RegistroHorasServiceImpl implements RegistroHorasService {
         }
 
         Horario horario = horarioService.buscarPorId(horarioId);
+        validarContraHorario(horario, fecha, horaInicio, horaFin);
         Profesor profesor = resolverProfesor(horario);
         Usuario registradoPor = (username != null) ? usuarioRepository.findByUsername(username) : null;
 
@@ -110,6 +114,28 @@ public class RegistroHorasServiceImpl implements RegistroHorasService {
             porHorario.put(r.getHorario().getId(), r);
         }
         return porHorario;
+    }
+
+    private void validarContraHorario(Horario horario, LocalDate fecha, LocalTime horaInicio, LocalTime horaFin) {
+        DiaSemana diaFecha = DiaSemana.desde(fecha.getDayOfWeek());
+        if (diaFecha != horario.getDiaSemana()) {
+            String etiquetaFecha = diaFecha != null ? diaFecha.getEtiqueta() : "Domingo";
+            throw new IllegalArgumentException("La fecha elegida cae en " + etiquetaFecha
+                    + ", pero este curso está programado los " + horario.getDiaSemana().getEtiqueta()
+                    + ". Elige una fecha que coincida con el día de clase.");
+        }
+
+        LocalTime inicioProgramado = horario.getHoraInicio();
+        LocalTime finProgramado = horario.getHoraFin();
+        if (inicioProgramado != null && finProgramado != null) {
+            LocalTime limiteInicio = inicioProgramado.minusMinutes(TOLERANCIA_MINUTOS);
+            LocalTime limiteFin = finProgramado.plusMinutes(TOLERANCIA_MINUTOS);
+            if (horaInicio.isBefore(limiteInicio) || horaFin.isAfter(limiteFin)) {
+                throw new IllegalArgumentException("Las horas deben estar dentro del horario programado ("
+                        + inicioProgramado + " - " + finProgramado + "), con un margen de "
+                        + TOLERANCIA_MINUTOS + " minutos.");
+            }
+        }
     }
 
     private Profesor resolverProfesor(Horario horario) {
