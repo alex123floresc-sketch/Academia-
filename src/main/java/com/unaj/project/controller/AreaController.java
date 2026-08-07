@@ -1,7 +1,6 @@
 package com.unaj.project.controller;
 
 import com.unaj.project.dto.AreaResumenDTO;
-import com.unaj.project.model.Alumno;
 import com.unaj.project.model.Areas;
 import com.unaj.project.model.Curso;
 import com.unaj.project.service.AlumnoService;
@@ -16,6 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/areas")
@@ -33,7 +33,7 @@ public class AreaController {
     public String ver(@RequestParam(required = false) String area, Model model) {
         String seleccionada = (area != null && Areas.TODAS.contains(area)) ? area : Areas.TODAS.get(0);
         List<Curso> cursos = cursoService.listarTodos();
-        List<Alumno> alumnos = alumnoService.listarTodos();
+        Map<String, Long> alumnosPorArea = alumnoService.contarPorArea();
 
         List<AreaResumenDTO> resumenes = Areas.TODAS.stream()
                 .map(a -> new AreaResumenDTO(
@@ -41,7 +41,7 @@ public class AreaController {
                         cursos.stream().filter(c -> c.getAreas().contains(a)).count(),
                         cursos.stream().filter(c -> c.getAreas().contains(a) && c.getProfesor() != null)
                                 .map(c -> c.getProfesor().getId()).distinct().count(),
-                        alumnos.stream().filter(al -> a.equalsIgnoreCase(al.getArea())).count()))
+                        alumnosPorArea.get(a)))
                 .toList();
 
         List<Curso> cursosOrdenados = cursos.stream()

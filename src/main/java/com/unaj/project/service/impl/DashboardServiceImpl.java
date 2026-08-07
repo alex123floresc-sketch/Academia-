@@ -3,8 +3,6 @@ package com.unaj.project.service.impl;
 import com.unaj.project.dto.AlumnoMorosoDTO;
 import com.unaj.project.dto.CursoDemandaDTO;
 import com.unaj.project.dto.IngresoMensualDTO;
-import com.unaj.project.model.Alumno;
-import com.unaj.project.model.Areas;
 import com.unaj.project.model.Curso;
 import com.unaj.project.model.Matricula;
 import com.unaj.project.model.MatriculaDetalle;
@@ -24,7 +22,6 @@ import java.util.Map;
 public class DashboardServiceImpl implements DashboardService {
 
     private static final int CUPO_POR_TURNO = 60;
-    private static final String SIN_AREA = "Sin área";
     private static final int DIAS_VENCIMIENTO_PROXIMO = 15;
 
     private final AlumnoService alumnoService;
@@ -94,18 +91,7 @@ public class DashboardServiceImpl implements DashboardService {
                     .setScale(1, RoundingMode.HALF_UP);
         }
 
-        Map<String, Integer> alumnosPorArea = new LinkedHashMap<>();
-        for (String area : Areas.TODAS) {
-            alumnosPorArea.put(area, 0);
-        }
-        alumnosPorArea.put(SIN_AREA, 0);
-        for (Alumno alumno : alumnoService.listarTodos()) {
-            String area = Areas.TODAS.stream()
-                    .filter(a -> a.equalsIgnoreCase(alumno.getArea()))
-                    .findFirst()
-                    .orElse(SIN_AREA);
-            alumnosPorArea.merge(area, 1, Integer::sum);
-        }
+        Map<String, Long> alumnosPorArea = alumnoService.contarPorArea();
 
         List<AlumnoMorosoDTO> morosos = reporteService.alumnosMorosos().stream().limit(5).toList();
 

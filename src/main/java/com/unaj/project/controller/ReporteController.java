@@ -1,6 +1,7 @@
 package com.unaj.project.controller;
 
 import com.unaj.project.dto.AlumnoMorosoDTO;
+import com.unaj.project.dto.AlumnosPorAreaDTO;
 import com.unaj.project.dto.AlumnosPorCicloTurnoDTO;
 import com.unaj.project.dto.IngresoMensualDTO;
 import com.unaj.project.service.PdfGeneradorService;
@@ -40,6 +41,7 @@ public class ReporteController {
         List<AlumnosPorCicloTurnoDTO> porCiclo = reporteService.alumnosPorCicloTurno();
         List<IngresoMensualDTO> porMes = reporteService.ingresosPorMes();
         List<AlumnoMorosoDTO> morosos = reporteService.alumnosMorosos();
+        List<AlumnosPorAreaDTO> porArea = reporteService.alumnosPorArea();
 
         long matriculasActivas = porCiclo.stream().mapToLong(AlumnosPorCicloTurnoDTO::cantidad).sum();
         String mesActual = YearMonth.now().toString();
@@ -54,6 +56,7 @@ public class ReporteController {
         model.addAttribute("porCiclo", porCiclo);
         model.addAttribute("porMes", porMes);
         model.addAttribute("morosos", morosos);
+        model.addAttribute("porArea", porArea);
         model.addAttribute("matriculasActivas", matriculasActivas);
         model.addAttribute("ingresosMesActual", ingresosMesActual);
         model.addAttribute("montoAdeudado", montoAdeudado);
@@ -103,6 +106,21 @@ public class ReporteController {
         return generarExcel("Alumnos morosos", new String[]{"Nombre", "Apellido", "Correo", "Pagos vencidos", "Monto adeudado"},
                 filas, fila -> new Object[]{fila.nombre(), fila.apellido(), fila.email(), fila.pagosVencidos(), fila.montoAdeudado()},
                 "alumnos_morosos.xlsx");
+    }
+
+    @GetMapping("/alumnos-por-area/pdf")
+    public ResponseEntity<byte[]> alumnosPorAreaPdf() throws Exception {
+        Context context = new Context();
+        context.setVariable("filas", reporteService.alumnosPorArea());
+        return generarPdf("reportes/alumnos-por-area-pdf", context, "alumnos_por_area.pdf");
+    }
+
+    @GetMapping("/alumnos-por-area/excel")
+    public ResponseEntity<byte[]> alumnosPorAreaExcel() throws Exception {
+        List<AlumnosPorAreaDTO> filas = reporteService.alumnosPorArea();
+        return generarExcel("Alumnos por área", new String[]{"Área", "Alumnos"},
+                filas, fila -> new Object[]{fila.area(), fila.cantidad()},
+                "alumnos_por_area.xlsx");
     }
 
     private ResponseEntity<byte[]> generarPdf(String template, Context context, String filename) throws Exception {

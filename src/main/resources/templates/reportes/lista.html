@@ -80,7 +80,7 @@
         </table>
     </div>
 
-    <div class="card">
+    <div class="card" style="margin-bottom:22px">
         <div class="card-head">
             <div>
                 <h2>Alumnos morosos</h2>
@@ -101,6 +101,29 @@
                 <td th:text="'S/ ' + ${fila.montoAdeudado}"></td>
             </tr>
             <tr th:if="${#lists.isEmpty(morosos)}"><td colspan="4" class="empty">No hay alumnos morosos por el momento.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <div class="card-head">
+            <div>
+                <h2>Alumnos por área</h2>
+                <p>Distribución de alumnos activos según el área declarada</p>
+            </div>
+            <div class="rowact">
+                <a th:href="@{/reportes/alumnos-por-area/pdf}" class="ui small primary button">Ver PDF</a>
+                <a th:href="@{/reportes/alumnos-por-area/excel}" class="ui small basic button">Excel</a>
+            </div>
+        </div>
+        <table>
+            <thead><tr><th>Área</th><th>Alumnos</th></tr></thead>
+            <tbody>
+            <tr th:each="fila : ${porArea}">
+                <td class="strong" th:text="${fila.area}"></td>
+                <td th:text="${fila.cantidad}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(porArea)}"><td colspan="2" class="empty">No hay alumnos registrados.</td></tr>
             </tbody>
         </table>
     </div>

@@ -3,6 +3,7 @@ package com.unaj.project.service.impl;
 import com.unaj.project.dto.AlumnoForm;
 import com.unaj.project.exception.RecursoNoEncontradoException;
 import com.unaj.project.model.Alumno;
+import com.unaj.project.model.Areas;
 import com.unaj.project.repository.AlumnoRepository;
 import com.unaj.project.service.AlumnoService;
 import org.springframework.data.domain.Page;
@@ -13,10 +14,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AlumnoServiceImpl implements AlumnoService {
+
+    private static final String SIN_AREA = "Sin área";
 
     private final AlumnoRepository alumnoRepository;
 
@@ -27,6 +32,23 @@ public class AlumnoServiceImpl implements AlumnoService {
     @Override
     public List<Alumno> listarTodos() {
         return alumnoRepository.findByEliminadoFalse();
+    }
+
+    @Override
+    public Map<String, Long> contarPorArea() {
+        Map<String, Long> conteo = new LinkedHashMap<>();
+        for (String area : Areas.TODAS) {
+            conteo.put(area, 0L);
+        }
+        conteo.put(SIN_AREA, 0L);
+        for (Alumno alumno : listarTodos()) {
+            String area = Areas.TODAS.stream()
+                    .filter(a -> a.equalsIgnoreCase(alumno.getArea()))
+                    .findFirst()
+                    .orElse(SIN_AREA);
+            conteo.merge(area, 1L, Long::sum);
+        }
+        return conteo;
     }
 
     @Override

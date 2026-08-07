@@ -1,12 +1,14 @@
 package com.unaj.project.service.impl;
 
 import com.unaj.project.dto.AlumnoMorosoDTO;
+import com.unaj.project.dto.AlumnosPorAreaDTO;
 import com.unaj.project.dto.AlumnosPorCicloTurnoDTO;
 import com.unaj.project.dto.IngresoMensualDTO;
 import com.unaj.project.model.Turno;
 import com.unaj.project.repository.AbonoRepository;
 import com.unaj.project.repository.MatriculaRepository;
 import com.unaj.project.repository.PagoRepository;
+import com.unaj.project.service.AlumnoService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -18,12 +20,14 @@ public class ReporteServiceImpl implements com.unaj.project.service.ReporteServi
     private final MatriculaRepository matriculaRepository;
     private final PagoRepository pagoRepository;
     private final AbonoRepository abonoRepository;
+    private final AlumnoService alumnoService;
 
     public ReporteServiceImpl(MatriculaRepository matriculaRepository, PagoRepository pagoRepository,
-                              AbonoRepository abonoRepository) {
+                              AbonoRepository abonoRepository, AlumnoService alumnoService) {
         this.matriculaRepository = matriculaRepository;
         this.pagoRepository = pagoRepository;
         this.abonoRepository = abonoRepository;
+        this.alumnoService = alumnoService;
     }
 
     @Override
@@ -42,6 +46,13 @@ public class ReporteServiceImpl implements com.unaj.project.service.ReporteServi
                 .map(fila -> new IngresoMensualDTO(
                         (String) fila[0],
                         (BigDecimal) fila[1]))
+                .toList();
+    }
+
+    @Override
+    public List<AlumnosPorAreaDTO> alumnosPorArea() {
+        return alumnoService.contarPorArea().entrySet().stream()
+                .map(e -> new AlumnosPorAreaDTO(e.getKey(), e.getValue()))
                 .toList();
     }
 
