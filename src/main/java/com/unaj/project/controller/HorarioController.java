@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.context.Context;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -48,6 +50,7 @@ public class HorarioController {
                          @RequestParam(required = false) String area,
                          Model model) {
         Ciclo cicloSel = (cicloId != null) ? cicloService.buscarPorId(cicloId) : cicloService.obtenerActivo();
+        String areaSel = (area != null && !area.isBlank()) ? area : Areas.TODAS.get(0);
 
         model.addAttribute("ciclos", cicloService.listarTodos());
         model.addAttribute("turnos", Turno.values());
@@ -55,19 +58,18 @@ public class HorarioController {
         model.addAttribute("cicloSel", cicloSel);
         model.addAttribute("diaHoy", DiaSemana.desde(LocalDate.now().getDayOfWeek()));
         model.addAttribute("areas", Areas.TODAS);
-        model.addAttribute("area", area);
+        model.addAttribute("area", areaSel);
 
         if (cicloSel != null) {
-            model.addAttribute("grilla", horarioService.agruparParaGrilla(cicloSel.getId(), area));
+            model.addAttribute("grilla", horarioService.agruparParaGrilla(cicloSel.getId(), areaSel));
         }
         return "horarios/lista";
     }
 
     @GetMapping("/pdf")
-    public ResponseEntity<byte[]> pdf(@RequestParam Long cicloId, @RequestParam(required = false) String area) {
+    public ResponseEntity<byte[]> pdf(@RequestParam Long cicloId, @RequestParam String area) {
         Ciclo ciclo = cicloService.buscarPorId(cicloId);
-        String titulo = "Horario de clases · " + ciclo.getNombre()
-                + ((area != null && !area.isBlank()) ? " · " + area : "");
+        String titulo = "Horario de clases · " + ciclo.getNombre() + " · " + area;
         Context context = new Context();
         context.setVariable("titulo", titulo);
         context.setVariable("turnos", Turno.values());
@@ -77,8 +79,7 @@ public class HorarioController {
         byte[] pdfBytes = pdfGeneradorService.renderizar("horarios/horario-pdf", context);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
-        String sufijoArea = (area != null && !area.isBlank()) ? "_" + area : "";
-        headers.setContentDispositionFormData("attachment", "horario_" + ciclo.getNombre() + sufijoArea + ".pdf");
+        headers.setContentDispositionFormData("attachment", "horario_" + ciclo.getNombre() + "_" + area + ".pdf");
         return ResponseEntity.ok().headers(headers).contentLength(pdfBytes.length).body(pdfBytes);
     }
 
@@ -96,6 +97,7 @@ public class HorarioController {
                           @RequestParam(required = false) List<Long> cursoIds,
                           Model model,
                           RedirectAttributes ra) {
+        BloqueHorario bloque = horarioService.buscarBloque(bloqueId);
         try {
             horarioService.asignarCurso(bloqueId, dia, cursoIds);
         } catch (IllegalArgumentException | IllegalStateException ex) {
@@ -104,14 +106,15 @@ public class HorarioController {
             return "horarios/formulario";
         }
         ra.addFlashAttribute("mensajeExito", "Curso agregado al horario correctamente.");
-        return "redirect:/horarios?cicloId=" + cicloId;
+        return redirectAGrilla(cicloId, bloque.getArea());
     }
 
     @PostMapping("/quitar-curso/{horarioId}")
-    public String quitarCurso(@PathVariable Long horarioId, @RequestParam Long cicloId, RedirectAttributes ra) {
+    public String quitarCurso(@PathVariable Long horarioId, @RequestParam Long cicloId,
+                              @RequestParam String area, RedirectAttributes ra) {
         horarioService.quitarCurso(horarioId);
         ra.addFlashAttribute("mensajeExito", "Curso quitado del horario.");
-        return "redirect:/horarios?cicloId=" + cicloId;
+        return redirectAGrilla(cicloId, area);
     }
 
     @PostMapping("/bloques/guardar")
@@ -120,17 +123,24 @@ public class HorarioController {
                                 @RequestParam String horaInicio,
                                 @RequestParam String horaFin,
                                 @RequestParam(defaultValue = "CLASE") TipoBloque tipo,
+                                @RequestParam String area,
                                 RedirectAttributes ra) {
-        horarioService.crearBloque(cicloId, turno, LocalTime.parse(horaInicio), LocalTime.parse(horaFin), tipo);
+        horarioService.crearBloque(cicloId, turno, LocalTime.parse(horaInicio), LocalTime.parse(horaFin), tipo, area);
         ra.addFlashAttribute("mensajeExito", "Bloque horario agregado correctamente.");
-        return "redirect:/horarios?cicloId=" + cicloId;
+        return redirectAGrilla(cicloId, area);
     }
 
     @PostMapping("/bloques/eliminar/{bloqueId}")
-    public String eliminarBloque(@PathVariable Long bloqueId, @RequestParam Long cicloId, RedirectAttributes ra) {
+    public String eliminarBloque(@PathVariable Long bloqueId, @RequestParam Long cicloId,
+                                 @RequestParam String area, RedirectAttributes ra) {
         horarioService.eliminarBloque(bloqueId);
         ra.addFlashAttribute("mensajeExito", "Bloque horario eliminado correctamente.");
-        return "redirect:/horarios?cicloId=" + cicloId;
+        return redirectAGrilla(cicloId, area);
+    }
+
+    private String redirectAGrilla(Long cicloId, String area) {
+        return "redirect:/horarios?cicloId=" + cicloId
+                + "&area=" + URLEncoder.encode(area, StandardCharsets.UTF_8);
     }
 
     private void prepararForm(Model model, Long cicloId, DiaSemana dia, Long bloqueId) {
@@ -139,7 +149,7 @@ public class HorarioController {
         model.addAttribute("ciclo", cicloService.buscarPorId(cicloId));
         model.addAttribute("cicloId", cicloId);
         model.addAttribute("dia", dia);
-        model.addAttribute("cursos", cursoService.listarTodos());
+        model.addAttribute("cursos", cursoService.listarPorArea(bloque.getArea()));
 
         List<Horario> cursosAgregados = horarioRepository.findByBloqueIdAndDiaSemana(bloqueId, dia);
         model.addAttribute("cursosAgregados", cursosAgregados);

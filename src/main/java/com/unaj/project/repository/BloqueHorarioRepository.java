@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface BloqueHorarioRepository extends JpaRepository<BloqueHorario, Long> {
 
-    List<BloqueHorario> findByCicloIdOrderByHoraInicioAsc(Long cicloId);
+    List<BloqueHorario> findByCicloIdAndAreaOrderByHoraInicioAsc(Long cicloId, String area);
 
-    boolean existsByCicloIdAndTurnoAndHoraInicio(Long cicloId, Turno turno, LocalTime horaInicio);
+    boolean existsByCicloIdAndTurnoAndHoraInicioAndArea(Long cicloId, Turno turno, LocalTime horaInicio, String area);
 }

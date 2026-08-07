@@ -20,11 +20,12 @@
     </form>
 
     <div class="area-tabs" style="padding:0 0 18px">
-        <a class="area-tab" th:classappend="${area == null or area == ''} ? ' active'"
-           th:href="@{/horarios(cicloId=${cicloSel != null ? cicloSel.id : null})}">Todas las áreas</a>
         <a class="area-tab" th:each="a : ${areas}" th:classappend="${a == area} ? ' active'"
            th:href="@{/horarios(cicloId=${cicloSel != null ? cicloSel.id : null}, area=${a})}" th:text="${a}"></a>
     </div>
+    <p style="font-size:12px;color:var(--ink-faint);margin:-12px 0 18px">
+        Cada área tiene su propio horario, totalmente independiente de las demás.
+    </p>
 
     <div class="turno-block" th:each="turno : ${turnos}"
          th:with="claseTurno='tb-' + ${#strings.toLowerCase(turno.name())}">
@@ -49,7 +50,7 @@
                         <td class="htable-hora">
                             <span th:text="${fila.bloque.horaInicio} + '–' + ${fila.bloque.horaFin}"></span>
                             <form sec:authorize="hasRole('ADMIN')" style="margin:0"
-                                  th:action="@{/horarios/bloques/eliminar/{id}(id=${fila.bloque.id},cicloId=${cicloSel.id})}" method="post">
+                                  th:action="@{/horarios/bloques/eliminar/{id}(id=${fila.bloque.id},cicloId=${cicloSel.id},area=${area})}" method="post">
                                 <button type="submit" class="hb-del" title="Eliminar bloque horario"
                                         onclick="return confirm('¿Eliminar este bloque horario? Debe estar sin cursos asignados.')">&times;</button>
                             </form>
@@ -60,7 +61,7 @@
                                 <div class="hb">
                                     <div class="hcell" th:each="h : ${fila.cursosDe(dia)}">
                                         <form class="tform" sec:authorize="hasRole('ADMIN')"
-                                              th:action="@{/horarios/quitar-curso/{hid}(hid=${h.id},cicloId=${cicloSel.id})}" method="post">
+                                              th:action="@{/horarios/quitar-curso/{hid}(hid=${h.id},cicloId=${cicloSel.id},area=${area})}" method="post">
                                             <button type="submit" class="hquitar" title="Quitar curso del horario"
                                                     onclick="return confirm('¿Quitar este curso del horario?')">&times;</button>
                                         </form>
@@ -89,6 +90,7 @@
                   th:action="@{/horarios/bloques/guardar}" method="post" class="bloque-form">
                 <input type="hidden" name="cicloId" th:value="${cicloSel.id}">
                 <input type="hidden" name="turno" th:value="${turno}">
+                <input type="hidden" name="area" th:value="${area}">
                 <input type="time" name="horaInicio" required>
                 <span class="sep">–</span>
                 <input type="time" name="horaFin" required>

@@ -8,8 +8,6 @@ import com.unaj.project.repository.MatriculaRepository;
 import com.unaj.project.repository.CicloRepository;
 import com.unaj.project.service.ConfiguracionService;
 import com.unaj.project.service.MatriculaService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,11 +43,6 @@ public class MatriculaServiceImpl implements MatriculaService {
     @Override
     public List<Matricula> listarTodos() {
         return matriculaRepository.findAllConEstudianteYSemestre();
-    }
-
-    @Override
-    public Page<Matricula> buscarPagina(String q, Pageable pageable) {
-        return matriculaRepository.buscar(q, pageable);
     }
 
     @Override
@@ -200,8 +193,4 @@ public class MatriculaServiceImpl implements MatriculaService {
         matriculaRepository.save(matricula);
     }
 
-    @Override
-    public void eliminar(Long id) {
-        matriculaRepository.deleteById(id);
-    }
 }

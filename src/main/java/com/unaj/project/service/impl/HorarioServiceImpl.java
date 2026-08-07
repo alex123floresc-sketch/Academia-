@@ -48,12 +48,15 @@ public class HorarioServiceImpl implements HorarioService {
 
     @Override
     @Transactional
-    public void crearBloque(Long cicloId, Turno turno, LocalTime horaInicio, LocalTime horaFin, TipoBloque tipo) {
+    public void crearBloque(Long cicloId, Turno turno, LocalTime horaInicio, LocalTime horaFin, TipoBloque tipo, String area) {
         if (horaInicio == null || horaFin == null || !horaFin.isAfter(horaInicio)) {
             throw new IllegalArgumentException("La hora de fin debe ser posterior a la de inicio.");
         }
-        if (bloqueHorarioRepository.existsByCicloIdAndTurnoAndHoraInicio(cicloId, turno, horaInicio)) {
-            throw new IllegalArgumentException("Ya existe un bloque que inicia a esa hora en este turno.");
+        if (area == null || area.isBlank()) {
+            throw new IllegalArgumentException("Debe seleccionar un área.");
+        }
+        if (bloqueHorarioRepository.existsByCicloIdAndTurnoAndHoraInicioAndArea(cicloId, turno, horaInicio, area)) {
+            throw new IllegalArgumentException("Ya existe un bloque que inicia a esa hora en este turno para esta área.");
         }
         Ciclo ciclo = cicloRepository.findById(cicloId)
                 .orElseThrow(() -> new IllegalArgumentException("Ciclo no encontrado: " + cicloId));
@@ -64,6 +67,7 @@ public class HorarioServiceImpl implements HorarioService {
         bloque.setHoraInicio(horaInicio);
         bloque.setHoraFin(horaFin);
         bloque.setTipo(tipo != null ? tipo : TipoBloque.CLASE);
+        bloque.setArea(area);
         bloqueHorarioRepository.save(bloque);
     }
 
@@ -74,25 +78,15 @@ public class HorarioServiceImpl implements HorarioService {
     }
 
     @Override
-    public Map<Turno, List<FilaHorarioDTO>> agruparParaGrilla(Long cicloId) {
-        return agruparParaGrilla(cicloId, null);
-    }
-
-    @Override
     public Map<Turno, List<FilaHorarioDTO>> agruparParaGrilla(Long cicloId, String area) {
         Map<Turno, List<FilaHorarioDTO>> resultado = new LinkedHashMap<>();
         for (Turno t : Turno.values()) {
             resultado.put(t, new ArrayList<>());
         }
-        if (cicloId == null) return resultado;
+        if (cicloId == null || area == null || area.isBlank()) return resultado;
 
-        List<BloqueHorario> bloques = bloqueHorarioRepository.findByCicloIdOrderByHoraInicioAsc(cicloId);
+        List<BloqueHorario> bloques = bloqueHorarioRepository.findByCicloIdAndAreaOrderByHoraInicioAsc(cicloId, area);
         List<Horario> horarios = horarioRepository.findByCicloId(cicloId);
-        if (area != null && !area.isBlank()) {
-            horarios = horarios.stream()
-                    .filter(h -> h.getCurso().getAreas().contains(area))
-                    .toList();
-        }
 
         Map<Long, Map<DiaSemana, List<Horario>>> porBloque = new LinkedHashMap<>();
         for (Horario h : horarios) {
@@ -125,6 +119,10 @@ public class HorarioServiceImpl implements HorarioService {
             }
             Curso curso = cursoRepository.findById(cursoId)
                     .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado: " + cursoId));
+            if (!curso.getAreas().contains(bloque.getArea())) {
+                throw new IllegalArgumentException(
+                        "El curso \"" + curso.getNombre() + "\" no pertenece al área " + bloque.getArea() + ".");
+            }
             Horario horario = new Horario();
             horario.setBloque(bloque);
             horario.setDiaSemana(dia);

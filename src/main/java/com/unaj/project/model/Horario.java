@@ -49,4 +49,5 @@ public class Horario {
     public LocalTime getHoraInicio() { return bloque != null ? bloque.getHoraInicio() : null; }
     public LocalTime getHoraFin() { return bloque != null ? bloque.getHoraFin() : null; }
     public Ciclo getCiclo() { return bloque != null ? bloque.getCiclo() : null; }
+    public String getArea() { return bloque != null ? bloque.getArea() : null; }
 }

@@ -11,7 +11,6 @@ import com.unaj.project.repository.PagoRepository;
 import com.unaj.project.service.AlumnoService;
 import com.unaj.project.service.CicloService;
 import com.unaj.project.service.ConfiguracionService;
-import com.unaj.project.service.CursoService;
 import com.unaj.project.service.MatriculaService;
 import com.unaj.project.service.PdfGeneradorService;
 import com.unaj.project.service.QrCodeService;
@@ -45,13 +44,12 @@ public class AlumnoController {
     private final PdfGeneradorService pdfGeneradorService;
     private final MatriculaService matriculaService;
     private final CicloService cicloService;
-    private final CursoService cursoService;
     private final ConfiguracionService configuracionService;
 
     public AlumnoController(AlumnoService alumnoService, PagoRepository pagoRepository,
                             MatriculaRepository matriculaRepository, QrCodeService qrCodeService,
                             PdfGeneradorService pdfGeneradorService, MatriculaService matriculaService,
-                            CicloService cicloService, CursoService cursoService,
+                            CicloService cicloService,
                             ConfiguracionService configuracionService) {
         this.alumnoService = alumnoService;
         this.pagoRepository = pagoRepository;
@@ -60,7 +58,6 @@ public class AlumnoController {
         this.pdfGeneradorService = pdfGeneradorService;
         this.matriculaService = matriculaService;
         this.cicloService = cicloService;
-        this.cursoService = cursoService;
         this.configuracionService = configuracionService;
     }
 
@@ -93,7 +90,6 @@ public class AlumnoController {
     @PostMapping("/guardar")
     public String guardar(@Valid @ModelAttribute("alumnoForm") AlumnoForm alumnoForm,
                           BindingResult result,
-                          @RequestParam(required = false) boolean matricular,
                           @RequestParam(required = false) Long cicloId,
                           @RequestParam(required = false) Turno turno,
                           @RequestParam(required = false) String conceptoMatricula,
@@ -102,14 +98,15 @@ public class AlumnoController {
                           @RequestParam(required = false) java.math.BigDecimal montoPension,
                           Model model,
                           RedirectAttributes ra) {
+        boolean esNuevo = alumnoForm.getId() == null;
         if (result.hasErrors()) {
-            if (alumnoForm.getId() == null) {
+            if (esNuevo) {
                 cargarDatosMatricula(model);
             }
             return "alumnos/formulario";
         }
         Alumno alumno = alumnoService.guardar(alumnoForm);
-        if (matricular && alumnoForm.getId() == null) {
+        if (esNuevo) {
             if (cicloId == null || turno == null) {
                 throw new IllegalArgumentException(
                         "El alumno se guardó, pero para matricularlo debes elegir ciclo y turno.");
@@ -136,8 +133,38 @@ public class AlumnoController {
         model.addAttribute("ciclos", cicloService.listarTodos());
         model.addAttribute("cicloActivo", cicloService.obtenerActivo());
         model.addAttribute("turnos", Turno.values());
-        model.addAttribute("cursos", cursoService.listarTodos());
         model.addAttribute("configuracion", configuracionService.obtener());
+    }
+
+    @GetMapping("/{id}/matricular")
+    public String nuevaMatricula(@PathVariable Long id, Model model) {
+        model.addAttribute("alumno", alumnoService.buscarPorId(id));
+        cargarDatosMatricula(model);
+        return "alumnos/matricular";
+    }
+
+    @PostMapping("/{id}/matricular")
+    public String guardarMatricula(@PathVariable Long id,
+                                   @RequestParam Long cicloId,
+                                   @RequestParam Turno turno,
+                                   @RequestParam String area,
+                                   @RequestParam(required = false) String conceptoMatricula,
+                                   @RequestParam(required = false) java.math.BigDecimal montoMatricula,
+                                   @RequestParam(required = false) String conceptoPension,
+                                   @RequestParam(required = false) java.math.BigDecimal montoPension,
+                                   Model model,
+                                   RedirectAttributes ra) {
+        try {
+            matriculaService.matricular(id, cicloId, turno, area,
+                    conceptoMatricula, montoMatricula, conceptoPension, montoPension);
+        } catch (IllegalArgumentException | IllegalStateException ex) {
+            model.addAttribute("error", ex.getMessage());
+            model.addAttribute("alumno", alumnoService.buscarPorId(id));
+            cargarDatosMatricula(model);
+            return "alumnos/matricular";
+        }
+        ra.addFlashAttribute("mensajeExito", "Alumno matriculado correctamente.");
+        return "redirect:/alumnos/" + id + "/expediente";
     }
 
     @PostMapping("/eliminar/{id}")

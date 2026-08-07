@@ -17,12 +17,11 @@ public interface HorarioService {
 
     BloqueHorario buscarBloque(Long id);
 
-    void crearBloque(Long cicloId, Turno turno, LocalTime horaInicio, LocalTime horaFin, TipoBloque tipo);
+    void crearBloque(Long cicloId, Turno turno, LocalTime horaInicio, LocalTime horaFin, TipoBloque tipo, String area);
 
     void eliminarBloque(Long bloqueId);
 
-    /** Bloques y cursos asignados de un ciclo, agrupados por turno y ordenados por hora. */
-    Map<Turno, List<FilaHorarioDTO>> agruparParaGrilla(Long cicloId);
+    /** Bloques y cursos de un ciclo y area, agrupados por turno y ordenados por hora. Cada area tiene su propia grilla, independiente de las demas. */
     Map<Turno, List<FilaHorarioDTO>> agruparParaGrilla(Long cicloId, String area);
 
     void asignarCurso(Long bloqueId, DiaSemana dia, List<Long> cursoIds);

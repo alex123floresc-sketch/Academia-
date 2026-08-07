@@ -70,13 +70,11 @@
                 <span class="field-error" th:if="${#fields.hasErrors('area')}" th:errors="*{area}"></span>
             </div>
 
-            <div th:if="${alumnoForm.id == null}" class="field check-inline">
-                <input type="checkbox" name="matricular" id="matricular" value="true">
-                <label for="matricular">Matricular también al alumno en esta área</label>
-            </div>
-
-            <div th:if="${alumnoForm.id == null}" id="matriculaBox" style="display:none">
+            <div th:if="${alumnoForm.id == null}" id="matriculaBox">
                 <div class="form-divider">Matrícula</div>
+                <p class="hint" style="margin:-6px 0 14px">
+                    El alumno queda matriculado automáticamente en el área elegida arriba, con todos sus cursos.
+                </p>
                 <div class="grid-2">
                     <div class="field">
                         <label>Ciclo</label>
@@ -91,24 +89,6 @@
                             <option th:each="t : ${turnos}" th:value="${t}" th:text="${t.etiqueta}"></option>
                         </select>
                     </div>
-                </div>
-
-                <div class="field">
-                    <label>Cursos incluidos <span class="hint">se asignan automáticamente según el área elegida arriba</span></label>
-                    <div class="courselist" id="courseList">
-                        <div class="courserow" th:each="curso : ${cursos}" style="cursor:default"
-                             th:attr="data-area=${curso.areasCsv}">
-                            <div>
-                                <div class="cn" th:text="${curso.nombre}"></div>
-                                <div class="cm" th:text="${curso.codigo} + ' · ' + (${curso.profesor != null} ? ${curso.profesor.nombreCompleto} : 'Sin asignar')"></div>
-                            </div>
-                            <span class="ch" th:text="${curso.horas} + ' h'"></span>
-                        </div>
-                        <p class="empty" id="courseEmpty" style="display:none">
-                            Elige un área para ver sus cursos. Si no tiene cursos aún, ve a <a th:href="@{/areas}">Áreas</a> para agregarlos.
-                        </p>
-                    </div>
-                    <p class="hint" id="cursosSelCount" style="margin-top:8px"></p>
                 </div>
 
                 <div class="pay-box">
@@ -162,31 +142,8 @@
 <th:block th:if="${alumnoForm.id == null}" layout:fragment="scripts">
     <script th:inline="javascript">
         (function () {
-            var areaSelect = document.getElementById('area');
-            var matricularCheck = document.getElementById('matricular');
-            var matriculaBox = document.getElementById('matriculaBox');
-            var courseRows = Array.prototype.slice.call(document.querySelectorAll('#courseList .courserow'));
-            var courseEmpty = document.getElementById('courseEmpty');
-            var cursosSelCount = document.getElementById('cursosSelCount');
             var montos = document.querySelectorAll('.js-monto');
             var totalPago = document.getElementById('totalPago');
-
-            function actualizarCursos() {
-                var area = areaSelect.value;
-                var visibles = 0, horas = 0;
-                courseRows.forEach(function (fila) {
-                    var areas = (fila.getAttribute('data-area') || '').split(' ');
-                    var coincide = area !== '' && areas.indexOf(area) !== -1;
-                    fila.style.display = coincide ? '' : 'none';
-                    if (coincide) {
-                        visibles++;
-                        horas += parseInt(fila.querySelector('.ch').textContent, 10) || 0;
-                    }
-                });
-                courseEmpty.style.display = visibles === 0 ? 'block' : 'none';
-                cursosSelCount.textContent = visibles === 0 ? ''
-                    : (visibles === 1 ? '1 curso incluido' : (visibles + ' cursos incluidos')) + ' · ' + horas + ' h en total';
-            }
 
             function actualizarTotal() {
                 var t = 0;
@@ -194,14 +151,7 @@
                 totalPago.textContent = 'S/ ' + t.toFixed(2);
             }
 
-            matricularCheck.addEventListener('change', function () {
-                matriculaBox.style.display = matricularCheck.checked ? '' : 'none';
-                if (matricularCheck.checked) { actualizarCursos(); actualizarTotal(); }
-            });
-            areaSelect.addEventListener('change', actualizarCursos);
             montos.forEach(function (i) { i.addEventListener('input', actualizarTotal); });
-
-            actualizarCursos();
             actualizarTotal();
         })();
     </script>

@@ -69,13 +69,15 @@
             <div class="card" style="padding:0">
                 <div class="card-head">
                     <div><h2>Últimas matrículas</h2><p th:text="${cicloActivo != null} ? ${cicloActivo.nombre} : 'Sin ciclo activo'"></p></div>
-                    <a th:href="@{/matriculas}" class="ui basic tiny button">Ver todas</a>
                 </div>
                 <table>
                     <thead><tr><th>Alumno</th><th>Ciclo</th><th>Turno</th><th>Estado</th></tr></thead>
                     <tbody>
                     <tr th:each="m : ${ultimas}">
-                        <td class="strong" th:text="${m.estudiante.nombre + ' ' + m.estudiante.apellido}"></td>
+                        <td class="strong">
+                            <a th:href="@{/alumnos/{id}/expediente(id=${m.estudiante.id})}" style="color:inherit;text-decoration:none"
+                               th:text="${m.estudiante.nombre + ' ' + m.estudiante.apellido}"></a>
+                        </td>
                         <td th:text="${m.semestre.nombre}"></td>
                         <td th:text="${m.turno != null} ? ${m.turno.etiqueta} : '-'"></td>
                         <td>
