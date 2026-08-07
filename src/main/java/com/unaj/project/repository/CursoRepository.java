@@ -28,6 +28,24 @@ public interface CursoRepository extends JpaRepository<Curso, Long> {
             "OR LOWER(p.apellido) LIKE LOWER(CONCAT('%', :q, '%')))")
     Page<Curso> buscar(@Param("q") String q, Pageable pageable);
 
+    @Query(value = "SELECT DISTINCT c FROM Curso c LEFT JOIN c.profesor p LEFT JOIN c.areas ar " +
+            "WHERE c.eliminado = false " +
+            "AND (:area IS NULL OR :area = '' OR ar = :area) " +
+            "AND (:q IS NULL OR :q = '' " +
+            "OR LOWER(c.nombre) LIKE LOWER(CONCAT('%', :q, '%')) " +
+            "OR LOWER(c.codigo) LIKE LOWER(CONCAT('%', :q, '%')) " +
+            "OR LOWER(p.nombre) LIKE LOWER(CONCAT('%', :q, '%')) " +
+            "OR LOWER(p.apellido) LIKE LOWER(CONCAT('%', :q, '%')))",
+            countQuery = "SELECT COUNT(DISTINCT c) FROM Curso c LEFT JOIN c.profesor p LEFT JOIN c.areas ar " +
+            "WHERE c.eliminado = false " +
+            "AND (:area IS NULL OR :area = '' OR ar = :area) " +
+            "AND (:q IS NULL OR :q = '' " +
+            "OR LOWER(c.nombre) LIKE LOWER(CONCAT('%', :q, '%')) " +
+            "OR LOWER(c.codigo) LIKE LOWER(CONCAT('%', :q, '%')) " +
+            "OR LOWER(p.nombre) LIKE LOWER(CONCAT('%', :q, '%')) " +
+            "OR LOWER(p.apellido) LIKE LOWER(CONCAT('%', :q, '%')))")
+    Page<Curso> buscar(@Param("q") String q, @Param("area") String area, Pageable pageable);
+
     @Query("SELECT c FROM Curso c LEFT JOIN FETCH c.profesor WHERE c.eliminado = false")
     List<Curso> findAllConProfesor();
 

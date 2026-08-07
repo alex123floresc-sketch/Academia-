@@ -2,6 +2,7 @@ package com.unaj.project.service.impl;
 
 import com.unaj.project.dto.CursoForm;
 import com.unaj.project.exception.RecursoNoEncontradoException;
+import com.unaj.project.model.Areas;
 import com.unaj.project.model.Curso;
 import com.unaj.project.model.Profesor;
 import com.unaj.project.repository.CursoRepository;
@@ -13,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -40,6 +43,27 @@ public class CursoServiceImpl implements CursoService {
     @Override
     public Page<Curso> buscarPagina(String q, Pageable pageable) {
         return cursoRepository.buscar(q, pageable);
+    }
+
+    @Override
+    public Page<Curso> buscarPagina(String q, String area, Pageable pageable) {
+        return cursoRepository.buscar(q, area, pageable);
+    }
+
+    @Override
+    public Map<String, Long> contarPorArea() {
+        Map<String, Long> conteo = new LinkedHashMap<>();
+        for (String area : Areas.TODAS) {
+            conteo.put(area, 0L);
+        }
+        for (Curso curso : listarTodos()) {
+            for (String area : curso.getAreas()) {
+                if (conteo.containsKey(area)) {
+                    conteo.merge(area, 1L, Long::sum);
+                }
+            }
+        }
+        return conteo;
     }
 
     @Override

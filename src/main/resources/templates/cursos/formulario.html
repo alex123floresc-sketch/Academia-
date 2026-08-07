@@ -4,12 +4,13 @@
       layout:decorate="~{layout}">
 <head><title>Curso</title></head>
 <div layout:fragment="contenido">
-    <a th:href="@{/cursos}" class="page-back">← Volver a la lista</a>
+    <a th:href="@{/cursos(area=${area})}" class="page-back">← Volver a la lista</a>
     <h2 class="page-title" th:text="${cursoForm.id} ? 'Editar curso' : 'Nuevo curso'"></h2>
 
     <div class="form-card">
         <form th:action="@{/cursos/guardar}" th:object="${cursoForm}" method="post">
             <input type="hidden" th:field="*{id}">
+            <input type="hidden" name="area" th:value="${area}">
             <div class="grid-2">
                 <div class="field">
                     <label>Código <span class="hint">identificador único</span></label>
@@ -44,7 +45,7 @@
             </div>
             <div class="form-foot">
                 <button type="submit" class="ui primary button">Guardar</button>
-                <a th:href="@{/cursos}" class="ui basic button">Cancelar</a>
+                <a th:href="@{/cursos(area=${area})}" class="ui basic button">Cancelar</a>
             </div>
         </form>
     </div>
