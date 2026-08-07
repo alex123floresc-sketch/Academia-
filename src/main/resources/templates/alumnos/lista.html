@@ -132,6 +132,7 @@
                     </div>
                     <div class="entity-card-foot" sec:authorize="hasAnyRole('ADMIN','CAJERO')">
                         <a th:href="@{/alumnos/{id}/expediente(id=${alumno.id})}" class="ui small basic button">Expediente</a>
+                        <a th:href="@{/alumnos/{id}/carnet(id=${alumno.id})}" class="ui small basic button">Carnet</a>
                         <a th:href="@{/alumnos/editar/{id}(id=${alumno.id})}" class="ui small basic button">Editar</a>
                         <form class="tform" th:action="@{/alumnos/eliminar/{id}(id=${alumno.id})}" method="post">
                             <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar alumno?')">Eliminar</button>

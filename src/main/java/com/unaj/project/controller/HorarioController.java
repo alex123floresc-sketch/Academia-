@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -61,7 +62,15 @@ public class HorarioController {
         model.addAttribute("area", areaSel);
 
         if (cicloSel != null) {
-            model.addAttribute("grilla", horarioService.agruparParaGrilla(cicloSel.getId(), areaSel));
+            Map<Turno, List<FilaHorarioDTO>> grilla = horarioService.agruparParaGrilla(cicloSel.getId(), areaSel);
+            model.addAttribute("grilla", grilla);
+            long totalBloques = grilla.values().stream().mapToLong(List::size).sum();
+            long totalAsignaciones = grilla.values().stream()
+                    .flatMap(List::stream)
+                    .flatMap(f -> f.porDia().values().stream())
+                    .mapToLong(List::size).sum();
+            model.addAttribute("totalBloques", totalBloques);
+            model.addAttribute("totalAsignaciones", totalAsignaciones);
         }
         return "horarios/lista";
     }

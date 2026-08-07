@@ -1,4 +1,4 @@
 package com.unaj.project.dto;
 
-public record AlumnosPorAreaDTO(String area, long cantidad) {
+public record giAlumnosPorAreaDTO(String area, long cantidad) {
 }
