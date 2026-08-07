@@ -21,7 +21,10 @@ import org.thymeleaf.context.Context;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.Comparator;
 import java.util.List;
 
 @Controller
@@ -60,13 +63,35 @@ public class ReporteController {
         model.addAttribute("matriculasActivas", matriculasActivas);
         model.addAttribute("ingresosMesActual", ingresosMesActual);
         model.addAttribute("montoAdeudado", montoAdeudado);
+
+        model.addAttribute("cicloTurnoLabels",
+                porCiclo.stream().map(f -> f.ciclo() + " · " + f.turno()).toList());
+        model.addAttribute("cicloTurnoValores",
+                porCiclo.stream().map(AlumnosPorCicloTurnoDTO::cantidad).toList());
+        model.addAttribute("mesLabels", porMes.stream().map(IngresoMensualDTO::mes).toList());
+        model.addAttribute("mesValores", porMes.stream().map(IngresoMensualDTO::total).toList());
+        model.addAttribute("areaLabels", porArea.stream().map(AlumnosPorAreaDTO::area).toList());
+        model.addAttribute("areaValores", porArea.stream().map(AlumnosPorAreaDTO::cantidad).toList());
+        List<AlumnoMorosoDTO> topMorosos = morosos.stream().limit(8).toList();
+        model.addAttribute("morososLabels",
+                topMorosos.stream().map(f -> f.nombre() + " " + f.apellido()).toList());
+        model.addAttribute("morososValores", topMorosos.stream().map(AlumnoMorosoDTO::montoAdeudado).toList());
+
         return "reportes/lista";
     }
 
     @GetMapping("/alumnos-por-ciclo/pdf")
     public ResponseEntity<byte[]> alumnosPorCicloPdf() throws Exception {
+        List<AlumnosPorCicloTurnoDTO> filas = reporteService.alumnosPorCicloTurno();
+        long totalAlumnos = filas.stream().mapToLong(AlumnosPorCicloTurnoDTO::cantidad).sum();
+        long totalCiclos = filas.stream().map(AlumnosPorCicloTurnoDTO::ciclo).distinct().count();
+        long totalTurnos = filas.stream().map(AlumnosPorCicloTurnoDTO::turno).distinct().count();
+
         Context context = new Context();
-        context.setVariable("filas", reporteService.alumnosPorCicloTurno());
+        context.setVariable("filas", filas);
+        context.setVariable("totalAlumnos", totalAlumnos);
+        context.setVariable("totalCiclos", totalCiclos);
+        context.setVariable("totalTurnos", totalTurnos);
         return generarPdf("reportes/alumnos-por-ciclo-pdf", context, "alumnos_por_ciclo.pdf");
     }
 
@@ -80,8 +105,20 @@ public class ReporteController {
 
     @GetMapping("/ingresos-mensuales/pdf")
     public ResponseEntity<byte[]> ingresosMensualesPdf() throws Exception {
+        List<IngresoMensualDTO> filas = reporteService.ingresosPorMes();
+        BigDecimal totalAcumulado = filas.stream()
+                .map(IngresoMensualDTO::total).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal promedioMensual = filas.isEmpty() ? BigDecimal.ZERO
+                : totalAcumulado.divide(BigDecimal.valueOf(filas.size()), 2, RoundingMode.HALF_UP);
+        IngresoMensualDTO mesMayor = filas.stream().max(Comparator.comparing(IngresoMensualDTO::total)).orElse(null);
+        IngresoMensualDTO mesMenor = filas.stream().min(Comparator.comparing(IngresoMensualDTO::total)).orElse(null);
+
         Context context = new Context();
-        context.setVariable("filas", reporteService.ingresosPorMes());
+        context.setVariable("filas", filas);
+        context.setVariable("totalAcumulado", totalAcumulado);
+        context.setVariable("promedioMensual", promedioMensual);
+        context.setVariable("mesMayor", mesMayor);
+        context.setVariable("mesMenor", mesMenor);
         return generarPdf("reportes/ingresos-mensuales-pdf", context, "ingresos_mensuales.pdf");
     }
 
@@ -95,8 +132,19 @@ public class ReporteController {
 
     @GetMapping("/morosos/pdf")
     public ResponseEntity<byte[]> morososPdf() throws Exception {
+        List<AlumnoMorosoDTO> filas = reporteService.alumnosMorosos();
+        long totalPagosVencidos = filas.stream().mapToLong(AlumnoMorosoDTO::pagosVencidos).sum();
+        BigDecimal totalAdeudado = filas.stream()
+                .map(AlumnoMorosoDTO::montoAdeudado).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal promedioAdeudado = filas.isEmpty() ? BigDecimal.ZERO
+                : totalAdeudado.divide(BigDecimal.valueOf(filas.size()), 2, RoundingMode.HALF_UP);
+
         Context context = new Context();
-        context.setVariable("filas", reporteService.alumnosMorosos());
+        context.setVariable("filas", filas);
+        context.setVariable("totalAlumnosMorosos", (long) filas.size());
+        context.setVariable("totalPagosVencidos", totalPagosVencidos);
+        context.setVariable("totalAdeudado", totalAdeudado);
+        context.setVariable("promedioAdeudado", promedioAdeudado);
         return generarPdf("reportes/morosos-pdf", context, "alumnos_morosos.pdf");
     }
 
@@ -110,8 +158,12 @@ public class ReporteController {
 
     @GetMapping("/alumnos-por-area/pdf")
     public ResponseEntity<byte[]> alumnosPorAreaPdf() throws Exception {
+        List<AlumnosPorAreaDTO> filas = reporteService.alumnosPorArea();
+        long totalAlumnos = filas.stream().mapToLong(AlumnosPorAreaDTO::cantidad).sum();
+
         Context context = new Context();
-        context.setVariable("filas", reporteService.alumnosPorArea());
+        context.setVariable("filas", filas);
+        context.setVariable("totalAlumnos", totalAlumnos);
         return generarPdf("reportes/alumnos-por-area-pdf", context, "alumnos_por_area.pdf");
     }
 
@@ -124,6 +176,7 @@ public class ReporteController {
     }
 
     private ResponseEntity<byte[]> generarPdf(String template, Context context, String filename) throws Exception {
+        context.setVariable("fechaGeneracion", LocalDate.now());
         byte[] pdfBytes = pdfGeneradorService.renderizar(template, context);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);

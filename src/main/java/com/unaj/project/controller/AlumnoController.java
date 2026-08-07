@@ -71,12 +71,16 @@ public class AlumnoController {
             deuda.put((Long) fila[0], (Long) fila[1]);
         }
         Page<Alumno> pagina = alumnoService.buscarPagina(q, area, pageable);
+        long totalAlumnos = alumnoService.listarTodos().size();
         model.addAttribute("pagina", pagina);
         model.addAttribute("alumnos", pagina.getContent());
         model.addAttribute("deuda", deuda);
         model.addAttribute("q", q);
         model.addAttribute("area", area);
         model.addAttribute("areas", com.unaj.project.model.Areas.TODAS);
+        model.addAttribute("totalAlumnos", totalAlumnos);
+        model.addAttribute("totalConDeuda", (long) deuda.size());
+        model.addAttribute("totalAlDia", totalAlumnos - deuda.size());
         return "alumnos/lista";
     }
 
@@ -180,13 +184,27 @@ public class AlumnoController {
         List<Matricula> matriculas = matriculaRepository.findByEstudianteIdConDetalle(id);
 
         Map<Long, List<Pago>> pagosPorMatricula = new LinkedHashMap<>();
+        java.math.BigDecimal totalPagado = java.math.BigDecimal.ZERO;
+        java.math.BigDecimal totalPendiente = java.math.BigDecimal.ZERO;
+        long matriculasActivas = 0;
         for (Matricula m : matriculas) {
-            pagosPorMatricula.put(m.getId(), pagoRepository.findByMatriculaId(m.getId()));
+            List<Pago> pagos = pagoRepository.findByMatriculaId(m.getId());
+            pagosPorMatricula.put(m.getId(), pagos);
+            for (Pago p : pagos) {
+                totalPagado = totalPagado.add(p.getMontoPagado());
+                totalPendiente = totalPendiente.add(p.getSaldo());
+            }
+            if ("ACTIVA".equals(m.getEstado())) {
+                matriculasActivas++;
+            }
         }
 
         model.addAttribute("alumno", alumno);
         model.addAttribute("matriculas", matriculas);
         model.addAttribute("pagosPorMatricula", pagosPorMatricula);
+        model.addAttribute("totalPagado", totalPagado);
+        model.addAttribute("totalPendiente", totalPendiente);
+        model.addAttribute("matriculasActivas", matriculasActivas);
         return "alumnos/expediente";
     }
 

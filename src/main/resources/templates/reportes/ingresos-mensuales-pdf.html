@@ -9,6 +9,23 @@
 <body>
 <div th:replace="~{fragments/pdf :: encabezado('Ingresos cobrados por mes')}"></div>
 
+<div class="pdf-section">Resumen general</div>
+<table class="pdf-info">
+    <tr>
+        <td class="k">Total acumulado</td>
+        <td class="v" th:text="'S/ ' + ${totalAcumulado}">S/ 0</td>
+        <td class="k">Promedio mensual</td>
+        <td class="v" th:text="'S/ ' + ${promedioMensual}">S/ 0</td>
+    </tr>
+    <tr>
+        <td class="k">Mes de mayor ingreso</td>
+        <td class="v" th:text="${mesMayor != null} ? (${mesMayor.mes} + ' (S/ ' + ${mesMayor.total} + ')') : '-'">-</td>
+        <td class="k">Mes de menor ingreso</td>
+        <td class="v" th:text="${mesMenor != null} ? (${mesMenor.mes} + ' (S/ ' + ${mesMenor.total} + ')') : '-'">-</td>
+    </tr>
+</table>
+
+<div class="pdf-section">Detalle por mes</div>
 <table class="pdf-table">
     <thead>
     <tr><th>Mes</th><th>Total cobrado</th></tr>
@@ -21,6 +38,7 @@
     </tbody>
 </table>
 <p class="pdf-empty" th:if="${#lists.isEmpty(filas)}">Sin datos disponibles.</p>
+<p class="pdf-total" th:unless="${#lists.isEmpty(filas)}">Total acumulado: <span th:text="'S/ ' + ${totalAcumulado}">S/ 0</span></p>
 
 <div th:replace="~{fragments/pdf :: pie}"></div>
 </body>

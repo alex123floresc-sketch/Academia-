@@ -9,6 +9,23 @@
 <body>
 <div th:replace="~{fragments/pdf :: encabezado('Alumnos matriculados por ciclo y turno')}"></div>
 
+<div class="pdf-section">Resumen general</div>
+<table class="pdf-info">
+    <tr>
+        <td class="k">Total de alumnos matriculados</td>
+        <td class="v" th:text="${totalAlumnos}">0</td>
+        <td class="k">Ciclos reportados</td>
+        <td class="v" th:text="${totalCiclos}">0</td>
+    </tr>
+    <tr>
+        <td class="k">Turnos con matrícula</td>
+        <td class="v" th:text="${totalTurnos}">0</td>
+        <td class="k">Promedio por ciclo/turno</td>
+        <td class="v" th:text="${#lists.isEmpty(filas)} ? 0 : ${#numbers.formatDecimal(totalAlumnos / (#lists.size(filas) * 1.0), 1, 1)}">0</td>
+    </tr>
+</table>
+
+<div class="pdf-section">Detalle por ciclo y turno</div>
 <table class="pdf-table">
     <thead>
     <tr><th>Ciclo</th><th>Turno</th><th>Alumnos matriculados</th></tr>
@@ -22,6 +39,7 @@
     </tbody>
 </table>
 <p class="pdf-empty" th:if="${#lists.isEmpty(filas)}">Sin datos disponibles.</p>
+<p class="pdf-total" th:unless="${#lists.isEmpty(filas)}">Total general: <span th:text="${totalAlumnos}">0</span> alumnos matriculados</p>
 
 <div th:replace="~{fragments/pdf :: pie}"></div>
 </body>

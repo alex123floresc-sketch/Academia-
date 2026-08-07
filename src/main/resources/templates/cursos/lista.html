@@ -12,8 +12,11 @@
     <div class="card">
         <div class="card-head">
             <div><h2>Cursos</h2><p>Catálogo de cursos y profesores asignados</p></div>
-            <a th:href="@{/cursos/nuevo}" sec:authorize="hasRole('ADMIN')" class="ui small primary button">
-                <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo curso</a>
+            <div class="rowact" style="align-items:center">
+                <div th:replace="~{fragments/vista-switch :: switch('cursos')}"></div>
+                <a th:href="@{/cursos/nuevo}" sec:authorize="hasRole('ADMIN')" class="ui small primary button">
+                    <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo curso</a>
+            </div>
         </div>
         <div class="searchbar">
             <form method="get" th:action="@{/cursos}" style="display:flex;gap:8px;flex:1">
@@ -21,27 +24,59 @@
                 <button type="submit" class="ui small basic button">Buscar</button>
             </form>
         </div>
-        <table>
-            <thead><tr><th>Código</th><th>Curso</th><th>Horas / sem.</th><th>Profesor</th><th></th></tr></thead>
-            <tbody>
-            <tr th:each="curso : ${cursos}">
-                <td><span class="pill pill-gray" th:text="${curso.codigo}"></span></td>
-                <td class="strong" th:text="${curso.nombre}"></td>
-                <td th:text="${curso.horas} + ' h'"></td>
-                <td th:text="${curso.profesor != null} ? ${curso.profesor.nombreCompleto} : 'Sin asignar'"></td>
-                <td sec:authorize="hasRole('ADMIN')">
-                    <div class="rowact">
+        <div data-view-panel="list" data-view-group="cursos">
+            <table>
+                <thead><tr><th>Código</th><th>Curso</th><th>Horas / sem.</th><th>Profesor</th><th></th></tr></thead>
+                <tbody>
+                <tr th:each="curso : ${cursos}">
+                    <td><span class="pill pill-gray" th:text="${curso.codigo}"></span></td>
+                    <td class="strong" th:text="${curso.nombre}"></td>
+                    <td th:text="${curso.horas} + ' h'"></td>
+                    <td th:text="${curso.profesor != null} ? ${curso.profesor.nombreCompleto} : 'Sin asignar'"></td>
+                    <td sec:authorize="hasRole('ADMIN')">
+                        <div class="rowact">
+                            <a th:href="@{/cursos/editar/{id}(id=${curso.id})}" class="ui small basic button">Editar</a>
+                            <form class="tform" th:action="@{/cursos/eliminar/{id}(id=${curso.id})}" method="post">
+                                <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar curso?')">Eliminar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(cursos)}"><td colspan="5" class="empty">No hay cursos registrados aún.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div data-view-panel="grid" data-view-group="cursos" hidden>
+            <div class="entity-grid" th:if="${not #lists.isEmpty(cursos)}">
+                <div class="entity-card" th:each="curso : ${cursos}">
+                    <div class="entity-card-top">
+                        <div class="entity-avatar" th:text="${#strings.substring(curso.nombre,0,1)}"></div>
+                        <div style="min-width:0">
+                            <div class="entity-card-name" th:text="${curso.nombre}"></div>
+                            <div class="entity-card-sub"><span class="pill pill-gray" th:text="${curso.codigo}"></span></div>
+                        </div>
+                    </div>
+                    <div class="entity-card-meta">
+                        <div class="entity-card-meta-row"><span class="k">Horas / sem.</span><span class="v" th:text="${curso.horas} + ' h'"></span></div>
+                        <div class="entity-card-meta-row"><span class="k">Profesor</span><span class="v" th:text="${curso.profesor != null} ? ${curso.profesor.nombreCompleto} : 'Sin asignar'"></span></div>
+                    </div>
+                    <div class="entity-card-foot" sec:authorize="hasRole('ADMIN')">
                         <a th:href="@{/cursos/editar/{id}(id=${curso.id})}" class="ui small basic button">Editar</a>
                         <form class="tform" th:action="@{/cursos/eliminar/{id}(id=${curso.id})}" method="post">
                             <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar curso?')">Eliminar</button>
                         </form>
                     </div>
-                </td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(cursos)}"><td colspan="5" class="empty">No hay cursos registrados aún.</td></tr>
-            </tbody>
-        </table>
+                </div>
+            </div>
+            <p th:if="${#lists.isEmpty(cursos)}" class="empty">No hay cursos registrados aún.</p>
+        </div>
+
         <div th:replace="~{fragments/paginacion :: paginacion(${pagina}, '/cursos', ${q})}"></div>
     </div>
 </div>
+
+<th:block layout:fragment="scripts">
+    <script th:src="@{/js/vista-toggle.js}"></script>
+</th:block>
 </html>

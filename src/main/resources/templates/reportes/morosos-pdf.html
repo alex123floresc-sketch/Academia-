@@ -9,6 +9,23 @@
 <body>
 <div th:replace="~{fragments/pdf :: encabezado('Alumnos con pagos vencidos')}"></div>
 
+<div class="pdf-section">Resumen general</div>
+<table class="pdf-info">
+    <tr>
+        <td class="k">Alumnos morosos</td>
+        <td class="v" th:text="${totalAlumnosMorosos}">0</td>
+        <td class="k">Pagos vencidos</td>
+        <td class="v" th:text="${totalPagosVencidos}">0</td>
+    </tr>
+    <tr>
+        <td class="k">Monto total adeudado</td>
+        <td class="v" th:text="'S/ ' + ${totalAdeudado}">S/ 0</td>
+        <td class="k">Promedio adeudado por alumno</td>
+        <td class="v" th:text="'S/ ' + ${promedioAdeudado}">S/ 0</td>
+    </tr>
+</table>
+
+<div class="pdf-section">Detalle por alumno</div>
 <table class="pdf-table">
     <thead>
     <tr><th>Alumno</th><th>Correo</th><th>Pagos vencidos</th><th>Monto adeudado</th></tr>
@@ -23,6 +40,7 @@
     </tbody>
 </table>
 <p class="pdf-empty" th:if="${#lists.isEmpty(filas)}">Sin alumnos morosos.</p>
+<p class="pdf-total" th:unless="${#lists.isEmpty(filas)}">Total adeudado: <span th:text="'S/ ' + ${totalAdeudado}">S/ 0</span></p>
 
 <div th:replace="~{fragments/pdf :: pie}"></div>
 </body>

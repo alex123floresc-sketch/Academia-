@@ -257,6 +257,39 @@ details[open]>.hd-toggle::after{transform:rotate(-135deg);margin-top:2px}
 .topbar-badge{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;padding:0 3px;border-radius:8px;background:var(--rose);color:#fff;font-size:9.5px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1}
 .topbar-avatar-btn{width:36px;height:36px;border-radius:50%;background:var(--lav-soft);color:var(--lav-strong);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;flex-shrink:0}
 
+.alumno-row{display:flex;align-items:center;gap:11px}
+.alumno-avatar{width:34px;height:34px;border-radius:50%;background:var(--sage-soft);color:var(--sage-strong);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;flex-shrink:0;text-transform:uppercase}
+
+/* Alternador de vista: lista (tabla) / bloques (tarjetas) */
+.view-switch{display:inline-flex;background:var(--surface-2);border-radius:var(--radius-sm);padding:3px;gap:2px;flex-shrink:0}
+.view-switch-btn{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--ink-soft);transition:.12s}
+.view-switch-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.9;fill:none;flex-shrink:0}
+.view-switch-btn:hover{color:var(--ink)}
+.view-switch-btn.active{background:var(--surface);color:var(--sage-strong);box-shadow:0 1px 3px rgba(27,42,61,.14)}
+[data-view-panel]{padding:0}
+[data-view-panel][hidden]{display:none}
+
+.entity-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(252px,1fr));gap:14px;padding:20px}
+.entity-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:17px 18px;display:flex;flex-direction:column;gap:13px;transition:.12s}
+.entity-card:hover{border-color:var(--sage);box-shadow:0 6px 18px -10px rgba(27,42,61,.18)}
+.entity-card-top{display:flex;align-items:center;gap:12px}
+.entity-avatar{width:42px;height:42px;border-radius:12px;background:var(--sage-soft);color:var(--sage-strong);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13.5px;flex-shrink:0;text-transform:uppercase;font-family:'Fraunces',serif}
+.entity-card-name{font-family:'Fraunces',serif;font-weight:600;font-size:14.5px;color:var(--ink);line-height:1.3}
+.entity-card-sub{font-size:11.5px;color:var(--ink-faint);margin-top:2px}
+.entity-card-meta{display:flex;flex-direction:column;gap:7px;font-size:12.5px}
+.entity-card-meta-row{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.entity-card-meta-row .k{color:var(--ink-faint)}
+.entity-card-meta-row .v{color:var(--ink-soft);text-align:right}
+.entity-card-foot{display:flex;gap:6px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--line-soft)}
+.entity-card-foot form{margin:0}
+.entity-card-foot .ui.button{flex:1;justify-content:center}
+@media(max-width:560px){.entity-grid{grid-template-columns:1fr;padding:16px}}
+
+/* Expediente del alumno */
+.exp-header{display:flex;align-items:center;gap:18px;padding:22px 24px}
+.exp-avatar{width:64px;height:64px;border-radius:16px;background:var(--sage-soft);color:var(--sage-strong);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:22px;flex-shrink:0;text-transform:uppercase}
+.exp-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:18px 0 22px}
+
 /* Inicio (landing) */
 .quick-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
 .quick-tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:14px;transition:.12s}

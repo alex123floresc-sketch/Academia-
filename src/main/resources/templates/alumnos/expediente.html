@@ -9,10 +9,11 @@
     <a th:href="@{/alumnos}" class="page-back">&laquo; Volver a alumnos</a>
 
     <div class="card" style="margin-top:14px">
-        <div class="card-head">
-            <div>
-                <h2 th:text="${alumno.nombre + ' ' + alumno.apellido}">Alumno</h2>
-                <p th:text="'DNI ' + (${alumno.dni} ?: '-') + ' · ' + (${alumno.email} ?: 'sin correo') + ' · ' + ${alumno.area}">-</p>
+        <div class="exp-header">
+            <div class="exp-avatar" th:text="${#strings.substring(alumno.nombre,0,1) + #strings.substring(alumno.apellido,0,1)}"></div>
+            <div style="flex:1">
+                <h2 style="font-family:'Fraunces',serif;font-weight:600;font-size:19px" th:text="${alumno.nombre + ' ' + alumno.apellido}">Alumno</h2>
+                <p style="font-size:12.5px;color:var(--ink-faint);margin-top:3px" th:text="'DNI ' + (${alumno.dni} ?: '-') + ' · ' + (${alumno.email} ?: 'sin correo') + ' · ' + ${alumno.area}">-</p>
                 <p th:if="${alumno.nombrePadre != null and !alumno.nombrePadre.isBlank()}" style="font-size:12px;color:var(--ink-faint);margin-top:2px"
                    th:text="'Padre/apoderado: ' + ${alumno.nombrePadre} + (${alumno.telefonoPadre != null and !alumno.telefonoPadre.isBlank()} ? ' · ' + ${alumno.telefonoPadre} : '')"></p>
             </div>
@@ -20,11 +21,33 @@
         </div>
     </div>
 
+    <div class="exp-metrics">
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sky)"></span>Matrículas activas</div>
+            <div class="val" th:text="${matriculasActivas}">0</div>
+            <div class="delta" th:text="${#lists.size(matriculas)} + ' en total'">0 en total</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Total pagado</div>
+            <div class="val" th:text="'S/ ' + ${totalPagado}">S/ 0</div>
+            <div class="delta">suma de todos los abonos</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--amber)"></span>Saldo pendiente</div>
+            <div class="val" th:text="'S/ ' + ${totalPendiente}">S/ 0</div>
+            <div class="delta" th:classappend="${totalPendiente.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? 'down' : ''">por cobrar en todas las matrículas</div>
+        </div>
+    </div>
+
     <div class="card" style="margin-top:20px" th:each="m : ${matriculas}">
         <div class="card-head">
             <div>
                 <h2 th:text="${m.semestre.nombre}">Ciclo</h2>
-                <p th:text="'Turno: ' + (${m.turno != null} ? ${m.turno.etiqueta} : '-') + ' · Estado: ' + ${m.estado}">-</p>
+                <p style="display:flex;align-items:center;gap:8px;margin-top:4px">
+                    <span th:text="'Turno: ' + (${m.turno != null} ? ${m.turno.etiqueta} : '-')">-</span>
+                    <span th:if="${m.estado == 'ACTIVA'}" class="pill pill-sage">Activa</span>
+                    <span th:unless="${m.estado == 'ACTIVA'}" class="pill pill-gray" th:text="${m.estado}"></span>
+                </p>
             </div>
             <div class="rowact">
                 <a th:href="@{/matriculas/ficha/{id}(id=${m.id})}" class="ui small basic button">Ver ficha</a>
