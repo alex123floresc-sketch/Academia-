@@ -44,14 +44,20 @@
                 </a>
             </div>
         </div>
-        <div class="area-tabs" style="padding-bottom:0">
-            <a class="area-tab" th:each="n : ${niveles}" th:classappend="${n == nivel} ? ' active'"
-               th:href="@{/alumnos(q=${q}, nivel=${n})}" th:text="${n.etiqueta}"></a>
+        <div class="filter-row">
+            <span class="filter-row-label">Nivel</span>
+            <div class="area-tabs">
+                <a class="area-tab" th:each="n : ${niveles}" th:classappend="${n == nivel} ? ' active'"
+                   th:href="@{/alumnos(q=${q}, nivel=${n})}" th:text="${n.etiqueta}"></a>
+            </div>
         </div>
-        <div class="area-tabs">
-            <a class="area-tab" th:classappend="${area == null or area == ''} ? ' active'" th:href="@{/alumnos(q=${q}, nivel=${nivel})}">Todas las áreas</a>
-            <a class="area-tab" th:each="a : ${areas}" th:classappend="${a == area} ? ' active'"
-               th:href="@{/alumnos(q=${q}, nivel=${nivel}, area=${a})}" th:text="${a}"></a>
+        <div class="filter-row" style="padding-bottom:14px">
+            <span class="filter-row-label">Área</span>
+            <div class="area-tabs">
+                <a class="area-tab" th:classappend="${area == null or area == ''} ? ' active'" th:href="@{/alumnos(q=${q}, nivel=${nivel})}">Todas</a>
+                <a class="area-tab" th:each="a : ${areas}" th:classappend="${a == area} ? ' active'"
+                   th:href="@{/alumnos(q=${q}, nivel=${nivel}, area=${a})}" th:text="${a}"></a>
+            </div>
         </div>
         <div class="searchbar">
             <form method="get" th:action="@{/alumnos}" style="display:flex;gap:8px;flex:1">

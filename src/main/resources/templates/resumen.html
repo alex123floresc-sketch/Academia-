@@ -103,7 +103,7 @@
                             <span style="color:var(--ink-faint)" th:text="${e.value} + ' / ' + ${cupoPorTurno}"></span>
                         </div>
                         <div class="ui tiny progress">
-                            <div class="bar" th:style="'width:' + ${T(java.lang.Math).min(100, (e.value * 100) / cupoPorTurno)} + '%'"></div>
+                            <div class="bar" th:style="'width:' + ${T(java.lang.Math).min(100, ((e.value * 100) / cupoPorTurno).intValue())} + '%'"></div>
                         </div>
                     </div>
                     <p th:if="${#maps.isEmpty(aforo)}" class="empty">Sin datos de aforo.</p>
@@ -126,7 +126,7 @@
                             <span style="color:var(--ink-faint)" th:text="${e.value} + ' alumno' + (${e.value == 1} ? '' : 's')"></span>
                         </div>
                         <div class="ui tiny progress">
-                            <div class="bar" th:style="'width:' + (${totalAlumnos > 0} ? ${T(java.lang.Math).min(100, (e.value * 100) / totalAlumnos)} : 0) + '%'"></div>
+                            <div class="bar" th:style="'width:' + (${totalAlumnos > 0} ? ${T(java.lang.Math).min(100, ((e.value * 100) / totalAlumnos).intValue())} : 0) + '%'"></div>
                         </div>
                     </div>
                     <p th:if="${#maps.isEmpty(alumnosPorArea)}" class="empty">Sin alumnos registrados.</p>
@@ -203,7 +203,7 @@
 </div>
 
 <th:block layout:fragment="scripts">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script th:src="@{/js/chart.min.js}"></script>
     <script th:inline="javascript">
         /*<![CDATA[*/
         var etiquetas = /*[[${mesesLabels}]]*/ [];
