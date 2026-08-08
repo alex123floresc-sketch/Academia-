@@ -4,6 +4,7 @@ import com.unaj.project.dto.AlumnoForm;
 import com.unaj.project.exception.RecursoNoEncontradoException;
 import com.unaj.project.model.Alumno;
 import com.unaj.project.model.Areas;
+import com.unaj.project.model.Nivel;
 import com.unaj.project.repository.AlumnoRepository;
 import com.unaj.project.service.AlumnoService;
 import org.springframework.data.domain.Page;
@@ -35,14 +36,15 @@ public class AlumnoServiceImpl implements AlumnoService {
     }
 
     @Override
-    public Map<String, Long> contarPorArea() {
+    public Map<String, Long> contarPorArea(Nivel nivel) {
         Map<String, Long> conteo = new LinkedHashMap<>();
-        for (String area : Areas.TODAS) {
+        for (String area : Areas.paraNivel(nivel)) {
             conteo.put(area, 0L);
         }
         conteo.put(SIN_AREA, 0L);
         for (Alumno alumno : listarTodos()) {
-            String area = Areas.TODAS.stream()
+            if (alumno.getNivel() != nivel) continue;
+            String area = Areas.paraNivel(nivel).stream()
                     .filter(a -> a.equalsIgnoreCase(alumno.getArea()))
                     .findFirst()
                     .orElse(SIN_AREA);
@@ -52,13 +54,27 @@ public class AlumnoServiceImpl implements AlumnoService {
     }
 
     @Override
-    public Page<Alumno> buscarPagina(String q, Pageable pageable) {
-        return alumnoRepository.buscar(q, null, pageable);
+    public Map<Nivel, Long> contarPorNivel() {
+        Map<Nivel, Long> conteo = new LinkedHashMap<>();
+        for (Nivel nivel : Nivel.values()) {
+            conteo.put(nivel, 0L);
+        }
+        for (Alumno alumno : listarTodos()) {
+            if (alumno.getNivel() != null) {
+                conteo.merge(alumno.getNivel(), 1L, Long::sum);
+            }
+        }
+        return conteo;
     }
 
     @Override
-    public Page<Alumno> buscarPagina(String q, String area, Pageable pageable) {
-        return alumnoRepository.buscar(q, area, pageable);
+    public Page<Alumno> buscarPagina(String q, Pageable pageable) {
+        return alumnoRepository.buscar(q, null, null, pageable);
+    }
+
+    @Override
+    public Page<Alumno> buscarPagina(String q, Nivel nivel, String area, Pageable pageable) {
+        return alumnoRepository.buscar(q, nivel, area, pageable);
     }
 
     @Override
@@ -108,6 +124,7 @@ public class AlumnoServiceImpl implements AlumnoService {
         alumno.setNombrePadre(form.getNombrePadre());
         alumno.setTelefonoPadre(form.getTelefonoPadre());
         alumno.setArea(form.getArea());
+        alumno.setNivel(form.getNivel());
 
         MultipartFile foto = form.getFoto();
         if (foto != null && !foto.isEmpty()) {
@@ -142,6 +159,7 @@ public class AlumnoServiceImpl implements AlumnoService {
         form.setNombrePadre(alumno.getNombrePadre());
         form.setTelefonoPadre(alumno.getTelefonoPadre());
         form.setArea(alumno.getArea());
+        form.setNivel(alumno.getNivel());
         return form;
     }
 }

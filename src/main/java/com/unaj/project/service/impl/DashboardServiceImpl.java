@@ -6,6 +6,7 @@ import com.unaj.project.dto.IngresoMensualDTO;
 import com.unaj.project.model.Curso;
 import com.unaj.project.model.Matricula;
 import com.unaj.project.model.MatriculaDetalle;
+import com.unaj.project.model.Nivel;
 import com.unaj.project.model.Pago;
 import com.unaj.project.service.*;
 import org.springframework.stereotype.Service;
@@ -91,7 +92,8 @@ public class DashboardServiceImpl implements DashboardService {
                     .setScale(1, RoundingMode.HALF_UP);
         }
 
-        Map<String, Long> alumnosPorArea = alumnoService.contarPorArea();
+        // Resumen todavía solo cubre Preuniversitario; extender a Primaria/Secundaria es un siguiente paso pendiente.
+        Map<String, Long> alumnosPorArea = alumnoService.contarPorArea(Nivel.PREUNIVERSITARIO);
 
         List<AlumnoMorosoDTO> morosos = reporteService.alumnosMorosos().stream().limit(5).toList();
 

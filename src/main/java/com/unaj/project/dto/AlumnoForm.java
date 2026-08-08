@@ -1,7 +1,9 @@
 package com.unaj.project.dto;
 
+import com.unaj.project.model.Nivel;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,6 +38,9 @@ public class AlumnoForm {
     @NotBlank(message = "El área es obligatoria")
     private String area;
 
+    @NotNull(message = "El nivel es obligatorio")
+    private Nivel nivel;
+
     private MultipartFile foto;
 
     public AlumnoForm() {}
@@ -66,6 +71,9 @@ public class AlumnoForm {
 
     public String getArea() { return area; }
     public void setArea(String area) { this.area = area; }
+
+    public Nivel getNivel() { return nivel; }
+    public void setNivel(Nivel nivel) { this.nivel = nivel; }
 
     public MultipartFile getFoto() { return foto; }
     public void setFoto(MultipartFile foto) { this.foto = foto; }

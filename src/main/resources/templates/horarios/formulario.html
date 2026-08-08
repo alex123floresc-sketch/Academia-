@@ -12,9 +12,9 @@
 
         <div class="note">
             <svg class="ic" viewBox="0 0 24 24"><path d="M12 8v8m-3-5h6M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"/></svg>
-            <div th:text="${ciclo.nombre} + ' · ' + ${bloque.area} + ' · ' + ${dia.etiqueta} + ' · ' + ${bloque.turno.etiqueta} + ' · ' + ${bloque.horaInicio} + '–' + ${bloque.horaFin}"></div>
+            <div th:text="${ciclo.nombre} + ' · ' + ${bloque.nivel.etiqueta} + ' · ' + ${bloque.area} + ' · ' + ${dia.etiqueta} + ' · ' + ${bloque.turno.etiqueta} + ' · ' + ${bloque.horaInicio} + '–' + ${bloque.horaFin}"></div>
         </div>
-        <p class="hint" style="margin:-8px 0 14px">Solo se muestran los cursos que pertenecen al área <b th:text="${bloque.area}"></b>.</p>
+        <p class="hint" style="margin:-8px 0 14px">Solo se muestran los cursos de <b th:text="${bloque.nivel.etiqueta}"></b> que pertenecen al área <b th:text="${bloque.area}"></b>.</p>
 
         <form th:action="@{/horarios/guardar}" method="post">
             <input type="hidden" name="cicloId" th:value="${cicloId}">

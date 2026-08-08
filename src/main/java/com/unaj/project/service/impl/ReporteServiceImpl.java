@@ -4,6 +4,7 @@ import com.unaj.project.dto.AlumnoMorosoDTO;
 import com.unaj.project.dto.AlumnosPorAreaDTO;
 import com.unaj.project.dto.AlumnosPorCicloTurnoDTO;
 import com.unaj.project.dto.IngresoMensualDTO;
+import com.unaj.project.model.Nivel;
 import com.unaj.project.model.Turno;
 import com.unaj.project.repository.AbonoRepository;
 import com.unaj.project.repository.MatriculaRepository;
@@ -51,7 +52,8 @@ public class ReporteServiceImpl implements com.unaj.project.service.ReporteServi
 
     @Override
     public List<AlumnosPorAreaDTO> alumnosPorArea() {
-        return alumnoService.contarPorArea().entrySet().stream()
+        // Reportes todavía solo cubre Preuniversitario; extender a Primaria/Secundaria es un siguiente paso pendiente.
+        return alumnoService.contarPorArea(Nivel.PREUNIVERSITARIO).entrySet().stream()
                 .map(e -> new AlumnosPorAreaDTO(e.getKey(), e.getValue()))
                 .toList();
     }

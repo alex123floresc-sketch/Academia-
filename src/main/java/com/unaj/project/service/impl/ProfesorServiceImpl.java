@@ -59,6 +59,7 @@ public class ProfesorServiceImpl implements ProfesorService {
         profesor.setEmail(form.getEmail());
         profesor.setEspecialidad(form.getEspecialidad());
         profesor.setTarifaHora(form.getTarifaHora());
+        profesor.setNiveles(form.getNiveles() != null ? form.getNiveles() : new java.util.LinkedHashSet<>());
         profesorRepository.save(profesor);
     }
 
@@ -79,6 +80,7 @@ public class ProfesorServiceImpl implements ProfesorService {
         form.setEmail(p.getEmail());
         form.setEspecialidad(p.getEspecialidad());
         form.setTarifaHora(p.getTarifaHora());
+        form.setNiveles(new java.util.LinkedHashSet<>(p.getNiveles()));
         return form;
     }
 }

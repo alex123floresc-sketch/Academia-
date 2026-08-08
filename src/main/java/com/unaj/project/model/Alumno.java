@@ -34,6 +34,10 @@ public class Alumno {
     @Column(name = "area")
     private String area;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "nivel")
+    private Nivel nivel;
+
     @Lob
     @Column(name = "foto", columnDefinition = "LONGBLOB")
     private byte[] foto;
@@ -72,6 +76,9 @@ public class Alumno {
 
     public String getArea() { return area; }
     public void setArea(String area) { this.area = area; }
+
+    public Nivel getNivel() { return nivel; }
+    public void setNivel(Nivel nivel) { this.nivel = nivel; }
 
     public byte[] getFoto() { return foto; }
     public void setFoto(byte[] foto) { this.foto = foto; }

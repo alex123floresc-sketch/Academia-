@@ -22,12 +22,16 @@
         </div>
         <div data-view-panel="list" data-view-group="profesores">
             <table>
-                <thead><tr><th>Profesor</th><th>Correo</th><th>Especialidad</th><th></th></tr></thead>
+                <thead><tr><th>Profesor</th><th>Correo</th><th>Especialidad</th><th>Niveles</th><th></th></tr></thead>
                 <tbody>
                 <tr th:each="profesor : ${profesores}">
                     <td><a class="strong" th:href="@{/profesores/{id}(id=${profesor.id})}" th:text="${profesor.nombre + ' ' + profesor.apellido}"></a></td>
                     <td th:text="${profesor.email}"></td>
                     <td><span class="pill pill-sage" th:text="${profesor.especialidad}"></span></td>
+                    <td>
+                        <span class="pill pill-sky" th:each="n : ${profesor.niveles}" th:text="${n.etiqueta}" style="margin-right:4px"></span>
+                        <span th:if="${profesor.niveles.isEmpty()}" class="hint">Sin asignar</span>
+                    </td>
                     <td>
                         <div class="rowact">
                             <a th:href="@{/profesores/{id}(id=${profesor.id})}" class="ui small basic button">Ver detalle</a>
@@ -38,7 +42,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr th:if="${#lists.isEmpty(profesores)}"><td colspan="4" class="empty">No hay profesores registrados aún.</td></tr>
+                <tr th:if="${#lists.isEmpty(profesores)}"><td colspan="5" class="empty">No hay profesores registrados aún.</td></tr>
                 </tbody>
             </table>
         </div>
@@ -55,6 +59,13 @@
                     </div>
                     <div class="entity-card-meta">
                         <div class="entity-card-meta-row"><span class="k">Especialidad</span><span class="pill pill-sage" th:text="${profesor.especialidad}"></span></div>
+                        <div class="entity-card-meta-row">
+                            <span class="k">Niveles</span>
+                            <span class="v">
+                                <span class="pill pill-sky" th:each="n : ${profesor.niveles}" th:text="${n.etiqueta}" style="margin-left:4px"></span>
+                                <span th:if="${profesor.niveles.isEmpty()}">Sin asignar</span>
+                            </span>
+                        </div>
                     </div>
                     <div class="entity-card-foot">
                         <a th:href="@{/profesores/{id}(id=${profesor.id})}" class="ui small basic button">Ver detalle</a>

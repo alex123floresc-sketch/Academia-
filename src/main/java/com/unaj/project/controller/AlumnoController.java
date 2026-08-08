@@ -4,6 +4,7 @@ import com.unaj.project.dto.AlumnoForm;
 import com.unaj.project.model.Alumno;
 import com.unaj.project.model.Areas;
 import com.unaj.project.model.Matricula;
+import com.unaj.project.model.Nivel;
 import com.unaj.project.model.Pago;
 import com.unaj.project.model.Turno;
 import com.unaj.project.repository.MatriculaRepository;
@@ -63,24 +64,36 @@ public class AlumnoController {
 
     @GetMapping
     public String listar(@RequestParam(required = false) String q,
+                         @RequestParam(required = false) Nivel nivel,
                          @RequestParam(required = false) String area,
                          @PageableDefault(size = 15, sort = "apellido") Pageable pageable,
                          Model model) {
+        Nivel nivelSel = (nivel != null) ? nivel : Nivel.PREUNIVERSITARIO;
+        List<String> areasDelNivel = Areas.paraNivel(nivelSel);
+        String areaSel = (area != null && areasDelNivel.contains(area)) ? area : null;
+
         java.util.Map<Long, Long> deuda = new java.util.HashMap<>();
         for (Object[] fila : pagoRepository.contarDeudaPorAlumno()) {
             deuda.put((Long) fila[0], (Long) fila[1]);
         }
-        Page<Alumno> pagina = alumnoService.buscarPagina(q, area, pageable);
-        long totalAlumnos = alumnoService.listarTodos().size();
+        Page<Alumno> pagina = alumnoService.buscarPagina(q, nivelSel, areaSel, pageable);
+        long totalAlumnos = alumnoService.listarTodos().stream()
+                .filter(a -> a.getNivel() == nivelSel).count();
+        long totalConDeuda = alumnoService.listarTodos().stream()
+                .filter(a -> a.getNivel() == nivelSel)
+                .filter(a -> deuda.getOrDefault(a.getId(), 0L) > 0)
+                .count();
         model.addAttribute("pagina", pagina);
         model.addAttribute("alumnos", pagina.getContent());
         model.addAttribute("deuda", deuda);
         model.addAttribute("q", q);
-        model.addAttribute("area", area);
-        model.addAttribute("areas", com.unaj.project.model.Areas.TODAS);
+        model.addAttribute("niveles", Nivel.values());
+        model.addAttribute("nivel", nivelSel);
+        model.addAttribute("area", areaSel);
+        model.addAttribute("areas", areasDelNivel);
         model.addAttribute("totalAlumnos", totalAlumnos);
-        model.addAttribute("totalConDeuda", (long) deuda.size());
-        model.addAttribute("totalAlDia", totalAlumnos - deuda.size());
+        model.addAttribute("totalConDeuda", totalConDeuda);
+        model.addAttribute("totalAlDia", totalAlumnos - totalConDeuda);
         return "alumnos/lista";
     }
 
@@ -88,6 +101,8 @@ public class AlumnoController {
     public String nuevo(Model model) {
         model.addAttribute("alumnoForm", new AlumnoForm());
         cargarDatosMatricula(model);
+        model.addAttribute("niveles", Nivel.values());
+        model.addAttribute("areasPorNivel", areasPorNivelJson());
         return "alumnos/formulario";
     }
 
@@ -107,6 +122,8 @@ public class AlumnoController {
             if (esNuevo) {
                 cargarDatosMatricula(model);
             }
+            model.addAttribute("niveles", Nivel.values());
+            model.addAttribute("areasPorNivel", areasPorNivelJson());
             return "alumnos/formulario";
         }
         Alumno alumno = alumnoService.guardar(alumnoForm);
@@ -121,28 +138,38 @@ public class AlumnoController {
         } else {
             ra.addFlashAttribute("mensajeExito", "Alumno guardado correctamente.");
         }
-        return "redirect:/alumnos";
+        return "redirect:/alumnos?nivel=" + alumno.getNivel().name();
     }
 
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable Long id, Model model) {
         model.addAttribute("alumnoForm", alumnoService.buscarFormPorId(id));
         model.addAttribute("tieneFoto", alumnoService.buscarPorId(id).isFotoPresente());
-        model.addAttribute("areas", Areas.TODAS);
+        model.addAttribute("niveles", Nivel.values());
+        model.addAttribute("areasPorNivel", areasPorNivelJson());
         return "alumnos/formulario";
     }
 
     private void cargarDatosMatricula(Model model) {
-        model.addAttribute("areas", Areas.TODAS);
         model.addAttribute("ciclos", cicloService.listarTodos());
         model.addAttribute("cicloActivo", cicloService.obtenerActivo());
         model.addAttribute("turnos", Turno.values());
         model.addAttribute("configuracion", configuracionService.obtener());
     }
 
+    private Map<String, List<String>> areasPorNivelJson() {
+        Map<String, List<String>> mapa = new java.util.LinkedHashMap<>();
+        for (Nivel n : Nivel.values()) {
+            mapa.put(n.name(), Areas.paraNivel(n));
+        }
+        return mapa;
+    }
+
     @GetMapping("/{id}/matricular")
     public String nuevaMatricula(@PathVariable Long id, Model model) {
-        model.addAttribute("alumno", alumnoService.buscarPorId(id));
+        Alumno alumno = alumnoService.buscarPorId(id);
+        model.addAttribute("alumno", alumno);
+        model.addAttribute("areas", Areas.paraNivel(alumno.getNivel()));
         cargarDatosMatricula(model);
         return "alumnos/matricular";
     }
@@ -162,8 +189,10 @@ public class AlumnoController {
             matriculaService.matricular(id, cicloId, turno, area,
                     conceptoMatricula, montoMatricula, conceptoPension, montoPension);
         } catch (IllegalArgumentException | IllegalStateException ex) {
+            Alumno alumno = alumnoService.buscarPorId(id);
             model.addAttribute("error", ex.getMessage());
-            model.addAttribute("alumno", alumnoService.buscarPorId(id));
+            model.addAttribute("alumno", alumno);
+            model.addAttribute("areas", Areas.paraNivel(alumno.getNivel()));
             cargarDatosMatricula(model);
             return "alumnos/matricular";
         }
@@ -172,10 +201,10 @@ public class AlumnoController {
     }
 
     @PostMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Long id, RedirectAttributes ra) {
+    public String eliminar(@PathVariable Long id, @RequestParam(required = false) Nivel nivel, RedirectAttributes ra) {
         alumnoService.eliminar(id);
         ra.addFlashAttribute("mensajeExito", "Alumno eliminado correctamente.");
-        return "redirect:/alumnos";
+        return "redirect:/alumnos" + (nivel != null ? "?nivel=" + nivel.name() : "");
     }
 
     @GetMapping("/{id}/expediente")

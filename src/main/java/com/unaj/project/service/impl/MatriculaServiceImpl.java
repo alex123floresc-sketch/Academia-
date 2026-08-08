@@ -90,10 +90,14 @@ public class MatriculaServiceImpl implements MatriculaService {
         Alumno alumno = alumnoRepository.findById(estudianteId)
                 .orElseThrow(() -> new IllegalArgumentException("Alumno no encontrado: " + estudianteId));
 
+        if (alumno.getNivel() == null) {
+            throw new IllegalArgumentException("El alumno no tiene un nivel asignado.");
+        }
+
         Ciclo ciclo = cicloRepository.findById(semestreId)
                 .orElseThrow(() -> new IllegalArgumentException("Ciclo no encontrado: " + semestreId));
 
-        List<Curso> cursos = cursoRepository.findByArea(area);
+        List<Curso> cursos = cursoRepository.findByNivelAndArea(alumno.getNivel(), area);
         if (cursos.isEmpty()) {
             throw new IllegalArgumentException(
                     "El área " + area + " todavía no tiene cursos asignados. Ve a Áreas para agregarlos.");

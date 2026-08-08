@@ -12,7 +12,7 @@
         <div class="metric">
             <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Total alumnos</div>
             <div class="val" th:text="${totalAlumnos}">0</div>
-            <div class="delta">registrados en la academia</div>
+            <div class="delta" th:text="'en ' + ${nivel.etiqueta}">registrados en la academia</div>
         </div>
         <div class="metric">
             <div class="lbl"><span class="dot" style="background:var(--rose)"></span>Con deuda pendiente</div>
@@ -35,22 +35,27 @@
         <div class="card-head">
             <div>
                 <h2>Alumnos</h2>
-                <p th:text="${area != null and area != ''} ? ('Alumnos del área de ' + ${area}) : 'Registro general de alumnos de la academia'"></p>
+                <p th:text="${area != null and area != ''} ? ('Alumnos de ' + ${nivel.etiqueta} + ' · ' + ${area}) : ('Alumnos de ' + ${nivel.etiqueta} + ', todas las áreas')"></p>
             </div>
             <div class="rowact" style="align-items:center">
                 <div th:replace="~{fragments/vista-switch :: switch('alumnos')}"></div>
-                <a th:href="@{/alumnos/nuevo}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="ui small primary button">
+                <a th:href="@{/alumnos/nuevo(nivel=${nivel})}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="ui small primary button">
                     <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo alumno
                 </a>
             </div>
         </div>
+        <div class="area-tabs" style="padding-bottom:0">
+            <a class="area-tab" th:each="n : ${niveles}" th:classappend="${n == nivel} ? ' active'"
+               th:href="@{/alumnos(q=${q}, nivel=${n})}" th:text="${n.etiqueta}"></a>
+        </div>
         <div class="area-tabs">
-            <a class="area-tab" th:classappend="${area == null or area == ''} ? ' active'" th:href="@{/alumnos(q=${q})}">Todas las áreas</a>
+            <a class="area-tab" th:classappend="${area == null or area == ''} ? ' active'" th:href="@{/alumnos(q=${q}, nivel=${nivel})}">Todas las áreas</a>
             <a class="area-tab" th:each="a : ${areas}" th:classappend="${a == area} ? ' active'"
-               th:href="@{/alumnos(q=${q}, area=${a})}" th:text="${a}"></a>
+               th:href="@{/alumnos(q=${q}, nivel=${nivel}, area=${a})}" th:text="${a}"></a>
         </div>
         <div class="searchbar">
             <form method="get" th:action="@{/alumnos}" style="display:flex;gap:8px;flex:1">
+                <input type="hidden" name="nivel" th:value="${nivel}">
                 <input type="hidden" name="area" th:value="${area}">
                 <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre, apellido, DNI o correo...">
                 <button type="submit" class="ui small basic button">Buscar</button>
@@ -95,6 +100,7 @@
                             <a th:href="@{/alumnos/{id}/carnet(id=${alumno.id})}" class="ui small basic button">Carnet</a>
                             <a th:href="@{/alumnos/editar/{id}(id=${alumno.id})}" class="ui small basic button">Editar</a>
                             <form class="tform" th:action="@{/alumnos/eliminar/{id}(id=${alumno.id})}" method="post">
+                                <input type="hidden" name="nivel" th:value="${nivel}">
                                 <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar alumno?')">Eliminar</button>
                             </form>
                         </div>
@@ -135,6 +141,7 @@
                         <a th:href="@{/alumnos/{id}/carnet(id=${alumno.id})}" class="ui small basic button">Carnet</a>
                         <a th:href="@{/alumnos/editar/{id}(id=${alumno.id})}" class="ui small basic button">Editar</a>
                         <form class="tform" th:action="@{/alumnos/eliminar/{id}(id=${alumno.id})}" method="post">
+                            <input type="hidden" name="nivel" th:value="${nivel}">
                             <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar alumno?')">Eliminar</button>
                         </form>
                     </div>
@@ -144,7 +151,7 @@
                th:text="${(q != null and !#strings.isEmpty(q)) or (area != null and !#strings.isEmpty(area))} ? 'Ningún alumno coincide con el filtro aplicado.' : 'No hay alumnos registrados aún.'"></p>
         </div>
 
-        <div th:replace="~{fragments/paginacion :: paginacionArea(${pagina}, '/alumnos', ${q}, ${area})}"></div>
+        <div th:replace="~{fragments/paginacion :: paginacionNivelArea(${pagina}, '/alumnos', ${q}, ${nivel}, ${area})}"></div>
     </div>
 </div>
 

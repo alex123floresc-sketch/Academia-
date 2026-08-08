@@ -4,6 +4,7 @@ import com.unaj.project.dto.CursoForm;
 import com.unaj.project.exception.RecursoNoEncontradoException;
 import com.unaj.project.model.Areas;
 import com.unaj.project.model.Curso;
+import com.unaj.project.model.Nivel;
 import com.unaj.project.model.Profesor;
 import com.unaj.project.repository.CursoRepository;
 import com.unaj.project.repository.ProfesorRepository;
@@ -36,31 +37,50 @@ public class CursoServiceImpl implements CursoService {
     }
 
     @Override
-    public List<Curso> listarPorArea(String area) {
-        return cursoRepository.findByArea(area);
+    public List<Curso> listarPorNivel(Nivel nivel) {
+        return cursoRepository.findAllConProfesorByNivel(nivel);
+    }
+
+    @Override
+    public List<Curso> listarPorNivelYArea(Nivel nivel, String area) {
+        return cursoRepository.findByNivelAndArea(nivel, area);
     }
 
     @Override
     public Page<Curso> buscarPagina(String q, Pageable pageable) {
-        return cursoRepository.buscar(q, pageable);
+        return cursoRepository.buscar(q, null, null, pageable);
     }
 
     @Override
-    public Page<Curso> buscarPagina(String q, String area, Pageable pageable) {
-        return cursoRepository.buscar(q, area, pageable);
+    public Page<Curso> buscarPagina(String q, Nivel nivel, String area, Pageable pageable) {
+        return cursoRepository.buscar(q, nivel, area, pageable);
     }
 
     @Override
-    public Map<String, Long> contarPorArea() {
+    public Map<String, Long> contarPorArea(Nivel nivel) {
         Map<String, Long> conteo = new LinkedHashMap<>();
-        for (String area : Areas.TODAS) {
+        for (String area : Areas.paraNivel(nivel)) {
             conteo.put(area, 0L);
         }
-        for (Curso curso : listarTodos()) {
+        for (Curso curso : cursoRepository.findAllConProfesorByNivel(nivel)) {
             for (String area : curso.getAreas()) {
                 if (conteo.containsKey(area)) {
                     conteo.merge(area, 1L, Long::sum);
                 }
+            }
+        }
+        return conteo;
+    }
+
+    @Override
+    public Map<Nivel, Long> contarPorNivel() {
+        Map<Nivel, Long> conteo = new LinkedHashMap<>();
+        for (Nivel nivel : Nivel.values()) {
+            conteo.put(nivel, 0L);
+        }
+        for (Curso curso : listarTodos()) {
+            if (curso.getNivel() != null) {
+                conteo.merge(curso.getNivel(), 1L, Long::sum);
             }
         }
         return conteo;
@@ -84,6 +104,7 @@ public class CursoServiceImpl implements CursoService {
         curso.setCodigo(form.getCodigo());
         curso.setNombre(form.getNombre());
         curso.setHoras(form.getHoras());
+        curso.setNivel(form.getNivel());
 
         if (form.getProfesorId() != null) {
             Profesor profesor = profesorRepository.findById(form.getProfesorId())
@@ -106,9 +127,9 @@ public class CursoServiceImpl implements CursoService {
 
     @Override
     @Transactional
-    public void establecerCursosDeArea(String area, List<Long> cursoIds) {
+    public void establecerCursosDeArea(Nivel nivel, String area, List<Long> cursoIds) {
         Set<Long> idsSeleccionados = new HashSet<>(cursoIds == null ? List.of() : cursoIds);
-        for (Curso curso : cursoRepository.findAllConProfesor()) {
+        for (Curso curso : cursoRepository.findAllConProfesorByNivel(nivel)) {
             boolean debeEstar = idsSeleccionados.contains(curso.getId());
             boolean estaba = curso.getAreas().contains(area);
             if (debeEstar && !estaba) {
@@ -127,6 +148,7 @@ public class CursoServiceImpl implements CursoService {
         form.setCodigo(c.getCodigo());
         form.setNombre(c.getNombre());
         form.setHoras(c.getHoras());
+        form.setNivel(c.getNivel());
         form.setProfesorId(c.getProfesor() != null ? c.getProfesor().getId() : null);
         return form;
     }

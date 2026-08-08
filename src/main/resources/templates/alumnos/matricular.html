@@ -13,6 +13,7 @@
         <form th:action="@{/alumnos/{id}/matricular(id=${alumno.id})}" method="post">
             <p class="hint" style="margin:0 0 14px">
                 El alumno queda matriculado automáticamente en el área elegida, con todos sus cursos.
+                Nivel: <b th:text="${alumno.nivel != null} ? ${alumno.nivel.etiqueta} : '-'"></b> (no se puede cambiar aquí).
             </p>
             <div class="grid-2">
                 <div class="field">

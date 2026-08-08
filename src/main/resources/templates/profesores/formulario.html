@@ -47,6 +47,15 @@
                     </div>
                     <p class="hint" style="margin:-6px 0 0">Se usa para calcular el monto esperado en el registro de horas dictadas.</p>
 
+                    <div class="form-divider">Niveles</div>
+                    <p class="hint" style="margin:-6px 0 12px">En qué niveles puede dictar este profesor. Puede marcar varios si enseña en más de uno.</p>
+                    <div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:19px">
+                        <label class="check-inline" th:each="n : ${niveles}">
+                            <input type="checkbox" th:field="*{niveles}" th:value="${n}">
+                            <span th:text="${n.etiqueta}"></span>
+                        </label>
+                    </div>
+
                     <div class="form-foot">
                         <button type="submit" class="ui primary button">
                             <svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>

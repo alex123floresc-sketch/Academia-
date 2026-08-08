@@ -3,6 +3,8 @@ package com.unaj.project.model;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "profesores")
@@ -30,6 +32,12 @@ public class Profesor {
     @Column(nullable = false)
     private boolean eliminado = false;
 
+    @ElementCollection
+    @CollectionTable(name = "profesor_niveles", joinColumns = @JoinColumn(name = "profesor_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "nivel")
+    private Set<Nivel> niveles = new LinkedHashSet<>();
+
     public Profesor() {}
 
     public Long getId() { return id; }
@@ -52,6 +60,9 @@ public class Profesor {
 
     public boolean isEliminado() { return eliminado; }
     public void setEliminado(boolean eliminado) { this.eliminado = eliminado; }
+
+    public Set<Nivel> getNiveles() { return niveles; }
+    public void setNiveles(Set<Nivel> niveles) { this.niveles = niveles; }
 
     public String getNombreCompleto() { return nombre + " " + apellido; }
 }

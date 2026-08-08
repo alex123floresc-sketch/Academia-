@@ -1,5 +1,6 @@
 package com.unaj.project.dto;
 
+import com.unaj.project.model.Nivel;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -23,6 +24,9 @@ public class CursoForm {
     @Max(value = 40, message = "Las horas no pueden superar 40")
     private Integer horas;
 
+    @NotNull(message = "El nivel es obligatorio")
+    private Nivel nivel;
+
     private Long profesorId;
 
     public CursoForm() {}
@@ -41,4 +45,7 @@ public class CursoForm {
 
     public Long getProfesorId() { return profesorId; }
     public void setProfesorId(Long profesorId) { this.profesorId = profesorId; }
+
+    public Nivel getNivel() { return nivel; }
+    public void setNivel(Nivel nivel) { this.nivel = nivel; }
 }

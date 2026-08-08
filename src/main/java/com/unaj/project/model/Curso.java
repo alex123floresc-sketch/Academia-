@@ -29,6 +29,10 @@ public class Curso {
     @Column(nullable = false)
     private boolean eliminado = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "nivel")
+    private Nivel nivel;
+
     @ElementCollection
     @CollectionTable(name = "curso_areas", joinColumns = @JoinColumn(name = "curso_id"))
     @Column(name = "area")
@@ -53,6 +57,9 @@ public class Curso {
 
     public boolean isEliminado() { return eliminado; }
     public void setEliminado(boolean eliminado) { this.eliminado = eliminado; }
+
+    public Nivel getNivel() { return nivel; }
+    public void setNivel(Nivel nivel) { this.nivel = nivel; }
 
     public Set<String> getAreas() { return areas; }
     public void setAreas(Set<String> areas) { this.areas = areas; }

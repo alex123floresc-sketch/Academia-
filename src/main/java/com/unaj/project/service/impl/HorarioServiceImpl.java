@@ -48,14 +48,17 @@ public class HorarioServiceImpl implements HorarioService {
 
     @Override
     @Transactional
-    public void crearBloque(Long cicloId, Turno turno, LocalTime horaInicio, LocalTime horaFin, TipoBloque tipo, String area) {
+    public void crearBloque(Long cicloId, Nivel nivel, Turno turno, LocalTime horaInicio, LocalTime horaFin, TipoBloque tipo, String area) {
         if (horaInicio == null || horaFin == null || !horaFin.isAfter(horaInicio)) {
             throw new IllegalArgumentException("La hora de fin debe ser posterior a la de inicio.");
+        }
+        if (nivel == null) {
+            throw new IllegalArgumentException("Debe seleccionar un nivel.");
         }
         if (area == null || area.isBlank()) {
             throw new IllegalArgumentException("Debe seleccionar un área.");
         }
-        if (bloqueHorarioRepository.existsByCicloIdAndTurnoAndHoraInicioAndArea(cicloId, turno, horaInicio, area)) {
+        if (bloqueHorarioRepository.existsByCicloIdAndNivelAndTurnoAndHoraInicioAndArea(cicloId, nivel, turno, horaInicio, area)) {
             throw new IllegalArgumentException("Ya existe un bloque que inicia a esa hora en este turno para esta área.");
         }
         Ciclo ciclo = cicloRepository.findById(cicloId)
@@ -63,6 +66,7 @@ public class HorarioServiceImpl implements HorarioService {
 
         BloqueHorario bloque = new BloqueHorario();
         bloque.setCiclo(ciclo);
+        bloque.setNivel(nivel);
         bloque.setTurno(turno);
         bloque.setHoraInicio(horaInicio);
         bloque.setHoraFin(horaFin);
@@ -78,14 +82,15 @@ public class HorarioServiceImpl implements HorarioService {
     }
 
     @Override
-    public Map<Turno, List<FilaHorarioDTO>> agruparParaGrilla(Long cicloId, String area) {
+    public Map<Turno, List<FilaHorarioDTO>> agruparParaGrilla(Long cicloId, Nivel nivel, String area) {
         Map<Turno, List<FilaHorarioDTO>> resultado = new LinkedHashMap<>();
         for (Turno t : Turno.values()) {
             resultado.put(t, new ArrayList<>());
         }
-        if (cicloId == null || area == null || area.isBlank()) return resultado;
+        if (cicloId == null || nivel == null || area == null || area.isBlank()) return resultado;
 
-        List<BloqueHorario> bloques = bloqueHorarioRepository.findByCicloIdAndAreaOrderByHoraInicioAsc(cicloId, area);
+        List<BloqueHorario> bloques =
+                bloqueHorarioRepository.findByCicloIdAndNivelAndAreaOrderByHoraInicioAsc(cicloId, nivel, area);
         List<Horario> horarios = horarioRepository.findByCicloId(cicloId);
 
         Map<Long, Map<DiaSemana, List<Horario>>> porBloque = new LinkedHashMap<>();
@@ -119,6 +124,10 @@ public class HorarioServiceImpl implements HorarioService {
             }
             Curso curso = cursoRepository.findById(cursoId)
                     .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado: " + cursoId));
+            if (curso.getNivel() != bloque.getNivel()) {
+                throw new IllegalArgumentException(
+                        "El curso \"" + curso.getNombre() + "\" no pertenece al nivel " + bloque.getNivel().getEtiqueta() + ".");
+            }
             if (!curso.getAreas().contains(bloque.getArea())) {
                 throw new IllegalArgumentException(
                         "El curso \"" + curso.getNombre() + "\" no pertenece al área " + bloque.getArea() + ".");

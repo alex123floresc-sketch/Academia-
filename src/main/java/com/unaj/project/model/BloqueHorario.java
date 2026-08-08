@@ -6,8 +6,8 @@ import java.time.LocalTime;
 
 @Entity
 @Table(name = "bloques_horario", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_bloque_ciclo_turno_hora_area",
-                columnNames = {"ciclo_id", "turno", "hora_inicio", "area"})
+        @UniqueConstraint(name = "uk_bloque_ciclo_nivel_turno_hora_area",
+                columnNames = {"ciclo_id", "nivel", "turno", "hora_inicio", "area"})
 })
 public class BloqueHorario {
 
@@ -25,6 +25,10 @@ public class BloqueHorario {
 
     @Column(nullable = false)
     private String area;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "nivel")
+    private Nivel nivel;
 
     @Column(nullable = false)
     private LocalTime horaInicio;
@@ -49,6 +53,9 @@ public class BloqueHorario {
 
     public String getArea() { return area; }
     public void setArea(String area) { this.area = area; }
+
+    public Nivel getNivel() { return nivel; }
+    public void setNivel(Nivel nivel) { this.nivel = nivel; }
 
     public LocalTime getHoraInicio() { return horaInicio; }
     public void setHoraInicio(LocalTime horaInicio) { this.horaInicio = horaInicio; }

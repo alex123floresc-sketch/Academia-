@@ -1,11 +1,14 @@
 package com.unaj.project.dto;
 
+import com.unaj.project.model.Nivel;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class ProfesorForm {
 
@@ -28,6 +31,8 @@ public class ProfesorForm {
     @DecimalMin(value = "0.0", message = "La tarifa no puede ser negativa")
     private BigDecimal tarifaHora;
 
+    private Set<Nivel> niveles = new LinkedHashSet<>();
+
     public ProfesorForm() {}
 
     public Long getId() { return id; }
@@ -47,4 +52,7 @@ public class ProfesorForm {
 
     public BigDecimal getTarifaHora() { return tarifaHora; }
     public void setTarifaHora(BigDecimal tarifaHora) { this.tarifaHora = tarifaHora; }
+
+    public Set<Nivel> getNiveles() { return niveles; }
+    public void setNiveles(Set<Nivel> niveles) { this.niveles = niveles; }
 }

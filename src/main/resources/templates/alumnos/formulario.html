@@ -61,13 +61,22 @@
                     <span class="field-error" th:if="${#fields.hasErrors('telefonoPadre')}" th:errors="*{telefonoPadre}"></span>
                 </div>
             </div>
-            <div class="field">
-                <label>Área</label>
-                <select th:field="*{area}" id="area">
-                    <option value="">-- Seleccione --</option>
-                    <option th:each="a : ${areas}" th:value="${a}" th:text="${a}"></option>
-                </select>
-                <span class="field-error" th:if="${#fields.hasErrors('area')}" th:errors="*{area}"></span>
+            <div class="grid-2">
+                <div class="field">
+                    <label>Nivel</label>
+                    <select th:field="*{nivel}" id="nivel">
+                        <option value="">-- Seleccione --</option>
+                        <option th:each="n : ${niveles}" th:value="${n}" th:text="${n.etiqueta}"></option>
+                    </select>
+                    <span class="field-error" th:if="${#fields.hasErrors('nivel')}" th:errors="*{nivel}"></span>
+                </div>
+                <div class="field">
+                    <label>Área <span class="hint" id="areaHint">o grado, según el nivel</span></label>
+                    <select th:field="*{area}" id="area">
+                        <option value="">-- Elige un nivel primero --</option>
+                    </select>
+                    <span class="field-error" th:if="${#fields.hasErrors('area')}" th:errors="*{area}"></span>
+                </div>
             </div>
 
             <div th:if="${alumnoForm.id == null}" id="matriculaBox">
@@ -139,21 +148,46 @@
     </div>
 </div>
 
-<th:block th:if="${alumnoForm.id == null}" layout:fragment="scripts">
+<th:block layout:fragment="scripts">
     <script th:inline="javascript">
         (function () {
-            var montos = document.querySelectorAll('.js-monto');
-            var totalPago = document.getElementById('totalPago');
+            /*<![CDATA[*/
+            var areasPorNivel = /*[[${areasPorNivel}]]*/ {};
+            var areaActual = /*[[${alumnoForm.area}]]*/ '';
+            /*]]>*/
+            var nivelSelect = document.getElementById('nivel');
+            var areaSelect = document.getElementById('area');
 
-            function actualizarTotal() {
-                var t = 0;
-                montos.forEach(function (i) { t += parseFloat(i.value) || 0; });
-                totalPago.textContent = 'S/ ' + t.toFixed(2);
+            function actualizarAreas() {
+                var opciones = areasPorNivel[nivelSelect.value] || [];
+                var actual = areaSelect.value || areaActual;
+                var html = '<option value="">-- Seleccione --</option>';
+                opciones.forEach(function (a) {
+                    html += '<option value="' + a + '"' + (a === actual ? ' selected' : '') + '>' + a + '</option>';
+                });
+                areaSelect.innerHTML = html;
             }
 
-            montos.forEach(function (i) { i.addEventListener('input', actualizarTotal); });
-            actualizarTotal();
+            nivelSelect.addEventListener('change', actualizarAreas);
+            if (nivelSelect.value) actualizarAreas();
         })();
     </script>
+    <th:block th:if="${alumnoForm.id == null}">
+        <script th:inline="javascript">
+            (function () {
+                var montos = document.querySelectorAll('.js-monto');
+                var totalPago = document.getElementById('totalPago');
+
+                function actualizarTotal() {
+                    var t = 0;
+                    montos.forEach(function (i) { t += parseFloat(i.value) || 0; });
+                    totalPago.textContent = 'S/ ' + t.toFixed(2);
+                }
+
+                montos.forEach(function (i) { i.addEventListener('input', actualizarTotal); });
+                actualizarTotal();
+            })();
+        </script>
+    </th:block>
 </th:block>
 </html>

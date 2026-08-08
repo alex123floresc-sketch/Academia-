@@ -50,4 +50,5 @@ public class Horario {
     public LocalTime getHoraFin() { return bloque != null ? bloque.getHoraFin() : null; }
     public Ciclo getCiclo() { return bloque != null ? bloque.getCiclo() : null; }
     public String getArea() { return bloque != null ? bloque.getArea() : null; }
+    public Nivel getNivel() { return bloque != null ? bloque.getNivel() : null; }
 }

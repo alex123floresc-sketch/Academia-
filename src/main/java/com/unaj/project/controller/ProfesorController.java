@@ -3,6 +3,7 @@ package com.unaj.project.controller;
 import com.unaj.project.dto.ProfesorForm;
 import com.unaj.project.model.Curso;
 import com.unaj.project.model.Horario;
+import com.unaj.project.model.Nivel;
 import com.unaj.project.model.PagoProfesor;
 import com.unaj.project.model.Profesor;
 import com.unaj.project.model.RegistroHoras;
@@ -64,14 +65,17 @@ public class ProfesorController {
     @GetMapping("/nuevo")
     public String nuevo(Model model) {
         model.addAttribute("profesorForm", new ProfesorForm());
+        model.addAttribute("niveles", Nivel.values());
         return "profesores/formulario";
     }
 
     @PostMapping("/guardar")
     public String guardar(@Valid @ModelAttribute("profesorForm") ProfesorForm profesorForm,
                           BindingResult result,
+                          Model model,
                           RedirectAttributes ra) {
         if (result.hasErrors()) {
+            model.addAttribute("niveles", Nivel.values());
             return "profesores/formulario";
         }
         profesorService.guardar(profesorForm);
@@ -82,6 +86,7 @@ public class ProfesorController {
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable Long id, Model model) {
         model.addAttribute("profesorForm", profesorService.buscarFormPorId(id));
+        model.addAttribute("niveles", Nivel.values());
         return "profesores/formulario";
     }
 

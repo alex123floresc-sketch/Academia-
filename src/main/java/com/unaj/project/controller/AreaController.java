@@ -3,6 +3,7 @@ package com.unaj.project.controller;
 import com.unaj.project.dto.AreaResumenDTO;
 import com.unaj.project.model.Areas;
 import com.unaj.project.model.Curso;
+import com.unaj.project.model.Nivel;
 import com.unaj.project.service.AlumnoService;
 import com.unaj.project.service.CursoService;
 import org.springframework.stereotype.Controller;
@@ -30,12 +31,16 @@ public class AreaController {
     }
 
     @GetMapping
-    public String ver(@RequestParam(required = false) String area, Model model) {
-        String seleccionada = (area != null && Areas.TODAS.contains(area)) ? area : Areas.TODAS.get(0);
-        List<Curso> cursos = cursoService.listarTodos();
-        Map<String, Long> alumnosPorArea = alumnoService.contarPorArea();
+    public String ver(@RequestParam(required = false) Nivel nivel,
+                      @RequestParam(required = false) String area, Model model) {
+        Nivel nivelSel = (nivel != null) ? nivel : Nivel.PREUNIVERSITARIO;
+        List<String> areasDelNivel = Areas.paraNivel(nivelSel);
+        String seleccionada = (area != null && areasDelNivel.contains(area)) ? area : areasDelNivel.get(0);
 
-        List<AreaResumenDTO> resumenes = Areas.TODAS.stream()
+        List<Curso> cursos = cursoService.listarPorNivel(nivelSel);
+        Map<String, Long> alumnosPorArea = alumnoService.contarPorArea(nivelSel);
+
+        List<AreaResumenDTO> resumenes = areasDelNivel.stream()
                 .map(a -> new AreaResumenDTO(
                         a,
                         cursos.stream().filter(c -> c.getAreas().contains(a)).count(),
@@ -49,6 +54,8 @@ public class AreaController {
                         .thenComparing(Curso::getNombre, String.CASE_INSENSITIVE_ORDER))
                 .toList();
 
+        model.addAttribute("niveles", Nivel.values());
+        model.addAttribute("nivel", nivelSel);
         model.addAttribute("areaSeleccionada", seleccionada);
         model.addAttribute("resumenes", resumenes);
         model.addAttribute("cursos", cursosOrdenados);
@@ -56,11 +63,12 @@ public class AreaController {
     }
 
     @PostMapping("/guardar")
-    public String guardar(@RequestParam String area,
+    public String guardar(@RequestParam Nivel nivel,
+                          @RequestParam String area,
                           @RequestParam(required = false) List<Long> cursoIds,
                           RedirectAttributes ra) {
-        cursoService.establecerCursosDeArea(area, cursoIds);
+        cursoService.establecerCursosDeArea(nivel, area, cursoIds);
         ra.addFlashAttribute("mensajeExito", "Cursos de " + area + " actualizados correctamente.");
-        return "redirect:/areas?area=" + area;
+        return "redirect:/areas?nivel=" + nivel.name() + "&area=" + area;
     }
 }

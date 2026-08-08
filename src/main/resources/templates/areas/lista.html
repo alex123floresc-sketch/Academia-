@@ -7,10 +7,15 @@
 </head>
 <div layout:fragment="contenido">
     <h2 class="page-title">Áreas</h2>
-    <p class="hint" style="margin-top:-14px;margin-bottom:20px">Resumen y asignación de cursos por área académica.</p>
+    <p class="hint" style="margin-top:-14px;margin-bottom:14px">Resumen y asignación de cursos por área académica, dentro de cada nivel.</p>
+
+    <div class="area-tabs" style="padding:0 0 20px">
+        <a class="area-tab" th:each="n : ${niveles}" th:classappend="${n == nivel} ? ' active'"
+           th:href="@{/areas(nivel=${n})}" th:text="${n.etiqueta}"></a>
+    </div>
 
     <div class="areas-row">
-        <a th:each="r : ${resumenes}" th:href="@{/areas(area=${r.nombre})}"
+        <a th:each="r : ${resumenes}" th:href="@{/areas(nivel=${nivel}, area=${r.nombre})}"
            class="area-card" th:classappend="${r.nombre == areaSeleccionada} ? ' active' : ''">
             <div class="area-card-top">
                 <div class="area-card-icon">
@@ -47,12 +52,13 @@
     <div class="card" style="padding:0">
         <div class="card-head">
             <div>
-                <h2 th:text="'Cursos de ' + ${areaSeleccionada}">Cursos</h2>
-                <p>Un curso puede pertenecer a más de un área · los ya asignados aparecen primero</p>
+                <h2 th:text="'Cursos de ' + ${nivel.etiqueta} + ' · ' + ${areaSeleccionada}">Cursos</h2>
+                <p th:text="'Solo se listan cursos de ' + ${nivel.etiqueta} + ' · un curso puede pertenecer a más de un área, los ya asignados aparecen primero'">Un curso puede pertenecer a más de un área · los ya asignados aparecen primero</p>
             </div>
         </div>
 
         <form th:action="@{/areas/guardar}" method="post">
+            <input type="hidden" name="nivel" th:value="${nivel}">
             <input type="hidden" name="area" th:value="${areaSeleccionada}">
 
             <div class="searchbar">

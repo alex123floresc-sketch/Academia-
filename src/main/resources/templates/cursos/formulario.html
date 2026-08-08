@@ -4,7 +4,7 @@
       layout:decorate="~{layout}">
 <head><title>Curso</title></head>
 <div layout:fragment="contenido">
-    <a th:href="@{/cursos(area=${area})}" class="page-back">← Volver a la lista</a>
+    <a th:href="@{/cursos(nivel=${nivelContexto},area=${area})}" class="page-back">← Volver a la lista</a>
     <h2 class="page-title" th:text="${cursoForm.id} ? 'Editar curso' : 'Nuevo curso'"></h2>
 
     <div class="form-card">
@@ -29,6 +29,14 @@
                 <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
             </div>
             <div class="field">
+                <label>Nivel <span class="hint">define qué alumnos y horarios pueden usar este curso</span></label>
+                <select th:field="*{nivel}">
+                    <option value="">-- Seleccione --</option>
+                    <option th:each="n : ${niveles}" th:value="${n}" th:text="${n.etiqueta}"></option>
+                </select>
+                <span class="field-error" th:if="${#fields.hasErrors('nivel')}" th:errors="*{nivel}"></span>
+            </div>
+            <div class="field">
                 <label>Profesor <span class="hint">opcional, se puede asignar después</span></label>
                 <div class="combo" id="comboProfesor" th:attr="data-selected=${cursoForm.profesorId}">
                     <input type="text" class="combo-input" placeholder="Buscar profesor... (opcional)" autocomplete="off">
@@ -45,7 +53,7 @@
             </div>
             <div class="form-foot">
                 <button type="submit" class="ui primary button">Guardar</button>
-                <a th:href="@{/cursos(area=${area})}" class="ui basic button">Cancelar</a>
+                <a th:href="@{/cursos(nivel=${nivelContexto},area=${area})}" class="ui basic button">Cancelar</a>
             </div>
         </form>
     </div>

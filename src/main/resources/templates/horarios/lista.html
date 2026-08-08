@@ -7,7 +7,7 @@
 <div layout:fragment="contenido">
     <div class="card-head" style="border:none;padding:0 0 6px">
         <div><h2 style="font-family:'Fraunces',serif;font-weight:500;font-size:20px">Horarios</h2><p style="font-size:12px;color:var(--ink-faint)">Grilla semanal por turno: define las horas primero y luego asigna los cursos a cada casilla</p></div>
-        <a th:if="${cicloSel != null}" th:href="@{/horarios/pdf(cicloId=${cicloSel.id}, area=${area})}" class="ui basic small button">
+        <a th:if="${cicloSel != null}" th:href="@{/horarios/pdf(cicloId=${cicloSel.id}, nivel=${nivel}, area=${area})}" class="ui basic small button">
             <svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>Descargar PDF</a>
     </div>
 
@@ -15,7 +15,7 @@
         <div class="metric">
             <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Bloques horarios</div>
             <div class="val" th:text="${totalBloques}">0</div>
-            <div class="delta">definidos para esta área y ciclo</div>
+            <div class="delta">definidos para este nivel, área y ciclo</div>
         </div>
         <div class="metric">
             <div class="lbl"><span class="dot" style="background:var(--sky)"></span>Cursos asignados</div>
@@ -23,18 +23,19 @@
             <div class="delta">casillas curso × día ocupadas</div>
         </div>
         <div class="metric">
-            <div class="lbl"><span class="dot" style="background:var(--lav)"></span>Área activa</div>
-            <div class="val" style="font-size:19px" th:text="${area}">-</div>
+            <div class="lbl"><span class="dot" style="background:var(--lav)"></span>Nivel y área activos</div>
+            <div class="val" style="font-size:17px" th:text="${nivel.etiqueta} + ' · ' + ${area}">-</div>
             <div class="delta" th:text="${cicloSel.nombre}">-</div>
         </div>
     </div>
 
     <div class="card" style="margin-bottom:22px">
         <div class="card-head">
-            <div><h2>Ciclo y área</h2><p>Cada área tiene su propio horario, totalmente independiente de las demás</p></div>
+            <div><h2>Ciclo, nivel y área</h2><p>El ciclo se comparte entre niveles, pero cada nivel y área tiene su propio horario, totalmente independiente de los demás</p></div>
         </div>
         <div style="padding:18px 20px;display:flex;gap:22px;flex-wrap:wrap;align-items:flex-end">
             <form th:action="@{/horarios}" method="get" style="min-width:240px">
+                <input type="hidden" name="nivel" th:value="${nivel}">
                 <input type="hidden" name="area" th:value="${area}">
                 <label style="display:block;font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:7px">Ciclo académico</label>
                 <select name="cicloId" onchange="this.form.submit()">
@@ -42,12 +43,19 @@
                             th:selected="${cicloSel != null and cicloSel.id == c.id}"></option>
                 </select>
             </form>
-            <div style="flex:1;min-width:260px">
-                <label style="display:block;font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:7px">Área</label>
-                <div class="area-tabs" style="padding:0">
-                    <a class="area-tab" th:each="a : ${areas}" th:classappend="${a == area} ? ' active'"
-                       th:href="@{/horarios(cicloId=${cicloSel != null ? cicloSel.id : null}, area=${a})}" th:text="${a}"></a>
-                </div>
+        </div>
+        <div style="padding:0 20px 18px">
+            <label style="display:block;font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:7px">Nivel</label>
+            <div class="area-tabs" style="padding:0">
+                <a class="area-tab" th:each="n : ${niveles}" th:classappend="${n == nivel} ? ' active'"
+                   th:href="@{/horarios(cicloId=${cicloSel != null ? cicloSel.id : null}, nivel=${n})}" th:text="${n.etiqueta}"></a>
+            </div>
+        </div>
+        <div style="padding:0 20px 20px">
+            <label style="display:block;font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:7px">Área</label>
+            <div class="area-tabs" style="padding:0">
+                <a class="area-tab" th:each="a : ${areas}" th:classappend="${a == area} ? ' active'"
+                   th:href="@{/horarios(cicloId=${cicloSel != null ? cicloSel.id : null}, nivel=${nivel}, area=${a})}" th:text="${a}"></a>
             </div>
         </div>
     </div>
@@ -75,7 +83,7 @@
                         <td class="htable-hora">
                             <span th:text="${fila.bloque.horaInicio} + '–' + ${fila.bloque.horaFin}"></span>
                             <form sec:authorize="hasRole('ADMIN')" style="margin:0"
-                                  th:action="@{/horarios/bloques/eliminar/{id}(id=${fila.bloque.id},cicloId=${cicloSel.id},area=${area})}" method="post">
+                                  th:action="@{/horarios/bloques/eliminar/{id}(id=${fila.bloque.id},cicloId=${cicloSel.id},nivel=${nivel},area=${area})}" method="post">
                                 <button type="submit" class="hb-del" title="Eliminar bloque horario"
                                         onclick="return confirm('¿Eliminar este bloque horario? Debe estar sin cursos asignados.')">&times;</button>
                             </form>
@@ -86,7 +94,7 @@
                                 <div class="hb">
                                     <div class="hcell" th:each="h : ${fila.cursosDe(dia)}">
                                         <form class="tform" sec:authorize="hasRole('ADMIN')"
-                                              th:action="@{/horarios/quitar-curso/{hid}(hid=${h.id},cicloId=${cicloSel.id},area=${area})}" method="post">
+                                              th:action="@{/horarios/quitar-curso/{hid}(hid=${h.id},cicloId=${cicloSel.id},nivel=${nivel},area=${area})}" method="post">
                                             <button type="submit" class="hquitar" title="Quitar curso del horario"
                                                     onclick="return confirm('¿Quitar este curso del horario?')">&times;</button>
                                         </form>
@@ -114,6 +122,7 @@
             <form th:if="${cicloSel != null}" sec:authorize="hasRole('ADMIN')"
                   th:action="@{/horarios/bloques/guardar}" method="post" class="bloque-form">
                 <input type="hidden" name="cicloId" th:value="${cicloSel.id}">
+                <input type="hidden" name="nivel" th:value="${nivel}">
                 <input type="hidden" name="turno" th:value="${turno}">
                 <input type="hidden" name="area" th:value="${area}">
                 <input type="time" name="horaInicio" required>
