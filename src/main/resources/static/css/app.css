@@ -40,6 +40,16 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg)
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .wrap{max-width:1180px}
 
+/* Entrada escalonada para grillas de tarjetas (niveles/áreas/cursos) */
+@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.stagger-cards>*{animation:cardIn .38s cubic-bezier(.22,.8,.36,1) backwards}
+.stagger-cards>*:nth-child(1){animation-delay:.02s}
+.stagger-cards>*:nth-child(2){animation-delay:.08s}
+.stagger-cards>*:nth-child(3){animation-delay:.14s}
+.stagger-cards>*:nth-child(4){animation-delay:.2s}
+.stagger-cards>*:nth-child(5){animation-delay:.26s}
+.stagger-cards>*:nth-child(6){animation-delay:.32s}
+
 .menu-toggle{display:none;align-items:center;justify-content:center;width:36px;height:36px;flex-shrink:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);cursor:pointer;color:var(--ink-soft)}
 .menu-toggle .ic{width:19px;height:19px;stroke:currentColor;stroke-width:1.9;fill:none}
 .menu-toggle:hover{background:var(--surface-2)}
@@ -63,6 +73,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 thead th{text-align:left;padding:12px 20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);background:var(--surface-2);border-bottom:1px solid var(--line-soft)}
 tbody td{padding:13px 20px;border-bottom:1px solid var(--line-soft);color:var(--ink-soft)}
 tbody tr:last-child td{border-bottom:none}
+tbody tr{transition:background .12s ease}
 tbody tr:hover{background:var(--surface-2)}
 td .strong,td.strong{color:var(--ink);font-weight:500}
 .mono{font-family:'Fraunces',serif;color:var(--ink-faint);font-size:12.5px}
@@ -204,24 +215,6 @@ td .strong,td.strong{color:var(--ink);font-weight:500}
 .filters{display:flex;gap:10px;margin-bottom:22px}
 .filters select{padding:9px 13px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--surface);font-family:inherit;font-size:13px}
 
-.areas-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px}
-.area-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;text-decoration:none;color:inherit;display:block;transition:.12s}
-.area-card:hover{border-color:var(--sage);box-shadow:0 4px 14px -8px rgba(27,42,61,.18)}
-.area-card.active{border-color:var(--sage);background:var(--sage-soft)}
-.area-card-top{display:flex;align-items:center;gap:11px;margin-bottom:16px}
-.area-card-icon{width:34px;height:34px;border-radius:10px;flex-shrink:0;background:var(--sage-soft);color:var(--sage-strong);display:flex;align-items:center;justify-content:center}
-.area-card-icon svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.8;fill:none}
-.area-card.active .area-card-icon{background:var(--surface);box-shadow:0 0 0 1px #C7DBFA}
-.area-card-name{font-family:'Fraunces',serif;font-weight:600;font-size:16px;color:var(--ink)}
-.area-card.active .area-card-name{color:var(--sage-strong)}
-.area-card-stats{display:flex;gap:22px}
-.area-card-stats>div{display:flex;flex-direction:column;gap:3px}
-.area-card-stat-top{display:flex;align-items:center;gap:6px}
-.area-card-stat-top svg{width:14px;height:14px;stroke:var(--ink-faint);stroke-width:1.8;fill:none}
-.area-card-stat-top b{font-family:'Fraunces',serif;font-size:19px;font-weight:600;color:var(--ink)}
-.area-card.active .area-card-stat-top b{color:var(--sage-strong)}
-.area-card-stats span{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint)}
-@media(max-width:920px){.areas-row{grid-template-columns:1fr}}
 
 /* Horas docentes */
 .hd-schedule{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;padding:20px}

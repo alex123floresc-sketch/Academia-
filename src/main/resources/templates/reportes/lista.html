@@ -37,7 +37,7 @@
         <div class="card-head">
             <div>
                 <h2>Alumnos por ciclo y turno</h2>
-                <p>Cantidad de alumnos matriculados (activos) agrupados por ciclo y turno</p>
+                <p>Cantidad de alumnos matriculados (activos) agrupados por ciclo y turno · en todos los niveles, ya que el ciclo se comparte entre Primaria, Secundaria y Preuniversitario</p>
             </div>
             <div class="rowact">
                 <a th:href="@{/reportes/alumnos-por-ciclo/pdf}" class="ui small primary button">Ver PDF</a>
@@ -64,7 +64,7 @@
         <div class="card-head">
             <div>
                 <h2>Ingresos por mes</h2>
-                <p>Total cobrado (abonos) agrupado por mes de pago</p>
+                <p>Total cobrado (abonos) agrupado por mes de pago · en todos los niveles</p>
             </div>
             <div class="rowact">
                 <a th:href="@{/reportes/ingresos-mensuales/pdf}" class="ui small primary button">Ver PDF</a>
@@ -90,7 +90,7 @@
         <div class="card-head">
             <div>
                 <h2>Alumnos morosos</h2>
-                <p>Alumnos con al menos un pago vencido y el monto adeudado</p>
+                <p>Alumnos con al menos un pago vencido y el monto adeudado · en todos los niveles</p>
             </div>
             <div class="rowact">
                 <a th:href="@{/reportes/morosos/pdf}" class="ui small primary button">Ver PDF</a>
@@ -117,12 +117,19 @@
     <div class="card">
         <div class="card-head">
             <div>
-                <h2>Alumnos por área</h2>
-                <p>Distribución de alumnos activos según el área declarada</p>
+                <h2 th:text="'Alumnos por área — ' + ${nivel.etiqueta}"></h2>
+                <p>Distribución de alumnos activos según el área/grado declarado · este reporte sí varía por nivel, elige uno abajo</p>
             </div>
             <div class="rowact">
-                <a th:href="@{/reportes/alumnos-por-area/pdf}" class="ui small primary button">Ver PDF</a>
-                <a th:href="@{/reportes/alumnos-por-area/excel}" class="ui small basic button">Excel</a>
+                <a th:href="@{/reportes/alumnos-por-area/pdf(nivel=${nivel})}" class="ui small primary button">Ver PDF</a>
+                <a th:href="@{/reportes/alumnos-por-area/excel(nivel=${nivel})}" class="ui small basic button">Excel</a>
+            </div>
+        </div>
+        <div class="filter-row" style="padding-bottom:14px">
+            <span class="filter-row-label">Nivel</span>
+            <div class="area-tabs">
+                <a class="area-tab" th:each="n : ${niveles}" th:classappend="${n == nivel} ? ' active'"
+                   th:href="@{/reportes(nivel=${n})}" th:text="${n.etiqueta}"></a>
             </div>
         </div>
         <div class="ui stackable two column grid" style="margin:0" th:if="${not #lists.isEmpty(porArea)}">

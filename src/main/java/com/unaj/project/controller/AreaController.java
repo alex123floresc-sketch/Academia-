@@ -33,33 +33,40 @@ public class AreaController {
     @GetMapping
     public String ver(@RequestParam(required = false) Nivel nivel,
                       @RequestParam(required = false) String area, Model model) {
-        Nivel nivelSel = (nivel != null) ? nivel : Nivel.PREUNIVERSITARIO;
-        List<String> areasDelNivel = Areas.paraNivel(nivelSel);
-        String seleccionada = (area != null && areasDelNivel.contains(area)) ? area : areasDelNivel.get(0);
+        if (nivel == null) {
+            model.addAttribute("resumenNiveles", cursoService.contarPorNivel());
+            return "areas/niveles";
+        }
 
-        List<Curso> cursos = cursoService.listarPorNivel(nivelSel);
-        Map<String, Long> alumnosPorArea = alumnoService.contarPorArea(nivelSel);
+        List<String> areasDelNivel = Areas.paraNivel(nivel);
+        String areaSel = (area != null && areasDelNivel.contains(area)) ? area : null;
 
-        List<AreaResumenDTO> resumenes = areasDelNivel.stream()
-                .map(a -> new AreaResumenDTO(
-                        a,
-                        cursos.stream().filter(c -> c.getAreas().contains(a)).count(),
-                        cursos.stream().filter(c -> c.getAreas().contains(a) && c.getProfesor() != null)
-                                .map(c -> c.getProfesor().getId()).distinct().count(),
-                        alumnosPorArea.get(a)))
-                .toList();
+        List<Curso> cursos = cursoService.listarPorNivel(nivel);
+
+        if (areaSel == null) {
+            Map<String, Long> alumnosPorArea = alumnoService.contarPorArea(nivel);
+            List<AreaResumenDTO> resumenes = areasDelNivel.stream()
+                    .map(a -> new AreaResumenDTO(
+                            a,
+                            cursos.stream().filter(c -> c.getAreas().contains(a)).count(),
+                            cursos.stream().filter(c -> c.getAreas().contains(a) && c.getProfesor() != null)
+                                    .map(c -> c.getProfesor().getId()).distinct().count(),
+                            alumnosPorArea.get(a)))
+                    .toList();
+            model.addAttribute("nivel", nivel);
+            model.addAttribute("resumenes", resumenes);
+            return "areas/lista";
+        }
 
         List<Curso> cursosOrdenados = cursos.stream()
-                .sorted(Comparator.comparing((Curso c) -> !c.getAreas().contains(seleccionada))
+                .sorted(Comparator.comparing((Curso c) -> !c.getAreas().contains(areaSel))
                         .thenComparing(Curso::getNombre, String.CASE_INSENSITIVE_ORDER))
                 .toList();
 
-        model.addAttribute("niveles", Nivel.values());
-        model.addAttribute("nivel", nivelSel);
-        model.addAttribute("areaSeleccionada", seleccionada);
-        model.addAttribute("resumenes", resumenes);
+        model.addAttribute("nivel", nivel);
+        model.addAttribute("areaSeleccionada", areaSel);
         model.addAttribute("cursos", cursosOrdenados);
-        return "areas/lista";
+        return "areas/gestionar";
     }
 
     @PostMapping("/guardar")

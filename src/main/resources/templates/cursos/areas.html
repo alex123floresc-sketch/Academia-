@@ -17,7 +17,7 @@
         </a>
     </div>
 
-    <div class="ui three stackable cards area-picker">
+    <div class="ui three stackable cards area-picker stagger-cards">
         <a class="ui raised card" th:each="r : ${resumenAreas}" th:href="@{/cursos(nivel=${nivel}, area=${r.key})}">
             <div class="content">
                 <div class="ui blue ribbon label" th:text="${r.key}"></div>

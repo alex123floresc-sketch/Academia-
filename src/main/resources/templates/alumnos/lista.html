@@ -121,7 +121,7 @@
         </div>
 
         <div data-view-panel="grid" data-view-group="alumnos" hidden>
-            <div class="entity-grid" th:if="${not #lists.isEmpty(alumnos)}">
+            <div class="entity-grid stagger-cards" th:if="${not #lists.isEmpty(alumnos)}">
                 <div class="entity-card" th:each="alumno : ${alumnos}">
                     <div class="entity-card-top">
                         <div class="entity-avatar" th:text="${#strings.substring(alumno.nombre,0,1) + #strings.substring(alumno.apellido,0,1)}"></div>

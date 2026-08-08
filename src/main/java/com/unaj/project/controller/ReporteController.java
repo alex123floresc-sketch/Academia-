@@ -4,6 +4,7 @@ import com.unaj.project.dto.AlumnoMorosoDTO;
 import com.unaj.project.dto.AlumnosPorAreaDTO;
 import com.unaj.project.dto.AlumnosPorCicloTurnoDTO;
 import com.unaj.project.dto.IngresoMensualDTO;
+import com.unaj.project.model.Nivel;
 import com.unaj.project.service.PdfGeneradorService;
 import com.unaj.project.service.ReporteService;
 import org.apache.poi.ss.usermodel.Cell;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.thymeleaf.context.Context;
 
 import java.io.ByteArrayOutputStream;
@@ -40,11 +42,13 @@ public class ReporteController {
     }
 
     @GetMapping
-    public String lista(Model model) {
+    public String lista(@RequestParam(required = false) Nivel nivel, Model model) {
+        Nivel nivelSel = (nivel != null) ? nivel : Nivel.PREUNIVERSITARIO;
+
         List<AlumnosPorCicloTurnoDTO> porCiclo = reporteService.alumnosPorCicloTurno();
         List<IngresoMensualDTO> porMes = reporteService.ingresosPorMes();
         List<AlumnoMorosoDTO> morosos = reporteService.alumnosMorosos();
-        List<AlumnosPorAreaDTO> porArea = reporteService.alumnosPorArea();
+        List<AlumnosPorAreaDTO> porArea = reporteService.alumnosPorArea(nivelSel);
 
         long matriculasActivas = porCiclo.stream().mapToLong(AlumnosPorCicloTurnoDTO::cantidad).sum();
         String mesActual = YearMonth.now().toString();
@@ -63,6 +67,8 @@ public class ReporteController {
         model.addAttribute("matriculasActivas", matriculasActivas);
         model.addAttribute("ingresosMesActual", ingresosMesActual);
         model.addAttribute("montoAdeudado", montoAdeudado);
+        model.addAttribute("niveles", Nivel.values());
+        model.addAttribute("nivel", nivelSel);
 
         model.addAttribute("cicloTurnoLabels",
                 porCiclo.stream().map(f -> f.ciclo() + " · " + f.turno()).toList());
@@ -157,22 +163,25 @@ public class ReporteController {
     }
 
     @GetMapping("/alumnos-por-area/pdf")
-    public ResponseEntity<byte[]> alumnosPorAreaPdf() throws Exception {
-        List<AlumnosPorAreaDTO> filas = reporteService.alumnosPorArea();
+    public ResponseEntity<byte[]> alumnosPorAreaPdf(@RequestParam(required = false) Nivel nivel) throws Exception {
+        Nivel nivelSel = (nivel != null) ? nivel : Nivel.PREUNIVERSITARIO;
+        List<AlumnosPorAreaDTO> filas = reporteService.alumnosPorArea(nivelSel);
         long totalAlumnos = filas.stream().mapToLong(AlumnosPorAreaDTO::cantidad).sum();
 
         Context context = new Context();
         context.setVariable("filas", filas);
         context.setVariable("totalAlumnos", totalAlumnos);
-        return generarPdf("reportes/alumnos-por-area-pdf", context, "alumnos_por_area.pdf");
+        context.setVariable("nivel", nivelSel);
+        return generarPdf("reportes/alumnos-por-area-pdf", context, "alumnos_por_area_" + nivelSel.name() + ".pdf");
     }
 
     @GetMapping("/alumnos-por-area/excel")
-    public ResponseEntity<byte[]> alumnosPorAreaExcel() throws Exception {
-        List<AlumnosPorAreaDTO> filas = reporteService.alumnosPorArea();
-        return generarExcel("Alumnos por área", new String[]{"Área", "Alumnos"},
+    public ResponseEntity<byte[]> alumnosPorAreaExcel(@RequestParam(required = false) Nivel nivel) throws Exception {
+        Nivel nivelSel = (nivel != null) ? nivel : Nivel.PREUNIVERSITARIO;
+        List<AlumnosPorAreaDTO> filas = reporteService.alumnosPorArea(nivelSel);
+        return generarExcel("Área - " + nivelSel.getEtiqueta(), new String[]{"Área", "Alumnos"},
                 filas, fila -> new Object[]{fila.area(), fila.cantidad()},
-                "alumnos_por_area.xlsx");
+                "alumnos_por_area_" + nivelSel.name() + ".xlsx");
     }
 
     private ResponseEntity<byte[]> generarPdf(String template, Context context, String filename) throws Exception {

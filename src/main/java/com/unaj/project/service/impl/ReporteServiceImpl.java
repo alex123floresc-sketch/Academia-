@@ -51,9 +51,8 @@ public class ReporteServiceImpl implements com.unaj.project.service.ReporteServi
     }
 
     @Override
-    public List<AlumnosPorAreaDTO> alumnosPorArea() {
-        // Reportes todavía solo cubre Preuniversitario; extender a Primaria/Secundaria es un siguiente paso pendiente.
-        return alumnoService.contarPorArea(Nivel.PREUNIVERSITARIO).entrySet().stream()
+    public List<AlumnosPorAreaDTO> alumnosPorArea(Nivel nivel) {
+        return alumnoService.contarPorArea(nivel).entrySet().stream()
                 .map(e -> new AlumnosPorAreaDTO(e.getKey(), e.getValue()))
                 .toList();
     }

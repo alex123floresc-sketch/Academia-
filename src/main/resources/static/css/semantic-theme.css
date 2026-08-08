@@ -69,3 +69,13 @@ a:hover{color:var(--sage-hover)}
 /* Messages keep Semantic's natural positive/warning/info colors so they stay
    distinguishable from each other; only negative (error) maps to the brand red. */
 .ui.negative.message{background:var(--rose-soft);color:var(--rose-strong)}
+
+/* Interacción: feedback táctil consistente en todos los botones/cards/filas/menús de Semantic UI. */
+.ui.button{transition:background .15s ease,color .15s ease,box-shadow .15s ease,border-color .15s ease,transform .08s ease}
+.ui.button:active{transform:scale(.96)}
+.ui.card,.ui.cards>.card{transition:box-shadow .18s ease,transform .18s ease,border-color .18s ease}
+.ui.table tbody tr{transition:background .12s ease}
+.ui.menu .item{transition:background .12s ease,color .12s ease}
+.ui.checkbox label:before{transition:background .12s ease,border-color .12s ease}
+.ui.progress .bar{transition:width .5s cubic-bezier(.4,0,.2,1)}
+.ui.pagination.menu .item{transition:background .12s ease,color .12s ease}

@@ -59,7 +59,7 @@
         </div>
 
         <div data-view-panel="grid" data-view-group="cursos" hidden>
-            <div class="entity-grid" th:if="${not #lists.isEmpty(cursos)}">
+            <div class="entity-grid stagger-cards" th:if="${not #lists.isEmpty(cursos)}">
                 <div class="entity-card" th:each="curso : ${cursos}">
                     <div class="entity-card-top">
                         <div class="entity-avatar" th:text="${#strings.substring(curso.nombre,0,1)}"></div>
