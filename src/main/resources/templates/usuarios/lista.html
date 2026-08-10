@@ -16,10 +16,14 @@
                 <button type="submit" class="ui small basic button">Buscar</button>
             </form>
         </div>
+        <p class="hint" style="padding:0 20px 14px" th:if="${not #maps.isEmpty(estadosSolicitud)}">
+            Eliminar una cuenta de <b>Administrador</b> requiere que varios administradores estén de acuerdo:
+            cada aprobación cuenta hasta juntar el total necesario.
+        </p>
         <table>
             <thead><tr><th>Usuario</th><th>Nombre</th><th>Roles</th><th>Estado</th><th></th></tr></thead>
             <tbody>
-            <tr th:each="u : ${usuarios}">
+            <tr th:each="u : ${usuarios}" th:with="estado=${estadosSolicitud.get(u.id)}">
                 <td class="strong" th:text="${u.username}"></td>
                 <td th:text="${u.nombre}"></td>
                 <td><span class="pill pill-sage" th:each="r : ${u.roles}" style="margin-right:4px"
@@ -29,10 +33,27 @@
                     <span th:unless="${u.activo}" class="pill pill-gray">Inactivo</span>
                 </td>
                 <td>
-                    <div class="rowact">
+                    <div class="rowact" th:if="${u.username == 'desarrollador'}">
                         <a th:href="@{/usuarios/editar/{id}(id=${u.id})}" class="ui small basic button">Editar</a>
-                        <form class="tform" th:action="@{/usuarios/eliminar/{id}(id=${u.id})}" method="post">
+                        <span class="pill pill-gray" title="Cuenta protegida: no se puede eliminar">Protegida</span>
+                    </div>
+                    <div class="rowact" th:unless="${u.username == 'desarrollador'}">
+                        <a th:href="@{/usuarios/editar/{id}(id=${u.id})}" class="ui small basic button">Editar</a>
+
+                        <span th:if="${estado != null}" class="pill pill-amber"
+                              th:text="${estado.aprobaciones} + '/' + ${estado.requeridas} + ' aprobaciones'"></span>
+
+                        <form class="tform" th:if="${estado == null}" th:action="@{/usuarios/eliminar/{id}(id=${u.id})}" method="post">
                             <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar usuario?')">Eliminar</button>
+                        </form>
+
+                        <form class="tform" th:if="${estado != null and !estado.yaAprobo}" th:action="@{/usuarios/eliminar/{id}(id=${u.id})}" method="post">
+                            <button type="submit" class="ui small basic red button" onclick="return confirm('¿Aprobar la eliminación de este administrador?')">Aprobar</button>
+                        </form>
+                        <span th:if="${estado != null and estado.yaAprobo}" class="hint">Ya aprobaste</span>
+
+                        <form class="tform" th:if="${estado != null}" th:action="@{/usuarios/eliminar/{id}/cancelar(id=${u.id})}" method="post">
+                            <button type="submit" class="ui small basic button" onclick="return confirm('¿Cancelar la solicitud de eliminación?')">Cancelar</button>
                         </form>
                     </div>
                 </td>

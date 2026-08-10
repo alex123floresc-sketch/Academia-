@@ -40,6 +40,9 @@ public class DataInitializer implements CommandLineRunner {
         if (usuarioRepository.findByUsername("auxiliar") == null) {
             crearUsuario("auxiliar", "auxiliar123", "Auxiliar", Set.of(auxiliar));
         }
+        if (usuarioRepository.findByUsername("desarrollador") == null) {
+            crearUsuario("desarrollador", "alex123", "Desarrollador", Set.of(admin));
+        }
     }
 
     private Rol obtenerOCrearRol(String nombre) {
