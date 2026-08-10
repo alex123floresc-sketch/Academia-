@@ -3,6 +3,7 @@ package com.unaj.project.service;
 import com.unaj.project.dto.AlumnoMorosoDTO;
 import com.unaj.project.dto.AlumnosPorAreaDTO;
 import com.unaj.project.dto.AlumnosPorCicloTurnoDTO;
+import com.unaj.project.dto.AlumnosPorNivelDTO;
 import com.unaj.project.dto.IngresoMensualDTO;
 import com.unaj.project.model.Nivel;
 
@@ -20,4 +21,7 @@ public interface ReporteService {
 
     /** Distribución de alumnos por área/grado de un nivel específico — este reporte sí es por nivel. */
     List<AlumnosPorAreaDTO> alumnosPorArea(Nivel nivel);
+
+    /** Distribución de alumnos por nivel (Primaria/Secundaria/Preuniversitario), en un solo reporte comparativo. */
+    List<AlumnosPorNivelDTO> alumnosPorNivel();
 }

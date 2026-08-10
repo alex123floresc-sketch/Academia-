@@ -116,8 +116,15 @@
         <div class="column">
             <div class="card">
                 <div class="card-head">
-                    <div><h2>Alumnos por área</h2><p>Distribución de alumnos según su área declarada</p></div>
+                    <div><h2 th:text="'Alumnos por área — ' + ${nivel.etiqueta}"></h2><p>Distribución de alumnos según su área/grado declarado</p></div>
                     <a th:href="@{/areas}" class="ui basic tiny button">Ver áreas</a>
+                </div>
+                <div class="filter-row" style="padding-bottom:14px">
+                    <span class="filter-row-label">Nivel</span>
+                    <div class="area-tabs">
+                        <a class="area-tab" th:each="n : ${niveles}" th:classappend="${n == nivel} ? ' active'"
+                           th:href="@{/resumen(nivel=${n})}" th:text="${n.etiqueta}"></a>
+                    </div>
                 </div>
                 <div style="padding:18px 20px">
                     <div th:each="e : ${alumnosPorArea}" style="margin-bottom:16px">

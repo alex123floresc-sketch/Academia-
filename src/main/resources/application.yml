@@ -1,5 +1,8 @@
 server:
   port: ${PORT:9090}
+  servlet:
+    session:
+      timeout: 60m
 
 spring:
   datasource:

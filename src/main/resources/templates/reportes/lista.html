@@ -114,6 +114,39 @@
         </table>
     </div>
 
+    <div class="card" style="margin-bottom:22px">
+        <div class="card-head">
+            <div>
+                <h2>Alumnos por nivel</h2>
+                <p>Comparativo de alumnos registrados en Primaria, Secundaria y Preuniversitario</p>
+            </div>
+            <div class="rowact">
+                <a th:href="@{/reportes/alumnos-por-nivel/pdf}" class="ui small primary button">Ver PDF</a>
+                <a th:href="@{/reportes/alumnos-por-nivel/excel}" class="ui small basic button">Excel</a>
+            </div>
+        </div>
+        <div class="ui stackable two column grid" style="margin:0" th:if="${not #lists.isEmpty(porNivel)}">
+            <div class="column" style="padding:20px;max-width:280px;margin:0 auto">
+                <canvas id="chartNivel"></canvas>
+            </div>
+            <div class="column" style="padding:0">
+                <table>
+                    <thead><tr><th>Nivel</th><th>Alumnos</th></tr></thead>
+                    <tbody>
+                    <tr th:each="fila : ${porNivel}">
+                        <td class="strong" th:text="${fila.nivel}"></td>
+                        <td th:text="${fila.cantidad}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <table th:if="${#lists.isEmpty(porNivel)}">
+            <thead><tr><th>Nivel</th><th>Alumnos</th></tr></thead>
+            <tbody><tr><td colspan="2" class="empty">No hay alumnos registrados.</td></tr></tbody>
+        </table>
+    </div>
+
     <div class="card">
         <div class="card-head">
             <div>
@@ -167,6 +200,8 @@
         var morososValores = /*[[${morososValores}]]*/ [];
         var areaLabels = /*[[${areaLabels}]]*/ [];
         var areaValores = /*[[${areaValores}]]*/ [];
+        var nivelLabels = /*[[${nivelLabels}]]*/ [];
+        var nivelValores = /*[[${nivelValores}]]*/ [];
         /*]]>*/
 
         Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
@@ -239,6 +274,26 @@
                     responsive: true,
                     plugins: { legend: { display: false } },
                     scales: { x: { beginAtZero: true, grid: { color: '#EAF1F9' } }, y: { grid: { display: false } } }
+                }
+            });
+        }
+
+        var nivelCtx = document.getElementById('chartNivel');
+        if (nivelCtx) {
+            new Chart(nivelCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: nivelLabels,
+                    datasets: [{
+                        data: nivelValores,
+                        backgroundColor: ['#2563EB', '#D97706', '#0EA5E9'],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 11, padding: 12, font: { size: 11.5 } } } }
                 }
             });
         }

@@ -47,7 +47,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public Map<String, Object> resumenInicio() {
+    public Map<String, Object> resumenInicio(Nivel nivel) {
         List<Matricula> matriculas = matriculaService.listarTodos();
         List<Pago> pagos = pagoService.listarTodos();
 
@@ -92,8 +92,7 @@ public class DashboardServiceImpl implements DashboardService {
                     .setScale(1, RoundingMode.HALF_UP);
         }
 
-        // Resumen todavía solo cubre Preuniversitario; extender a Primaria/Secundaria es un siguiente paso pendiente.
-        Map<String, Long> alumnosPorArea = alumnoService.contarPorArea(Nivel.PREUNIVERSITARIO);
+        Map<String, Long> alumnosPorArea = alumnoService.contarPorArea(nivel);
 
         List<AlumnoMorosoDTO> morosos = reporteService.alumnosMorosos().stream().limit(5).toList();
 
@@ -140,6 +139,8 @@ public class DashboardServiceImpl implements DashboardService {
         datos.put("ingresoMesActual", ingresoMesActual);
         datos.put("deltaIngresoPct", deltaIngresoPct);
         datos.put("alumnosPorArea", alumnosPorArea);
+        datos.put("nivel", nivel);
+        datos.put("niveles", Nivel.values());
         datos.put("morosos", morosos);
         datos.put("proximosVencimientos", proximosVencimientos);
         datos.put("hoy", hoy);

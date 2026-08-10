@@ -3,6 +3,7 @@ package com.unaj.project.service.impl;
 import com.unaj.project.dto.AlumnoMorosoDTO;
 import com.unaj.project.dto.AlumnosPorAreaDTO;
 import com.unaj.project.dto.AlumnosPorCicloTurnoDTO;
+import com.unaj.project.dto.AlumnosPorNivelDTO;
 import com.unaj.project.dto.IngresoMensualDTO;
 import com.unaj.project.model.Nivel;
 import com.unaj.project.model.Turno;
@@ -54,6 +55,13 @@ public class ReporteServiceImpl implements com.unaj.project.service.ReporteServi
     public List<AlumnosPorAreaDTO> alumnosPorArea(Nivel nivel) {
         return alumnoService.contarPorArea(nivel).entrySet().stream()
                 .map(e -> new AlumnosPorAreaDTO(e.getKey(), e.getValue()))
+                .toList();
+    }
+
+    @Override
+    public List<AlumnosPorNivelDTO> alumnosPorNivel() {
+        return alumnoService.contarPorNivel().entrySet().stream()
+                .map(e -> new AlumnosPorNivelDTO(e.getKey().getEtiqueta(), e.getValue()))
                 .toList();
     }
 

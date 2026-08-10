@@ -6,13 +6,13 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif}
 .ui.header,h1.ui,h2.ui,h3.ui,h4.ui{font-family:'Fraunces',serif;font-weight:600;color:var(--ink)}
 
 /* Primary brand color (blue) */
-.ui.primary.button,.ui.primary.buttons .button{background:var(--sage);color:#fff}
-.ui.primary.button:hover,.ui.primary.buttons .button:hover{background:var(--sage-hover)}
-.ui.primary.button:active{background:var(--sage-strong)}
+.ui.primary.button,.ui.primary.buttons .button{background:linear-gradient(160deg,var(--sage-hover),var(--sage));color:#fff;box-shadow:0 1px 0 rgba(255,255,255,.25) inset,0 4px 10px -4px rgba(30,64,175,.55)}
+.ui.primary.button:hover,.ui.primary.buttons .button:hover{background:linear-gradient(160deg,var(--sage-strong),var(--sage-hover));box-shadow:0 1px 0 rgba(255,255,255,.25) inset,0 6px 16px -5px rgba(30,64,175,.6)}
+.ui.primary.button:active{background:var(--sage-strong);box-shadow:0 2px 5px -2px rgba(30,64,175,.5) inset}
 .ui.primary.label{background:var(--sage)!important;color:#fff!important}
 .ui.basic.primary.label{background:var(--sage-soft)!important;color:var(--sage-strong)!important;border-color:var(--sage)!important}
 a.ui.primary.label:hover{background:var(--sage-hover)!important}
-.ui.secondary.button{background:var(--surface);color:var(--ink-soft);border:1px solid var(--line)}
+.ui.secondary.button{background:var(--surface);color:var(--ink-soft);border:1px solid var(--line);box-shadow:0 1px 2px rgba(27,42,61,.06)}
 .ui.secondary.button:hover{background:var(--surface-2);color:var(--ink)}
 .ui.button .ic{width:15px;height:15px;stroke:currentColor;stroke-width:1.9;fill:none;vertical-align:-3px;margin-right:6px}
 .ui.button{font-family:'Inter',system-ui,-apple-system,sans-serif}
@@ -45,8 +45,9 @@ a:hover{color:var(--sage-hover)}
 .ui.table td,.ui.table th{border-color:var(--line-soft)}
 
 /* Segment / card */
-.ui.segment{border-color:var(--line);border-radius:var(--radius)}
-.ui.card,.ui.cards>.card{border-radius:var(--radius);box-shadow:0 1px 2px 0 rgba(27,42,61,.08),0 0 0 1px var(--line)}
+.ui.segment{border-color:var(--line);border-radius:var(--radius);box-shadow:var(--shadow-layer-1)}
+.ui.card,.ui.cards>.card{border-radius:var(--radius);box-shadow:var(--shadow-layer-2)}
+.ui.card:hover,.ui.cards>.card:hover{box-shadow:var(--shadow-layer-hover)}
 .ui.card>.content>.header,.ui.cards>.card>.content>.header{font-family:'Fraunces',serif}
 
 /* Statistic */
