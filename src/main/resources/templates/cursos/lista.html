@@ -28,7 +28,7 @@
             <form method="get" th:action="@{/cursos}" style="display:flex;gap:8px;flex:1">
                 <input type="hidden" name="nivel" th:value="${nivel}">
                 <input type="hidden" name="area" th:value="${area}">
-                <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre, código o profesor...">
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre, código o profesor..." aria-label="Buscar curso">
                 <button type="submit" class="ui small basic button">Buscar</button>
             </form>
         </div>

@@ -30,7 +30,7 @@
         <div class="card-head"><div><h2>Cuotas y pensiones</h2><p>Seguimiento de pagos, agrupado por alumno</p></div></div>
         <div class="searchbar">
             <form method="get" th:action="@{/pagos}" style="display:flex;gap:8px;flex:1">
-                <input type="text" name="q" th:value="${q}" placeholder="Buscar por alumno o concepto...">
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar por alumno o concepto..." aria-label="Buscar pago">
                 <button type="submit" class="ui small basic button">Buscar</button>
             </form>
         </div>

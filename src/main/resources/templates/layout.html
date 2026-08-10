@@ -54,7 +54,7 @@
                     </button>
                     <div class="topbar-dropdown-panel" id="searchMenuPanel" style="padding:12px">
                         <form th:action="@{/buscar}" method="get" style="display:flex;gap:8px">
-                            <input type="text" name="q" placeholder="Alumno, profesor, curso..." autocomplete="off" style="flex:1;padding:8px 11px;border:1px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:13px">
+                            <input type="text" name="q" placeholder="Alumno, profesor, curso..." aria-label="Buscar en el sistema" autocomplete="off" style="flex:1;padding:8px 11px;border:1px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:13px">
                             <button type="submit" class="ui small primary button">Buscar</button>
                         </form>
                     </div>

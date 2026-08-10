@@ -12,24 +12,24 @@
             <input type="hidden" th:field="*{id}">
             <div class="grid-2">
                 <div class="field">
-                    <label>Usuario</label>
+                    <label for="username">Usuario</label>
                     <input type="text" th:field="*{username}" placeholder="usuario">
                     <span class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></span>
                 </div>
                 <div class="field">
-                    <label>Nombre</label>
+                    <label for="nombre">Nombre</label>
                     <input type="text" th:field="*{nombre}" placeholder="Nombre completo">
                     <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
                 </div>
             </div>
             <div class="grid-2">
                 <div class="field">
-                    <label>Contraseña <span class="hint" th:if="${usuarioForm.id}">(vacío = no cambiar)</span></label>
+                    <label for="passwordPlano">Contraseña <span class="hint" th:if="${usuarioForm.id}">(vacío = no cambiar)</span></label>
                     <input type="password" th:field="*{passwordPlano}" placeholder="••••••••">
                     <span class="field-error" th:if="${#fields.hasErrors('passwordPlano')}" th:errors="*{passwordPlano}"></span>
                 </div>
                 <div class="field">
-                    <label>Rol</label>
+                    <label for="rolId">Rol</label>
                     <select th:field="*{rolId}">
                         <option value="">-- Seleccione --</option>
                         <option th:each="r : ${roles}" th:value="${r.id}"

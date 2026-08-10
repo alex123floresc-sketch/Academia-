@@ -44,23 +44,23 @@
             <input type="hidden" name="horarioId" th:value="${horario.id}">
             <div class="grid-3">
                 <div class="field">
-                    <label>Fecha de la clase</label>
+                    <label for="campoFecha">Fecha de la clase</label>
                     <input type="date" name="fecha" th:value="${fecha}" id="campoFecha" required>
                 </div>
                 <div class="field">
-                    <label>Hora inicio</label>
-                    <input type="time" name="horaInicio" th:value="${horaInicioSel}"
+                    <label for="campoHoraInicio">Hora inicio</label>
+                    <input type="time" name="horaInicio" id="campoHoraInicio" th:value="${horaInicioSel}"
                            th:attr="min=${horaInicioMin}, max=${horaFinMax}" required>
                 </div>
                 <div class="field">
-                    <label>Hora fin</label>
-                    <input type="time" name="horaFin" th:value="${horaFinSel}"
+                    <label for="campoHoraFin">Hora fin</label>
+                    <input type="time" name="horaFin" id="campoHoraFin" th:value="${horaFinSel}"
                            th:attr="min=${horaInicioMin}, max=${horaFinMax}" required>
                 </div>
             </div>
             <div class="field">
-                <label>Observaciones <span class="hint">opcional</span></label>
-                <input type="text" name="observaciones" th:value="${observacionesSel}" placeholder="Ej. clase de recuperación, salió antes, etc.">
+                <label for="campoObservaciones">Observaciones <span class="hint">opcional</span></label>
+                <input type="text" name="observaciones" id="campoObservaciones" th:value="${observacionesSel}" placeholder="Ej. clase de recuperación, salió antes, etc.">
             </div>
             <div class="form-foot">
                 <button type="submit" class="ui primary button" id="btnGuardarHoras">

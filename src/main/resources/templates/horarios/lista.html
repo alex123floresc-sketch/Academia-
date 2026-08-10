@@ -37,8 +37,8 @@
             <form th:action="@{/horarios}" method="get" style="min-width:240px">
                 <input type="hidden" name="nivel" th:value="${nivel}">
                 <input type="hidden" name="area" th:value="${area}">
-                <label style="display:block;font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:7px">Ciclo académico</label>
-                <select name="cicloId" onchange="this.form.submit()">
+                <label for="cicloId" style="display:block;font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:7px">Ciclo académico</label>
+                <select name="cicloId" id="cicloId" onchange="this.form.submit()">
                     <option th:each="c : ${ciclos}" th:value="${c.id}" th:text="${c.nombre}"
                             th:selected="${cicloSel != null and cicloSel.id == c.id}"></option>
                 </select>

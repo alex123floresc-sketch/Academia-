@@ -16,7 +16,7 @@
         </div>
         <div class="searchbar">
             <form class="ui form" method="get" th:action="@{/profesores}" style="display:flex;gap:8px;flex:1">
-                <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre, correo o especialidad...">
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre, correo o especialidad..." aria-label="Buscar profesor">
                 <button type="submit" class="ui small basic button">Buscar</button>
             </form>
         </div>

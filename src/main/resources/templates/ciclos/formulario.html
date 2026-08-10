@@ -11,18 +11,18 @@
         <form th:action="@{/ciclos/guardar}" th:object="${cicloForm}" method="post">
             <input type="hidden" th:field="*{id}">
             <div class="field">
-                <label>Nombre</label>
+                <label for="nombre">Nombre</label>
                 <input type="text" th:field="*{nombre}" placeholder="Ej. Verano 2026">
                 <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
             </div>
             <div class="grid-2">
                 <div class="field">
-                    <label>Fecha inicio</label>
+                    <label for="fechaInicio">Fecha inicio</label>
                     <input type="date" th:field="*{fechaInicio}">
                     <span class="field-error" th:if="${#fields.hasErrors('fechaInicio')}" th:errors="*{fechaInicio}"></span>
                 </div>
                 <div class="field">
-                    <label>Fecha fin</label>
+                    <label for="fechaFin">Fecha fin</label>
                     <input type="date" th:field="*{fechaFin}">
                     <span class="field-error" th:if="${#fields.hasErrors('fechaFin')}" th:errors="*{fechaFin}"></span>
                 </div>

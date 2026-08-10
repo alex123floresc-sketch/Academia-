@@ -99,16 +99,16 @@
                 <input type="hidden" name="matriculaId" th:value="${m.id}">
                 <input type="hidden" name="alumnoId" th:value="${alumno.id}">
                 <div class="field" style="margin-bottom:0">
-                    <label>Concepto</label>
-                    <input type="text" name="concepto" placeholder="Ej. Pensión marzo" required>
+                    <label th:for="${'concepto-' + m.id}">Concepto</label>
+                    <input type="text" name="concepto" th:id="${'concepto-' + m.id}" placeholder="Ej. Pensión marzo" required>
                 </div>
                 <div class="field" style="margin-bottom:0">
-                    <label>Monto (S/)</label>
-                    <input type="number" name="monto" step="0.01" min="0.01" placeholder="180.00" required>
+                    <label th:for="${'monto-' + m.id}">Monto (S/)</label>
+                    <input type="number" name="monto" th:id="${'monto-' + m.id}" step="0.01" min="0.01" placeholder="180.00" required>
                 </div>
                 <div class="field" style="margin-bottom:0">
-                    <label>Vence</label>
-                    <input type="date" name="fechaVencimiento" required>
+                    <label th:for="${'fechaVencimiento-' + m.id}">Vence</label>
+                    <input type="date" name="fechaVencimiento" th:id="${'fechaVencimiento-' + m.id}" required>
                 </div>
                 <div style="grid-column:1/-1;margin-top:4px">
                     <button type="submit" class="ui small primary button">Agregar cuota</button>
