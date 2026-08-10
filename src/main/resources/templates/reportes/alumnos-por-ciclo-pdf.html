@@ -31,6 +31,10 @@
     </tr>
 </table>
 
+<div class="pdf-chart" th:if="${chartDataUri != null}">
+    <img th:src="${chartDataUri}" alt="Gráfico de alumnos por ciclo y turno"/>
+</div>
+
 <div class="pdf-section">Detalle por ciclo y turno</div>
 <table class="pdf-table">
     <thead>

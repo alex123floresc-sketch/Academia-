@@ -31,6 +31,10 @@
     </tr>
 </table>
 
+<div class="pdf-chart" th:if="${chartDataUri != null}">
+    <img th:src="${chartDataUri}" alt="Gráfico de monto adeudado por alumno"/>
+</div>
+
 <div class="pdf-section">Detalle por alumno</div>
 <table class="pdf-table">
     <thead>

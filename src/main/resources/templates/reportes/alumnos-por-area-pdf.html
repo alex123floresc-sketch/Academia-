@@ -25,6 +25,10 @@
     </tr>
 </table>
 
+<div class="pdf-chart" th:if="${chartDataUri != null}">
+    <img th:src="${chartDataUri}" alt="Gráfico de alumnos por área"/>
+</div>
+
 <div class="pdf-section">Distribución por área</div>
 <table class="pdf-table">
     <thead>

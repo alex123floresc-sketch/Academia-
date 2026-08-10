@@ -7,6 +7,7 @@ import com.unaj.project.dto.AlumnosPorNivelDTO;
 import com.unaj.project.dto.IngresoMensualDTO;
 import com.unaj.project.model.Nivel;
 import com.unaj.project.service.AlumnoService;
+import com.unaj.project.service.ChartImageService;
 import com.unaj.project.service.CursoService;
 import com.unaj.project.service.PdfGeneradorService;
 import com.unaj.project.service.ProfesorService;
@@ -42,14 +43,17 @@ public class ReporteController {
     private final CursoService cursoService;
     private final ProfesorService profesorService;
     private final PdfGeneradorService pdfGeneradorService;
+    private final ChartImageService chartImageService;
 
     public ReporteController(ReporteService reporteService, AlumnoService alumnoService, CursoService cursoService,
-                             ProfesorService profesorService, PdfGeneradorService pdfGeneradorService) {
+                             ProfesorService profesorService, PdfGeneradorService pdfGeneradorService,
+                             ChartImageService chartImageService) {
         this.reporteService = reporteService;
         this.alumnoService = alumnoService;
         this.cursoService = cursoService;
         this.profesorService = profesorService;
         this.pdfGeneradorService = pdfGeneradorService;
+        this.chartImageService = chartImageService;
     }
 
     @GetMapping
@@ -125,6 +129,12 @@ public class ReporteController {
         context.setVariable("totalCiclos", totalCiclos);
         context.setVariable("totalTurnos", totalTurnos);
         context.setVariable("nivel", nivel);
+        if (!filas.isEmpty()) {
+            context.setVariable("chartDataUri", chartImageService.barChart(
+                    filas.stream().map(f -> f.ciclo() + " · " + f.turno()).toList(),
+                    filas.stream().map(AlumnosPorCicloTurnoDTO::cantidad).toList(),
+                    "Alumnos matriculados"));
+        }
         return generarPdf("reportes/alumnos-por-ciclo-pdf", context, "alumnos_por_ciclo_" + nivel.name() + ".pdf");
     }
 
@@ -153,6 +163,12 @@ public class ReporteController {
         context.setVariable("mesMayor", mesMayor);
         context.setVariable("mesMenor", mesMenor);
         context.setVariable("nivel", nivel);
+        if (!filas.isEmpty()) {
+            context.setVariable("chartDataUri", chartImageService.lineChart(
+                    filas.stream().map(IngresoMensualDTO::mes).toList(),
+                    filas.stream().map(IngresoMensualDTO::total).toList(),
+                    "Ingresos (S/)"));
+        }
         return generarPdf("reportes/ingresos-mensuales-pdf", context, "ingresos_mensuales_" + nivel.name() + ".pdf");
     }
 
@@ -180,6 +196,13 @@ public class ReporteController {
         context.setVariable("totalAdeudado", totalAdeudado);
         context.setVariable("promedioAdeudado", promedioAdeudado);
         context.setVariable("nivel", nivel);
+        List<AlumnoMorosoDTO> topMorosos = filas.stream().limit(10).toList();
+        if (!topMorosos.isEmpty()) {
+            context.setVariable("chartDataUri", chartImageService.horizontalBarChart(
+                    topMorosos.stream().map(f -> f.nombre() + " " + f.apellido()).toList(),
+                    topMorosos.stream().map(AlumnoMorosoDTO::montoAdeudado).toList(),
+                    "Monto adeudado (S/)"));
+        }
         return generarPdf("reportes/morosos-pdf", context, "alumnos_morosos_" + nivel.name() + ".pdf");
     }
 
@@ -200,6 +223,11 @@ public class ReporteController {
         context.setVariable("filas", filas);
         context.setVariable("totalAlumnos", totalAlumnos);
         context.setVariable("nivel", nivel);
+        if (!filas.isEmpty()) {
+            context.setVariable("chartDataUri", chartImageService.pieChart(
+                    filas.stream().map(AlumnosPorAreaDTO::area).toList(),
+                    filas.stream().map(AlumnosPorAreaDTO::cantidad).toList()));
+        }
         return generarPdf("reportes/alumnos-por-area-pdf", context, "alumnos_por_area_" + nivel.name() + ".pdf");
     }
 
@@ -219,6 +247,11 @@ public class ReporteController {
         Context context = new Context();
         context.setVariable("filas", filas);
         context.setVariable("totalAlumnos", totalAlumnos);
+        if (!filas.isEmpty()) {
+            context.setVariable("chartDataUri", chartImageService.pieChart(
+                    filas.stream().map(AlumnosPorNivelDTO::nivel).toList(),
+                    filas.stream().map(AlumnosPorNivelDTO::cantidad).toList()));
+        }
         return generarPdf("reportes/alumnos-por-nivel-pdf", context, "alumnos_por_nivel.pdf");
     }
 
