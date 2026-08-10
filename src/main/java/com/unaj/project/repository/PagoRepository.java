@@ -1,6 +1,7 @@
 package com.unaj.project.repository;
 
 import com.unaj.project.model.Alumno;
+import com.unaj.project.model.Nivel;
 import com.unaj.project.model.Pago;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -55,6 +56,13 @@ public interface PagoRepository extends JpaRepository<Pago, Long> {
             "GROUP BY a.id, a.nombre, a.apellido, a.email " +
             "ORDER BY SUM(p.monto - COALESCE(p.montoPagado, 0)) DESC")
     List<Object[]> listarMorosos();
+
+    @Query("SELECT a.id, a.nombre, a.apellido, a.email, COUNT(p), SUM(p.monto - COALESCE(p.montoPagado, 0)) " +
+            "FROM Pago p JOIN p.matricula m JOIN m.estudiante a " +
+            "WHERE p.estado = 'VENCIDO' AND a.nivel = :nivel " +
+            "GROUP BY a.id, a.nombre, a.apellido, a.email " +
+            "ORDER BY SUM(p.monto - COALESCE(p.montoPagado, 0)) DESC")
+    List<Object[]> listarMorosos(@Param("nivel") Nivel nivel);
 
     @Modifying
     @Query("UPDATE Pago p SET p.estado = 'VENCIDO' " +

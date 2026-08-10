@@ -34,7 +34,16 @@ public class ReporteServiceImpl implements com.unaj.project.service.ReporteServi
 
     @Override
     public List<AlumnosPorCicloTurnoDTO> alumnosPorCicloTurno() {
-        return matriculaRepository.contarAlumnosPorCicloYTurno().stream()
+        return aAlumnosPorCicloTurno(matriculaRepository.contarAlumnosPorCicloYTurno());
+    }
+
+    @Override
+    public List<AlumnosPorCicloTurnoDTO> alumnosPorCicloTurno(Nivel nivel) {
+        return aAlumnosPorCicloTurno(matriculaRepository.contarAlumnosPorCicloYTurno(nivel));
+    }
+
+    private List<AlumnosPorCicloTurnoDTO> aAlumnosPorCicloTurno(List<Object[]> filas) {
+        return filas.stream()
                 .map(fila -> new AlumnosPorCicloTurnoDTO(
                         (String) fila[0],
                         ((Turno) fila[1]).getEtiqueta(),
@@ -44,7 +53,16 @@ public class ReporteServiceImpl implements com.unaj.project.service.ReporteServi
 
     @Override
     public List<IngresoMensualDTO> ingresosPorMes() {
-        return abonoRepository.sumarPorMes().stream()
+        return aIngresoMensual(abonoRepository.sumarPorMes());
+    }
+
+    @Override
+    public List<IngresoMensualDTO> ingresosPorMes(Nivel nivel) {
+        return aIngresoMensual(abonoRepository.sumarPorMes(nivel.name()));
+    }
+
+    private List<IngresoMensualDTO> aIngresoMensual(List<Object[]> filas) {
+        return filas.stream()
                 .map(fila -> new IngresoMensualDTO(
                         (String) fila[0],
                         (BigDecimal) fila[1]))
@@ -67,7 +85,16 @@ public class ReporteServiceImpl implements com.unaj.project.service.ReporteServi
 
     @Override
     public List<AlumnoMorosoDTO> alumnosMorosos() {
-        return pagoRepository.listarMorosos().stream()
+        return aAlumnoMoroso(pagoRepository.listarMorosos());
+    }
+
+    @Override
+    public List<AlumnoMorosoDTO> alumnosMorosos(Nivel nivel) {
+        return aAlumnoMoroso(pagoRepository.listarMorosos(nivel));
+    }
+
+    private List<AlumnoMorosoDTO> aAlumnoMoroso(List<Object[]> filas) {
+        return filas.stream()
                 .map(fila -> new AlumnoMorosoDTO(
                         (Long) fila[0],
                         (String) fila[1],

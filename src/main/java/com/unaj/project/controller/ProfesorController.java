@@ -17,6 +17,8 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -86,8 +88,21 @@ public class ProfesorController {
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable Long id, Model model) {
         model.addAttribute("profesorForm", profesorService.buscarFormPorId(id));
+        model.addAttribute("tieneFoto", profesorService.buscarPorId(id).isFotoPresente());
         model.addAttribute("niveles", Nivel.values());
         return "profesores/formulario";
+    }
+
+    @GetMapping("/{id}/foto")
+    public ResponseEntity<byte[]> foto(@PathVariable Long id) {
+        Profesor profesor = profesorService.buscarPorId(id);
+        if (!profesor.isFotoPresente()) {
+            return ResponseEntity.notFound().build();
+        }
+        MediaType tipo = (profesor.getFotoContentType() != null)
+                ? MediaType.parseMediaType(profesor.getFotoContentType())
+                : MediaType.IMAGE_JPEG;
+        return ResponseEntity.ok().contentType(tipo).body(profesor.getFoto());
     }
 
     @GetMapping("/{id}")
@@ -117,6 +132,7 @@ public class ProfesorController {
                 .map(PagoProfesor::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         model.addAttribute("profesor", profesor);
+        model.addAttribute("tieneFoto", profesor.isFotoPresente());
         model.addAttribute("cursos", cursos);
         model.addAttribute("horarios", horarios);
         model.addAttribute("rangoQuincena", rangoQuincena);

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashSet;
@@ -33,6 +34,8 @@ public class ProfesorForm {
 
     private Set<Nivel> niveles = new LinkedHashSet<>();
 
+    private MultipartFile foto;
+
     public ProfesorForm() {}
 
     public Long getId() { return id; }
@@ -55,4 +58,7 @@ public class ProfesorForm {
 
     public Set<Nivel> getNiveles() { return niveles; }
     public void setNiveles(Set<Nivel> niveles) { this.niveles = niveles; }
+
+    public MultipartFile getFoto() { return foto; }
+    public void setFoto(MultipartFile foto) { this.foto = foto; }
 }

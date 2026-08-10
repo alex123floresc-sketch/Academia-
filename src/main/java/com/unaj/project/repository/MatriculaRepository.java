@@ -1,8 +1,10 @@
 package com.unaj.project.repository;
 
 import com.unaj.project.model.Matricula;
+import com.unaj.project.model.Nivel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -37,6 +39,12 @@ public interface MatriculaRepository extends JpaRepository<Matricula, Long> {
            "GROUP BY m.semestre.nombre, m.turno " +
            "ORDER BY m.semestre.nombre, m.turno")
     List<Object[]> contarAlumnosPorCicloYTurno();
+
+    @Query("SELECT m.semestre.nombre, m.turno, COUNT(DISTINCT m.estudiante.id) " +
+           "FROM Matricula m WHERE m.estado = 'ACTIVA' AND m.estudiante.nivel = :nivel " +
+           "GROUP BY m.semestre.nombre, m.turno " +
+           "ORDER BY m.semestre.nombre, m.turno")
+    List<Object[]> contarAlumnosPorCicloYTurno(@Param("nivel") Nivel nivel);
 
     @Query("SELECT DISTINCT m FROM Matricula m " +
            "JOIN FETCH m.semestre " +

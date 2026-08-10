@@ -12,9 +12,15 @@
 
     <div class="card" style="margin-bottom:16px">
         <div class="card-head">
-            <div>
-                <h2>Datos del profesor</h2>
-                <p th:text="${profesor.especialidad} ?: 'Sin especialidad registrada'"></p>
+            <div style="display:flex;align-items:center;gap:14px">
+                <img th:if="${tieneFoto}" th:src="@{/profesores/{id}/foto(id=${profesor.id})}" alt="Foto del profesor"
+                     style="width:52px;height:52px;object-fit:cover;border-radius:12px;border:1px solid var(--line)">
+                <div th:unless="${tieneFoto}" class="entity-avatar" style="width:52px;height:52px"
+                     th:text="${#strings.substring(profesor.nombre,0,1) + #strings.substring(profesor.apellido,0,1)}"></div>
+                <div>
+                    <h2>Datos del profesor</h2>
+                    <p th:text="${profesor.especialidad} ?: 'Sin especialidad registrada'"></p>
+                </div>
             </div>
             <div class="rowact">
                 <a th:href="@{/horas-docentes(profesorId=${profesor.id})}" class="ui small primary button">Registrar / ver horas</a>

@@ -7,15 +7,21 @@
     <th:block th:replace="~{fragments/pdf :: estilos}"></th:block>
 </head>
 <body>
-<div th:replace="~{fragments/pdf :: encabezado('Alumnos con pagos vencidos')}"></div>
+<div th:replace="~{fragments/pdf :: encabezado('Alumnos con pagos vencidos — ' + ${nivel.etiqueta})}"></div>
 
 <div class="pdf-section">Resumen general</div>
 <table class="pdf-info">
     <tr>
+        <td class="k">Nivel</td>
+        <td class="v" th:text="${nivel.etiqueta}">-</td>
         <td class="k">Alumnos morosos</td>
         <td class="v" th:text="${totalAlumnosMorosos}">0</td>
+    </tr>
+    <tr>
         <td class="k">Pagos vencidos</td>
         <td class="v" th:text="${totalPagosVencidos}">0</td>
+        <td class="k"></td>
+        <td class="v"></td>
     </tr>
     <tr>
         <td class="k">Monto total adeudado</td>

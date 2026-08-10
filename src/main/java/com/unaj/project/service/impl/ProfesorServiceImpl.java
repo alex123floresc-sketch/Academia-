@@ -9,7 +9,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.List;
 
 @Service
@@ -60,6 +63,17 @@ public class ProfesorServiceImpl implements ProfesorService {
         profesor.setEspecialidad(form.getEspecialidad());
         profesor.setTarifaHora(form.getTarifaHora());
         profesor.setNiveles(form.getNiveles() != null ? form.getNiveles() : new java.util.LinkedHashSet<>());
+
+        MultipartFile foto = form.getFoto();
+        if (foto != null && !foto.isEmpty()) {
+            try {
+                profesor.setFoto(foto.getBytes());
+                profesor.setFotoContentType(foto.getContentType());
+            } catch (IOException e) {
+                throw new UncheckedIOException("No se pudo leer la fotografía enviada.", e);
+            }
+        }
+
         profesorRepository.save(profesor);
     }
 

@@ -4,13 +4,14 @@
       layout:decorate="~{layout}">
 <head><title>Reportes</title></head>
 <div layout:fragment="contenido">
+    <a th:href="@{/reportes}" class="page-back">&laquo; Volver a niveles</a>
 
     <div class="card-head" style="border:none;padding:0 0 6px">
-        <div><h2 style="font-family:'Fraunces',serif;font-weight:500;font-size:20px">Reportes</h2>
-            <p style="font-size:12px;color:var(--ink-faint)">Vista rápida de los indicadores clave, con exportación a PDF o Excel</p></div>
+        <div><h2 style="font-family:'Fraunces',serif;font-weight:500;font-size:20px" th:text="'Reportes — ' + ${nivel.etiqueta}"></h2>
+            <p style="font-size:12px;color:var(--ink-faint)">Indicadores de este nivel, con exportación a PDF o Excel</p></div>
     </div>
 
-    <div class="metrics">
+    <div class="metrics" style="grid-template-columns:repeat(3,1fr)">
         <div class="metric">
             <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Matrículas activas</div>
             <div class="val" th:text="${matriculasActivas}">0</div>
@@ -22,14 +23,24 @@
             <div class="delta">cobrado según los abonos registrados</div>
         </div>
         <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--lav)"></span>Cursos activos</div>
+            <div class="val" th:text="${totalCursosNivel}">0</div>
+            <div class="delta" th:text="${totalProfesoresNivel} + ' profesor' + (${totalProfesoresNivel == 1} ? '' : 'es') + ' asignado' + (${totalProfesoresNivel == 1} ? '' : 's')">0 profesores</div>
+        </div>
+        <div class="metric">
             <div class="lbl"><span class="dot" style="background:var(--rose)"></span>Alumnos morosos</div>
             <div class="val" th:text="${#lists.size(morosos)}">0</div>
-            <div class="delta" th:classappend="${#lists.size(morosos) > 0} ? 'down' : ''">con al menos un pago vencido</div>
+            <div class="delta" th:classappend="${#lists.size(morosos) > 0} ? 'down' : ''" th:text="${tasaMorosidadPct} + '% de los alumnos de este nivel'">0%</div>
         </div>
         <div class="metric">
             <div class="lbl"><span class="dot" style="background:var(--amber)"></span>Monto adeudado</div>
             <div class="val" th:text="'S/ ' + ${montoAdeudado}">S/ 0</div>
             <div class="delta down">pendiente de cobro por morosidad</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Nivel</div>
+            <div class="val" style="font-size:19px" th:text="${nivel.etiqueta}">-</div>
+            <div class="delta">todos los indicadores de esta página son solo de este nivel</div>
         </div>
     </div>
 
@@ -37,11 +48,11 @@
         <div class="card-head">
             <div>
                 <h2>Alumnos por ciclo y turno</h2>
-                <p>Cantidad de alumnos matriculados (activos) agrupados por ciclo y turno · en todos los niveles, ya que el ciclo se comparte entre Primaria, Secundaria y Preuniversitario</p>
+                <p>Cantidad de alumnos matriculados (activos) de este nivel, agrupados por ciclo y turno</p>
             </div>
             <div class="rowact">
-                <a th:href="@{/reportes/alumnos-por-ciclo/pdf}" class="ui small primary button">Ver PDF</a>
-                <a th:href="@{/reportes/alumnos-por-ciclo/excel}" class="ui small basic button">Excel</a>
+                <a th:href="@{/reportes/alumnos-por-ciclo/pdf(nivel=${nivel})}" class="ui small primary button">Ver PDF</a>
+                <a th:href="@{/reportes/alumnos-por-ciclo/excel(nivel=${nivel})}" class="ui small basic button">Excel</a>
             </div>
         </div>
         <div style="padding:18px 20px 4px" th:if="${not #lists.isEmpty(porCiclo)}">
@@ -55,7 +66,7 @@
                 <td th:text="${fila.turno}"></td>
                 <td th:text="${fila.cantidad}"></td>
             </tr>
-            <tr th:if="${#lists.isEmpty(porCiclo)}"><td colspan="3" class="empty">No hay matrículas activas registradas.</td></tr>
+            <tr th:if="${#lists.isEmpty(porCiclo)}"><td colspan="3" class="empty">No hay matrículas activas registradas en este nivel.</td></tr>
             </tbody>
         </table>
     </div>
@@ -64,11 +75,11 @@
         <div class="card-head">
             <div>
                 <h2>Ingresos por mes</h2>
-                <p>Total cobrado (abonos) agrupado por mes de pago · en todos los niveles</p>
+                <p>Total cobrado (abonos) de este nivel, agrupado por mes de pago</p>
             </div>
             <div class="rowact">
-                <a th:href="@{/reportes/ingresos-mensuales/pdf}" class="ui small primary button">Ver PDF</a>
-                <a th:href="@{/reportes/ingresos-mensuales/excel}" class="ui small basic button">Excel</a>
+                <a th:href="@{/reportes/ingresos-mensuales/pdf(nivel=${nivel})}" class="ui small primary button">Ver PDF</a>
+                <a th:href="@{/reportes/ingresos-mensuales/excel(nivel=${nivel})}" class="ui small basic button">Excel</a>
             </div>
         </div>
         <div style="padding:18px 20px 4px" th:if="${not #lists.isEmpty(porMes)}">
@@ -81,7 +92,7 @@
                 <td class="strong" th:text="${fila.mes}"></td>
                 <td th:text="'S/ ' + ${fila.total}"></td>
             </tr>
-            <tr th:if="${#lists.isEmpty(porMes)}"><td colspan="2" class="empty">Aún no se han registrado abonos.</td></tr>
+            <tr th:if="${#lists.isEmpty(porMes)}"><td colspan="2" class="empty">Aún no se han registrado abonos en este nivel.</td></tr>
             </tbody>
         </table>
     </div>
@@ -90,11 +101,11 @@
         <div class="card-head">
             <div>
                 <h2>Alumnos morosos</h2>
-                <p>Alumnos con al menos un pago vencido y el monto adeudado · en todos los niveles</p>
+                <p>Alumnos de este nivel con al menos un pago vencido y el monto adeudado</p>
             </div>
             <div class="rowact">
-                <a th:href="@{/reportes/morosos/pdf}" class="ui small primary button">Ver PDF</a>
-                <a th:href="@{/reportes/morosos/excel}" class="ui small basic button">Excel</a>
+                <a th:href="@{/reportes/morosos/pdf(nivel=${nivel})}" class="ui small primary button">Ver PDF</a>
+                <a th:href="@{/reportes/morosos/excel(nivel=${nivel})}" class="ui small basic button">Excel</a>
             </div>
         </div>
         <div style="padding:18px 20px 4px" th:if="${not #lists.isEmpty(morosos)}">
@@ -109,60 +120,20 @@
                 <td><span class="pill pill-rose" th:text="${fila.pagosVencidos}"></span></td>
                 <td th:text="'S/ ' + ${fila.montoAdeudado}"></td>
             </tr>
-            <tr th:if="${#lists.isEmpty(morosos)}"><td colspan="4" class="empty">No hay alumnos morosos por el momento.</td></tr>
+            <tr th:if="${#lists.isEmpty(morosos)}"><td colspan="4" class="empty">No hay alumnos morosos en este nivel por el momento.</td></tr>
             </tbody>
-        </table>
-    </div>
-
-    <div class="card" style="margin-bottom:22px">
-        <div class="card-head">
-            <div>
-                <h2>Alumnos por nivel</h2>
-                <p>Comparativo de alumnos registrados en Primaria, Secundaria y Preuniversitario</p>
-            </div>
-            <div class="rowact">
-                <a th:href="@{/reportes/alumnos-por-nivel/pdf}" class="ui small primary button">Ver PDF</a>
-                <a th:href="@{/reportes/alumnos-por-nivel/excel}" class="ui small basic button">Excel</a>
-            </div>
-        </div>
-        <div class="ui stackable two column grid" style="margin:0" th:if="${not #lists.isEmpty(porNivel)}">
-            <div class="column" style="padding:20px;max-width:280px;margin:0 auto">
-                <canvas id="chartNivel"></canvas>
-            </div>
-            <div class="column" style="padding:0">
-                <table>
-                    <thead><tr><th>Nivel</th><th>Alumnos</th></tr></thead>
-                    <tbody>
-                    <tr th:each="fila : ${porNivel}">
-                        <td class="strong" th:text="${fila.nivel}"></td>
-                        <td th:text="${fila.cantidad}"></td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <table th:if="${#lists.isEmpty(porNivel)}">
-            <thead><tr><th>Nivel</th><th>Alumnos</th></tr></thead>
-            <tbody><tr><td colspan="2" class="empty">No hay alumnos registrados.</td></tr></tbody>
         </table>
     </div>
 
     <div class="card">
         <div class="card-head">
             <div>
-                <h2 th:text="'Alumnos por área — ' + ${nivel.etiqueta}"></h2>
-                <p>Distribución de alumnos activos según el área/grado declarado · este reporte sí varía por nivel, elige uno abajo</p>
+                <h2>Alumnos por área</h2>
+                <p>Distribución de alumnos activos de este nivel según el área/grado declarado</p>
             </div>
             <div class="rowact">
                 <a th:href="@{/reportes/alumnos-por-area/pdf(nivel=${nivel})}" class="ui small primary button">Ver PDF</a>
                 <a th:href="@{/reportes/alumnos-por-area/excel(nivel=${nivel})}" class="ui small basic button">Excel</a>
-            </div>
-        </div>
-        <div class="filter-row" style="padding-bottom:14px">
-            <span class="filter-row-label">Nivel</span>
-            <div class="area-tabs">
-                <a class="area-tab" th:each="n : ${niveles}" th:classappend="${n == nivel} ? ' active'"
-                   th:href="@{/reportes(nivel=${n})}" th:text="${n.etiqueta}"></a>
             </div>
         </div>
         <div class="ui stackable two column grid" style="margin:0" th:if="${not #lists.isEmpty(porArea)}">
@@ -183,7 +154,7 @@
         </div>
         <table th:if="${#lists.isEmpty(porArea)}">
             <thead><tr><th>Área</th><th>Alumnos</th></tr></thead>
-            <tbody><tr><td colspan="2" class="empty">No hay alumnos registrados.</td></tr></tbody>
+            <tbody><tr><td colspan="2" class="empty">No hay alumnos registrados en este nivel.</td></tr></tbody>
         </table>
     </div>
 </div>
@@ -200,8 +171,6 @@
         var morososValores = /*[[${morososValores}]]*/ [];
         var areaLabels = /*[[${areaLabels}]]*/ [];
         var areaValores = /*[[${areaValores}]]*/ [];
-        var nivelLabels = /*[[${nivelLabels}]]*/ [];
-        var nivelValores = /*[[${nivelValores}]]*/ [];
         /*]]>*/
 
         Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
@@ -274,26 +243,6 @@
                     responsive: true,
                     plugins: { legend: { display: false } },
                     scales: { x: { beginAtZero: true, grid: { color: '#EAF1F9' } }, y: { grid: { display: false } } }
-                }
-            });
-        }
-
-        var nivelCtx = document.getElementById('chartNivel');
-        if (nivelCtx) {
-            new Chart(nivelCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: nivelLabels,
-                    datasets: [{
-                        data: nivelValores,
-                        backgroundColor: ['#2563EB', '#D97706', '#0EA5E9'],
-                        borderColor: '#FFFFFF',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 11, padding: 12, font: { size: 11.5 } } } }
                 }
             });
         }

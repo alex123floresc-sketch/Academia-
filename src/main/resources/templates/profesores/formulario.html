@@ -11,10 +11,19 @@
       <div class="row">
         <div class="ten wide column">
             <div class="form-card" style="max-width:100%">
-                <form class="ui form" th:action="@{/profesores/guardar}" th:object="${profesorForm}" method="post" id="profesorForm">
+                <form class="ui form" th:action="@{/profesores/guardar}" th:object="${profesorForm}" method="post" id="profesorForm" enctype="multipart/form-data">
                     <input type="hidden" th:field="*{id}">
 
                     <div class="form-divider">Datos personales</div>
+                    <div class="field">
+                        <label for="campoFoto">Fotografía <span class="hint">opcional</span></label>
+                        <div style="display:flex;align-items:center;gap:14px">
+                            <img th:if="${tieneFoto}" id="fotoActual" th:src="@{/profesores/{id}/foto(id=${profesorForm.id})}" alt="Foto actual"
+                                 style="width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)">
+                            <div th:unless="${tieneFoto}" id="sinFoto" style="width:64px;height:64px;border-radius:10px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-size:10px;text-align:center">Sin foto</div>
+                            <input type="file" th:field="*{foto}" id="campoFoto" accept="image/*" style="flex:1">
+                        </div>
+                    </div>
                     <div class="grid-2">
                         <div class="field">
                             <label for="campoNombre">Nombre</label>
@@ -70,7 +79,8 @@
         <div class="six wide column">
             <div class="card" style="padding:24px">
                 <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px">
-                    <div class="profile-avatar" id="previewAvatar">--</div>
+                    <div class="profile-avatar" id="previewAvatar"
+                         th:style="${tieneFoto} ? ('background-image:url(' + @{/profesores/{id}/foto(id=${profesorForm.id})} + ');background-size:cover;background-position:center')">--</div>
                     <div>
                         <div class="strong" style="font-size:16px;color:var(--ink)" id="previewNombre">Nuevo profesor</div>
                         <div class="hint" id="previewCorreo">Sin correo registrado</div>
@@ -104,13 +114,33 @@
             var pCorreo = document.getElementById('previewCorreo');
             var pEspecialidad = document.getElementById('previewEspecialidad');
             var pTarifa = document.getElementById('previewTarifa');
+            var campoFoto = document.getElementById('campoFoto');
+            var avatarTieneFoto = avatar.style.backgroundImage !== '';
+
+            if (campoFoto) {
+                campoFoto.addEventListener('change', function () {
+                    var archivo = campoFoto.files && campoFoto.files[0];
+                    if (!archivo) return;
+                    var lector = new FileReader();
+                    lector.onload = function (e) {
+                        avatar.style.backgroundImage = 'url(' + e.target.result + ')';
+                        avatar.style.backgroundSize = 'cover';
+                        avatar.style.backgroundPosition = 'center';
+                        avatarTieneFoto = true;
+                        avatar.textContent = '';
+                    };
+                    lector.readAsDataURL(archivo);
+                });
+            }
 
             function actualizar() {
                 var n = (nombre.value || '').trim();
                 var a = (apellido.value || '').trim();
                 var completo = (n + ' ' + a).trim();
                 pNombre.textContent = completo || 'Nuevo profesor';
-                avatar.textContent = (completo || 'NP').split(/\s+/).slice(0, 2).map(function (p) { return p.charAt(0); }).join('').toUpperCase() || '--';
+                if (!avatarTieneFoto) {
+                    avatar.textContent = (completo || 'NP').split(/\s+/).slice(0, 2).map(function (p) { return p.charAt(0); }).join('').toUpperCase() || '--';
+                }
                 pCorreo.textContent = correo.value || 'Sin correo registrado';
 
                 if (especialidad.value) {

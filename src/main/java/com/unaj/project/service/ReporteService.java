@@ -13,11 +13,20 @@ public interface ReporteService {
     /** Matrículas activas por ciclo y turno, en todos los niveles (el ciclo se comparte entre niveles). */
     List<AlumnosPorCicloTurnoDTO> alumnosPorCicloTurno();
 
+    /** Igual que alumnosPorCicloTurno(), acotado a un solo nivel — lo que usa /reportes?nivel=X. */
+    List<AlumnosPorCicloTurnoDTO> alumnosPorCicloTurno(Nivel nivel);
+
     /** Abonos cobrados por mes, en todos los niveles. */
     List<IngresoMensualDTO> ingresosPorMes();
 
+    /** Igual que ingresosPorMes(), acotado a un solo nivel. */
+    List<IngresoMensualDTO> ingresosPorMes(Nivel nivel);
+
     /** Alumnos con pagos vencidos, en todos los niveles. */
     List<AlumnoMorosoDTO> alumnosMorosos();
+
+    /** Igual que alumnosMorosos(), acotado a un solo nivel. */
+    List<AlumnoMorosoDTO> alumnosMorosos(Nivel nivel);
 
     /** Distribución de alumnos por área/grado de un nivel específico — este reporte sí es por nivel. */
     List<AlumnosPorAreaDTO> alumnosPorArea(Nivel nivel);

@@ -32,6 +32,13 @@ public class Profesor {
     @Column(nullable = false)
     private boolean eliminado = false;
 
+    @Lob
+    @Column(name = "foto", columnDefinition = "LONGBLOB")
+    private byte[] foto;
+
+    @Column(name = "foto_content_type")
+    private String fotoContentType;
+
     @ElementCollection
     @CollectionTable(name = "profesor_niveles", joinColumns = @JoinColumn(name = "profesor_id"))
     @Enumerated(EnumType.STRING)
@@ -60,6 +67,14 @@ public class Profesor {
 
     public boolean isEliminado() { return eliminado; }
     public void setEliminado(boolean eliminado) { this.eliminado = eliminado; }
+
+    public byte[] getFoto() { return foto; }
+    public void setFoto(byte[] foto) { this.foto = foto; }
+
+    public String getFotoContentType() { return fotoContentType; }
+    public void setFotoContentType(String fotoContentType) { this.fotoContentType = fotoContentType; }
+
+    public boolean isFotoPresente() { return foto != null && foto.length > 0; }
 
     public Set<Nivel> getNiveles() { return niveles; }
     public void setNiveles(Set<Nivel> niveles) { this.niveles = niveles; }

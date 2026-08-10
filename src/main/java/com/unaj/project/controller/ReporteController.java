@@ -6,7 +6,10 @@ import com.unaj.project.dto.AlumnosPorCicloTurnoDTO;
 import com.unaj.project.dto.AlumnosPorNivelDTO;
 import com.unaj.project.dto.IngresoMensualDTO;
 import com.unaj.project.model.Nivel;
+import com.unaj.project.service.AlumnoService;
+import com.unaj.project.service.CursoService;
 import com.unaj.project.service.PdfGeneradorService;
+import com.unaj.project.service.ProfesorService;
 import com.unaj.project.service.ReporteService;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -35,22 +38,31 @@ import java.util.List;
 public class ReporteController {
 
     private final ReporteService reporteService;
+    private final AlumnoService alumnoService;
+    private final CursoService cursoService;
+    private final ProfesorService profesorService;
     private final PdfGeneradorService pdfGeneradorService;
 
-    public ReporteController(ReporteService reporteService, PdfGeneradorService pdfGeneradorService) {
+    public ReporteController(ReporteService reporteService, AlumnoService alumnoService, CursoService cursoService,
+                             ProfesorService profesorService, PdfGeneradorService pdfGeneradorService) {
         this.reporteService = reporteService;
+        this.alumnoService = alumnoService;
+        this.cursoService = cursoService;
+        this.profesorService = profesorService;
         this.pdfGeneradorService = pdfGeneradorService;
     }
 
     @GetMapping
     public String lista(@RequestParam(required = false) Nivel nivel, Model model) {
-        Nivel nivelSel = (nivel != null) ? nivel : Nivel.PREUNIVERSITARIO;
+        if (nivel == null) {
+            model.addAttribute("resumenNiveles", alumnoService.contarPorNivel());
+            return "reportes/niveles";
+        }
 
-        List<AlumnosPorCicloTurnoDTO> porCiclo = reporteService.alumnosPorCicloTurno();
-        List<IngresoMensualDTO> porMes = reporteService.ingresosPorMes();
-        List<AlumnoMorosoDTO> morosos = reporteService.alumnosMorosos();
-        List<AlumnosPorAreaDTO> porArea = reporteService.alumnosPorArea(nivelSel);
-        List<AlumnosPorNivelDTO> porNivel = reporteService.alumnosPorNivel();
+        List<AlumnosPorCicloTurnoDTO> porCiclo = reporteService.alumnosPorCicloTurno(nivel);
+        List<IngresoMensualDTO> porMes = reporteService.ingresosPorMes(nivel);
+        List<AlumnoMorosoDTO> morosos = reporteService.alumnosMorosos(nivel);
+        List<AlumnosPorAreaDTO> porArea = reporteService.alumnosPorArea(nivel);
 
         long matriculasActivas = porCiclo.stream().mapToLong(AlumnosPorCicloTurnoDTO::cantidad).sum();
         String mesActual = YearMonth.now().toString();
@@ -62,16 +74,27 @@ public class ReporteController {
                 .map(AlumnoMorosoDTO::montoAdeudado)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        long totalAlumnosNivel = porArea.stream().mapToLong(AlumnosPorAreaDTO::cantidad).sum();
+        BigDecimal tasaMorosidadPct = totalAlumnosNivel > 0
+                ? BigDecimal.valueOf(morosos.size()).divide(BigDecimal.valueOf(totalAlumnosNivel), 4, RoundingMode.HALF_UP)
+                        .multiply(BigDecimal.valueOf(100)).setScale(1, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+        long totalCursosNivel = cursoService.contarPorNivel().getOrDefault(nivel, 0L);
+        long totalProfesoresNivel = profesorService.listarTodos().stream()
+                .filter(p -> p.getNiveles() != null && p.getNiveles().contains(nivel))
+                .count();
+
         model.addAttribute("porCiclo", porCiclo);
         model.addAttribute("porMes", porMes);
         model.addAttribute("morosos", morosos);
         model.addAttribute("porArea", porArea);
-        model.addAttribute("porNivel", porNivel);
         model.addAttribute("matriculasActivas", matriculasActivas);
         model.addAttribute("ingresosMesActual", ingresosMesActual);
         model.addAttribute("montoAdeudado", montoAdeudado);
-        model.addAttribute("niveles", Nivel.values());
-        model.addAttribute("nivel", nivelSel);
+        model.addAttribute("tasaMorosidadPct", tasaMorosidadPct);
+        model.addAttribute("totalCursosNivel", totalCursosNivel);
+        model.addAttribute("totalProfesoresNivel", totalProfesoresNivel);
+        model.addAttribute("nivel", nivel);
 
         model.addAttribute("cicloTurnoLabels",
                 porCiclo.stream().map(f -> f.ciclo() + " · " + f.turno()).toList());
@@ -81,8 +104,6 @@ public class ReporteController {
         model.addAttribute("mesValores", porMes.stream().map(IngresoMensualDTO::total).toList());
         model.addAttribute("areaLabels", porArea.stream().map(AlumnosPorAreaDTO::area).toList());
         model.addAttribute("areaValores", porArea.stream().map(AlumnosPorAreaDTO::cantidad).toList());
-        model.addAttribute("nivelLabels", porNivel.stream().map(AlumnosPorNivelDTO::nivel).toList());
-        model.addAttribute("nivelValores", porNivel.stream().map(AlumnosPorNivelDTO::cantidad).toList());
         List<AlumnoMorosoDTO> topMorosos = morosos.stream().limit(8).toList();
         model.addAttribute("morososLabels",
                 topMorosos.stream().map(f -> f.nombre() + " " + f.apellido()).toList());
@@ -92,8 +113,8 @@ public class ReporteController {
     }
 
     @GetMapping("/alumnos-por-ciclo/pdf")
-    public ResponseEntity<byte[]> alumnosPorCicloPdf() throws Exception {
-        List<AlumnosPorCicloTurnoDTO> filas = reporteService.alumnosPorCicloTurno();
+    public ResponseEntity<byte[]> alumnosPorCicloPdf(@RequestParam Nivel nivel) throws Exception {
+        List<AlumnosPorCicloTurnoDTO> filas = reporteService.alumnosPorCicloTurno(nivel);
         long totalAlumnos = filas.stream().mapToLong(AlumnosPorCicloTurnoDTO::cantidad).sum();
         long totalCiclos = filas.stream().map(AlumnosPorCicloTurnoDTO::ciclo).distinct().count();
         long totalTurnos = filas.stream().map(AlumnosPorCicloTurnoDTO::turno).distinct().count();
@@ -103,20 +124,21 @@ public class ReporteController {
         context.setVariable("totalAlumnos", totalAlumnos);
         context.setVariable("totalCiclos", totalCiclos);
         context.setVariable("totalTurnos", totalTurnos);
-        return generarPdf("reportes/alumnos-por-ciclo-pdf", context, "alumnos_por_ciclo.pdf");
+        context.setVariable("nivel", nivel);
+        return generarPdf("reportes/alumnos-por-ciclo-pdf", context, "alumnos_por_ciclo_" + nivel.name() + ".pdf");
     }
 
     @GetMapping("/alumnos-por-ciclo/excel")
-    public ResponseEntity<byte[]> alumnosPorCicloExcel() throws Exception {
-        List<AlumnosPorCicloTurnoDTO> filas = reporteService.alumnosPorCicloTurno();
+    public ResponseEntity<byte[]> alumnosPorCicloExcel(@RequestParam Nivel nivel) throws Exception {
+        List<AlumnosPorCicloTurnoDTO> filas = reporteService.alumnosPorCicloTurno(nivel);
         return generarExcel("Alumnos por ciclo", new String[]{"Ciclo", "Turno", "Alumnos matriculados"},
                 filas, fila -> new Object[]{fila.ciclo(), fila.turno(), fila.cantidad()},
-                "alumnos_por_ciclo.xlsx");
+                "alumnos_por_ciclo_" + nivel.name() + ".xlsx");
     }
 
     @GetMapping("/ingresos-mensuales/pdf")
-    public ResponseEntity<byte[]> ingresosMensualesPdf() throws Exception {
-        List<IngresoMensualDTO> filas = reporteService.ingresosPorMes();
+    public ResponseEntity<byte[]> ingresosMensualesPdf(@RequestParam Nivel nivel) throws Exception {
+        List<IngresoMensualDTO> filas = reporteService.ingresosPorMes(nivel);
         BigDecimal totalAcumulado = filas.stream()
                 .map(IngresoMensualDTO::total).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal promedioMensual = filas.isEmpty() ? BigDecimal.ZERO
@@ -130,20 +152,21 @@ public class ReporteController {
         context.setVariable("promedioMensual", promedioMensual);
         context.setVariable("mesMayor", mesMayor);
         context.setVariable("mesMenor", mesMenor);
-        return generarPdf("reportes/ingresos-mensuales-pdf", context, "ingresos_mensuales.pdf");
+        context.setVariable("nivel", nivel);
+        return generarPdf("reportes/ingresos-mensuales-pdf", context, "ingresos_mensuales_" + nivel.name() + ".pdf");
     }
 
     @GetMapping("/ingresos-mensuales/excel")
-    public ResponseEntity<byte[]> ingresosMensualesExcel() throws Exception {
-        List<IngresoMensualDTO> filas = reporteService.ingresosPorMes();
+    public ResponseEntity<byte[]> ingresosMensualesExcel(@RequestParam Nivel nivel) throws Exception {
+        List<IngresoMensualDTO> filas = reporteService.ingresosPorMes(nivel);
         return generarExcel("Ingresos por mes", new String[]{"Mes", "Total cobrado"},
                 filas, fila -> new Object[]{fila.mes(), fila.total()},
-                "ingresos_mensuales.xlsx");
+                "ingresos_mensuales_" + nivel.name() + ".xlsx");
     }
 
     @GetMapping("/morosos/pdf")
-    public ResponseEntity<byte[]> morososPdf() throws Exception {
-        List<AlumnoMorosoDTO> filas = reporteService.alumnosMorosos();
+    public ResponseEntity<byte[]> morososPdf(@RequestParam Nivel nivel) throws Exception {
+        List<AlumnoMorosoDTO> filas = reporteService.alumnosMorosos(nivel);
         long totalPagosVencidos = filas.stream().mapToLong(AlumnoMorosoDTO::pagosVencidos).sum();
         BigDecimal totalAdeudado = filas.stream()
                 .map(AlumnoMorosoDTO::montoAdeudado).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -156,37 +179,36 @@ public class ReporteController {
         context.setVariable("totalPagosVencidos", totalPagosVencidos);
         context.setVariable("totalAdeudado", totalAdeudado);
         context.setVariable("promedioAdeudado", promedioAdeudado);
-        return generarPdf("reportes/morosos-pdf", context, "alumnos_morosos.pdf");
+        context.setVariable("nivel", nivel);
+        return generarPdf("reportes/morosos-pdf", context, "alumnos_morosos_" + nivel.name() + ".pdf");
     }
 
     @GetMapping("/morosos/excel")
-    public ResponseEntity<byte[]> morososExcel() throws Exception {
-        List<AlumnoMorosoDTO> filas = reporteService.alumnosMorosos();
+    public ResponseEntity<byte[]> morososExcel(@RequestParam Nivel nivel) throws Exception {
+        List<AlumnoMorosoDTO> filas = reporteService.alumnosMorosos(nivel);
         return generarExcel("Alumnos morosos", new String[]{"Nombre", "Apellido", "Correo", "Pagos vencidos", "Monto adeudado"},
                 filas, fila -> new Object[]{fila.nombre(), fila.apellido(), fila.email(), fila.pagosVencidos(), fila.montoAdeudado()},
-                "alumnos_morosos.xlsx");
+                "alumnos_morosos_" + nivel.name() + ".xlsx");
     }
 
     @GetMapping("/alumnos-por-area/pdf")
-    public ResponseEntity<byte[]> alumnosPorAreaPdf(@RequestParam(required = false) Nivel nivel) throws Exception {
-        Nivel nivelSel = (nivel != null) ? nivel : Nivel.PREUNIVERSITARIO;
-        List<AlumnosPorAreaDTO> filas = reporteService.alumnosPorArea(nivelSel);
+    public ResponseEntity<byte[]> alumnosPorAreaPdf(@RequestParam Nivel nivel) throws Exception {
+        List<AlumnosPorAreaDTO> filas = reporteService.alumnosPorArea(nivel);
         long totalAlumnos = filas.stream().mapToLong(AlumnosPorAreaDTO::cantidad).sum();
 
         Context context = new Context();
         context.setVariable("filas", filas);
         context.setVariable("totalAlumnos", totalAlumnos);
-        context.setVariable("nivel", nivelSel);
-        return generarPdf("reportes/alumnos-por-area-pdf", context, "alumnos_por_area_" + nivelSel.name() + ".pdf");
+        context.setVariable("nivel", nivel);
+        return generarPdf("reportes/alumnos-por-area-pdf", context, "alumnos_por_area_" + nivel.name() + ".pdf");
     }
 
     @GetMapping("/alumnos-por-area/excel")
-    public ResponseEntity<byte[]> alumnosPorAreaExcel(@RequestParam(required = false) Nivel nivel) throws Exception {
-        Nivel nivelSel = (nivel != null) ? nivel : Nivel.PREUNIVERSITARIO;
-        List<AlumnosPorAreaDTO> filas = reporteService.alumnosPorArea(nivelSel);
-        return generarExcel("Área - " + nivelSel.getEtiqueta(), new String[]{"Área", "Alumnos"},
+    public ResponseEntity<byte[]> alumnosPorAreaExcel(@RequestParam Nivel nivel) throws Exception {
+        List<AlumnosPorAreaDTO> filas = reporteService.alumnosPorArea(nivel);
+        return generarExcel("Área - " + nivel.getEtiqueta(), new String[]{"Área", "Alumnos"},
                 filas, fila -> new Object[]{fila.area(), fila.cantidad()},
-                "alumnos_por_area_" + nivelSel.name() + ".xlsx");
+                "alumnos_por_area_" + nivel.name() + ".xlsx");
     }
 
     @GetMapping("/alumnos-por-nivel/pdf")

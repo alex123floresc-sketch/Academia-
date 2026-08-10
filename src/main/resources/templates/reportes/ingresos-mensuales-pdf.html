@@ -7,15 +7,21 @@
     <th:block th:replace="~{fragments/pdf :: estilos}"></th:block>
 </head>
 <body>
-<div th:replace="~{fragments/pdf :: encabezado('Ingresos cobrados por mes')}"></div>
+<div th:replace="~{fragments/pdf :: encabezado('Ingresos cobrados por mes — ' + ${nivel.etiqueta})}"></div>
 
 <div class="pdf-section">Resumen general</div>
 <table class="pdf-info">
     <tr>
+        <td class="k">Nivel</td>
+        <td class="v" th:text="${nivel.etiqueta}">-</td>
         <td class="k">Total acumulado</td>
         <td class="v" th:text="'S/ ' + ${totalAcumulado}">S/ 0</td>
+    </tr>
+    <tr>
         <td class="k">Promedio mensual</td>
         <td class="v" th:text="'S/ ' + ${promedioMensual}">S/ 0</td>
+        <td class="k"></td>
+        <td class="v"></td>
     </tr>
     <tr>
         <td class="k">Mes de mayor ingreso</td>
