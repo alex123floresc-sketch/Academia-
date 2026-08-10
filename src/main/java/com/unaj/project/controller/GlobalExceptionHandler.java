@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -53,9 +56,30 @@ public class GlobalExceptionHandler {
                 "/configuracion"};
         for (String m : modulos) {
             if (uri.startsWith(m)) {
-                return m;
+                return m + contextoDeNavegacion(m, request);
             }
         }
         return "/inicio";
+    }
+
+    /**
+     * Algunos módulos (hoy solo Horarios) tienen navegación en capas (ciclo/nivel/área):
+     * si una acción falla, volver a la ruta base "pelada" tira al usuario hasta arriba de
+     * esa navegación en vez de dejarlo donde estaba. Si la request que falló traía esos
+     * parámetros (los formularios de asignar/quitar curso y crear/eliminar bloque siempre
+     * los incluyen), se reconstruyen aquí para volver exactamente a la misma grilla.
+     */
+    private String contextoDeNavegacion(String modulo, HttpServletRequest request) {
+        if (!"/horarios".equals(modulo)) {
+            return "";
+        }
+        String cicloId = request.getParameter("cicloId");
+        String nivel = request.getParameter("nivel");
+        String area = request.getParameter("area");
+        if (cicloId == null || nivel == null || area == null || area.isBlank()) {
+            return "";
+        }
+        return "?cicloId=" + cicloId + "&nivel=" + nivel
+                + "&area=" + URLEncoder.encode(area, StandardCharsets.UTF_8);
     }
 }
