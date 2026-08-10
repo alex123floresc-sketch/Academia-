@@ -8,13 +8,13 @@
 </head>
 <div layout:fragment="contenido">
 
-    <div class="card" style="padding:0;margin-bottom:16px;overflow:visible">
+    <div class="card" style="padding:0;margin-bottom:16px;overflow:visible" th:if="${profesorId != null}">
         <div class="card-head">
             <div><h2>Horas docentes</h2><p>Registro de llegada, horas dictadas y pagos por período</p></div>
         </div>
         <form class="ui form" method="get" th:action="@{/horas-docentes}" style="padding:0 20px 20px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
             <div class="field" style="flex:1;min-width:260px;margin:0">
-                <label>Profesor</label>
+                <label>Cambiar de profesor</label>
                 <div class="combo" id="comboProfesor" th:attr="data-selected=${profesorId}">
                     <input type="text" class="combo-input" placeholder="Buscar profesor por nombre..." autocomplete="off">
                     <button type="button" class="combo-clear" aria-label="Quitar selección">&times;</button>
@@ -34,7 +34,68 @@
     </div>
 
     <div class="card" th:if="${profesorId == null}">
-        <div class="empty">Elige un profesor arriba para ver sus horarios, horas registradas y pagos.</div>
+        <div class="card-head">
+            <div><h2>Horas docentes</h2><p>Elige un profesor de la lista para ver sus horarios, horas registradas y pagos</p></div>
+            <div class="rowact" style="align-items:center">
+                <div th:replace="~{fragments/vista-switch :: switch('horas-docentes')}"></div>
+            </div>
+        </div>
+        <div class="searchbar">
+            <form method="get" th:action="@{/horas-docentes}" style="display:flex;gap:8px;flex:1">
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre, correo o especialidad..." aria-label="Buscar profesor">
+                <button type="submit" class="ui small basic button">Buscar</button>
+            </form>
+        </div>
+        <div data-view-panel="list" data-view-group="horas-docentes">
+            <table>
+                <thead><tr><th>Profesor</th><th>Correo</th><th>Especialidad</th><th>Niveles</th><th></th></tr></thead>
+                <tbody>
+                <tr th:each="p : ${pagina.content}">
+                    <td class="strong" th:text="${p.nombre + ' ' + p.apellido}"></td>
+                    <td th:text="${p.email} ?: '-'"></td>
+                    <td><span class="pill pill-sage" th:text="${p.especialidad} ?: 'Sin especialidad'"></span></td>
+                    <td>
+                        <span class="pill pill-sky" th:each="n : ${p.niveles}" th:text="${n.etiqueta}" style="margin-right:4px"></span>
+                        <span th:if="${p.niveles.isEmpty()}" class="hint">Sin asignar</span>
+                    </td>
+                    <td>
+                        <a th:href="@{/horas-docentes(profesorId=${p.id})}" class="ui small primary button">Ver horas</a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(pagina.content)}"><td colspan="5" class="empty">No hay profesores registrados aún.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div data-view-panel="grid" data-view-group="horas-docentes" hidden>
+            <div class="entity-grid stagger-cards" th:if="${not #lists.isEmpty(pagina.content)}">
+                <div class="entity-card" th:each="p : ${pagina.content}">
+                    <div class="entity-card-top">
+                        <div class="entity-avatar" th:text="${#strings.substring(p.nombre,0,1) + #strings.substring(p.apellido,0,1)}"></div>
+                        <div style="min-width:0">
+                            <div class="entity-card-name" th:text="${p.nombre + ' ' + p.apellido}"></div>
+                            <div class="entity-card-sub" th:text="${p.email} ?: 'Sin correo'"></div>
+                        </div>
+                    </div>
+                    <div class="entity-card-meta">
+                        <div class="entity-card-meta-row"><span class="k">Especialidad</span><span class="pill pill-sage" th:text="${p.especialidad} ?: 'Sin especialidad'"></span></div>
+                        <div class="entity-card-meta-row">
+                            <span class="k">Niveles</span>
+                            <span class="v">
+                                <span class="pill pill-sky" th:each="n : ${p.niveles}" th:text="${n.etiqueta}" style="margin-left:4px"></span>
+                                <span th:if="${p.niveles.isEmpty()}">Sin asignar</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="entity-card-foot">
+                        <a th:href="@{/horas-docentes(profesorId=${p.id})}" class="ui small primary button">Ver horas</a>
+                    </div>
+                </div>
+            </div>
+            <p th:if="${#lists.isEmpty(pagina.content)}" class="empty">No hay profesores registrados aún.</p>
+        </div>
+
+        <div th:replace="~{fragments/paginacion :: paginacion(${pagina}, '/horas-docentes', ${q})}"></div>
     </div>
 
     <th:block th:if="${profesorId != null}">
@@ -225,5 +286,6 @@
     <script>
         initCombo('comboProfesor');
     </script>
+    <script th:src="@{/js/vista-toggle.js}"></script>
 </div>
 </html>

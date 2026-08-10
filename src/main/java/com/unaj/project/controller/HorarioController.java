@@ -52,22 +52,30 @@ public class HorarioController {
                          @RequestParam(required = false) String area,
                          Model model) {
         Ciclo cicloSel = (cicloId != null) ? cicloService.buscarPorId(cicloId) : cicloService.obtenerActivo();
-        Nivel nivelSel = (nivel != null) ? nivel : Nivel.PREUNIVERSITARIO;
-        List<String> areasDelNivel = Areas.paraNivel(nivelSel);
-        String areaSel = (area != null && areasDelNivel.contains(area)) ? area : areasDelNivel.get(0);
-
         model.addAttribute("ciclos", cicloService.listarTodos());
+        model.addAttribute("cicloSel", cicloSel);
+
+        if (nivel == null) {
+            model.addAttribute("resumenNiveles", horarioService.contarBloquesPorNivel(cicloSel != null ? cicloSel.getId() : null));
+            return "horarios/niveles";
+        }
+
+        List<String> areasDelNivel = Areas.paraNivel(nivel);
+        String areaSel = (area != null && areasDelNivel.contains(area)) ? area : null;
+        if (areaSel == null) {
+            model.addAttribute("nivel", nivel);
+            model.addAttribute("resumenAreas", horarioService.contarBloquesPorArea(cicloSel != null ? cicloSel.getId() : null, nivel));
+            return "horarios/areas";
+        }
+
         model.addAttribute("turnos", Turno.values());
         model.addAttribute("dias", DiaSemana.values());
-        model.addAttribute("cicloSel", cicloSel);
         model.addAttribute("diaHoy", DiaSemana.desde(LocalDate.now().getDayOfWeek()));
-        model.addAttribute("niveles", Nivel.values());
-        model.addAttribute("nivel", nivelSel);
-        model.addAttribute("areas", areasDelNivel);
+        model.addAttribute("nivel", nivel);
         model.addAttribute("area", areaSel);
 
         if (cicloSel != null) {
-            Map<Turno, List<FilaHorarioDTO>> grilla = horarioService.agruparParaGrilla(cicloSel.getId(), nivelSel, areaSel);
+            Map<Turno, List<FilaHorarioDTO>> grilla = horarioService.agruparParaGrilla(cicloSel.getId(), nivel, areaSel);
             model.addAttribute("grilla", grilla);
             long totalBloques = grilla.values().stream().mapToLong(List::size).sum();
             long totalAsignaciones = grilla.values().stream()

@@ -4,7 +4,7 @@
       layout:decorate="~{layout}">
 <head><title>Horario</title></head>
 <div layout:fragment="contenido">
-    <a th:href="@{/horarios(cicloId=${cicloId})}" class="page-back">&larr; Volver a la grilla</a>
+    <a th:href="@{/horarios(cicloId=${cicloId},nivel=${bloque.nivel},area=${bloque.area})}" class="page-back">&larr; Volver a la grilla</a>
     <h2 class="page-title">Agregar curso al horario</h2>
 
     <div class="form-card">
@@ -54,7 +54,7 @@
 
             <div class="form-foot">
                 <button type="submit" class="ui primary button">Agregar cursos</button>
-                <a th:href="@{/horarios(cicloId=${cicloId})}" class="ui basic button">Cancelar</a>
+                <a th:href="@{/horarios(cicloId=${cicloId},nivel=${bloque.nivel},area=${bloque.area})}" class="ui basic button">Cancelar</a>
             </div>
         </form>
     </div>

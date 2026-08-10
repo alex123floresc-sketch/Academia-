@@ -108,6 +108,34 @@ public class HorarioServiceImpl implements HorarioService {
     }
 
     @Override
+    public Map<Nivel, Long> contarBloquesPorNivel(Long cicloId) {
+        Map<Nivel, Long> conteo = new LinkedHashMap<>();
+        for (Nivel nivel : Nivel.values()) {
+            conteo.put(nivel, 0L);
+        }
+        if (cicloId == null) return conteo;
+        for (BloqueHorario bloque : bloqueHorarioRepository.findByCicloId(cicloId)) {
+            conteo.merge(bloque.getNivel(), 1L, Long::sum);
+        }
+        return conteo;
+    }
+
+    @Override
+    public Map<String, Long> contarBloquesPorArea(Long cicloId, Nivel nivel) {
+        Map<String, Long> conteo = new LinkedHashMap<>();
+        for (String area : Areas.paraNivel(nivel)) {
+            conteo.put(area, 0L);
+        }
+        if (cicloId == null) return conteo;
+        for (BloqueHorario bloque : bloqueHorarioRepository.findByCicloId(cicloId)) {
+            if (bloque.getNivel() == nivel && conteo.containsKey(bloque.getArea())) {
+                conteo.merge(bloque.getArea(), 1L, Long::sum);
+            }
+        }
+        return conteo;
+    }
+
+    @Override
     @Transactional
     public void asignarCurso(Long bloqueId, DiaSemana dia, List<Long> cursoIds) {
         BloqueHorario bloque = buscarBloque(bloqueId);

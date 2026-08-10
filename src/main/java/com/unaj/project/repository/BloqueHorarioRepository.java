@@ -17,6 +17,8 @@ public interface BloqueHorarioRepository extends JpaRepository<BloqueHorario, Lo
 
     List<BloqueHorario> findByCicloIdAndNivelAndAreaOrderByHoraInicioAsc(Long cicloId, Nivel nivel, String area);
 
+    List<BloqueHorario> findByCicloId(Long cicloId);
+
     boolean existsByCicloIdAndNivelAndTurnoAndHoraInicioAndArea(
             Long cicloId, Nivel nivel, Turno turno, LocalTime horaInicio, String area);
 

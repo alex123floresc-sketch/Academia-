@@ -25,6 +25,12 @@ public interface HorarioService {
     /** Bloques y cursos de un ciclo, nivel y area, agrupados por turno y ordenados por hora. Cada nivel+area tiene su propia grilla, independiente de las demas, aunque el ciclo se comparta entre niveles. */
     Map<Turno, List<FilaHorarioDTO>> agruparParaGrilla(Long cicloId, Nivel nivel, String area);
 
+    /** Bloques horarios definidos por nivel, para el selector de nivel de /horarios (mismo patron que CursoService.contarPorNivel). */
+    Map<Nivel, Long> contarBloquesPorNivel(Long cicloId);
+
+    /** Bloques horarios definidos por area de un nivel, para el selector de area de /horarios (mismo patron que CursoService.contarPorArea). */
+    Map<String, Long> contarBloquesPorArea(Long cicloId, Nivel nivel);
+
     void asignarCurso(Long bloqueId, DiaSemana dia, List<Long> cursoIds);
 
     void quitarCurso(Long horarioId);

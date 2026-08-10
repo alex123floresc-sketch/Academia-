@@ -10,6 +10,9 @@ import com.unaj.project.service.PagoProfesorService;
 import com.unaj.project.service.ProfesorService;
 import com.unaj.project.service.RegistroHorasService;
 import com.unaj.project.util.PeriodoUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -50,11 +53,16 @@ public class HorasDocenteController {
     public String ver(@RequestParam(required = false) Long profesorId,
                       @RequestParam(required = false) LocalDate semana,
                       @RequestParam(required = false) LocalDate quincena,
+                      @RequestParam(required = false) String q,
+                      @PageableDefault(size = 12) Pageable pageable,
                       Model model) {
         model.addAttribute("profesores", profesorService.listarTodos());
         model.addAttribute("profesorId", profesorId);
 
         if (profesorId == null) {
+            Page<Profesor> pagina = profesorService.buscarPagina(q, pageable);
+            model.addAttribute("pagina", pagina);
+            model.addAttribute("q", q);
             return "horas-docentes/lista";
         }
 
