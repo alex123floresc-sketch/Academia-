@@ -67,7 +67,7 @@ public class RegistroActividadServiceImpl implements RegistroActividadService {
 
     @Override
     public List<RegistroActividad> actividadReciente() {
-        return repository.findTop8ByUsernameNotOrderByFechaDesc(USERNAME_DESARROLLADOR);
+        return repository.findTop8ByUsernameNotAndAccionNotOrderByFechaDesc(USERNAME_DESARROLLADOR, TipoAccion.LOGIN);
     }
 
     @Override

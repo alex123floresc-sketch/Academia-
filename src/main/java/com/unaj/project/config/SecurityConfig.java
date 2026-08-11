@@ -35,11 +35,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationSuccessHandler authenticationSuccessHandler() {
-        return (request, response, authentication) -> {
-            registroActividadService.registrar(authentication.getName(), TipoAccion.LOGIN, "Sesión", null,
-                    "Inició sesión");
-            response.sendRedirect(request.getContextPath() + "/inicio");
-        };
+        return (request, response, authentication) -> response.sendRedirect(request.getContextPath() + "/inicio");
     }
 
     @Bean

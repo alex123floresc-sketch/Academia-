@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 @Controller
 @RequestMapping("/actividad")
@@ -44,7 +45,8 @@ public class RegistroActividadController {
         model.addAttribute("modulo", modulo);
         model.addAttribute("accion", accion);
         model.addAttribute("modulos", registroActividadService.modulos());
-        model.addAttribute("acciones", TipoAccion.values());
+        model.addAttribute("acciones", Arrays.stream(TipoAccion.values())
+                .filter(a -> a != TipoAccion.LOGIN).toArray());
         model.addAttribute("totalHoy", registroActividadService.contarDesde(inicioHoy));
         model.addAttribute("totalSemana", registroActividadService.contarDesde(inicioSemana));
         return "actividad/lista";
