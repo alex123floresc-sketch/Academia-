@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title layout:title-pattern="$CONTENT_TITLE · Lapreplus">Lapreplus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/semantic-theme.css}">
+    <link th:if="${marcaTieneFavicon}" rel="icon" th:href="@{/configuracion/favicon}">
+    <link th:if="${!marcaTieneFavicon and marcaTieneLogo}" rel="icon" th:href="@{/configuracion/logo}">
+    <style th:if="${marcaColor != null and !marcaColor.isEmpty()}" th:text="':root{--sage:' + ${marcaColor} + ';--sage-strong:color-mix(in srgb, ' + ${marcaColor} + ' 75%, black);--sage-hover:color-mix(in srgb, ' + ${marcaColor} + ' 85%, black);--sage-soft:color-mix(in srgb, ' + ${marcaColor} + ' 12%, white);}'"></style>
+    <th:block layout:fragment="estilos"></th:block>
+</head>
+<body th:attr="data-marca=${marcaNombre}">
+<div class="app">
+
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar-left">
+                <button type="button" class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false">
+                    <svg class="ic" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+                </button>
+                <div>
+                    <div class="crumb" id="crumb">Panel</div>
+                    <h1 id="ptitle" th:text="${marcaNombre}">Lapreplus</h1>
+                </div>
+            </div>
+            <div class="top-actions">
+                <div class="topbar-dropdown">
+                    <button type="button" class="topbar-icon-btn" id="quickMenuBtn" aria-label="Accesos rápidos">
+                        <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                    </button>
+                    <div class="topbar-dropdown-panel" id="quickMenuPanel">
+                        <div class="topbar-dropdown-title">Accesos rápidos</div>
+                        <a th:href="@{/alumnos/nuevo}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="topbar-dropdown-item">
+                            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg>Nuevo alumno</a>
+                        <a th:href="@{/profesores/nuevo}" sec:authorize="hasRole('ADMIN')" class="topbar-dropdown-item">
+                            <svg viewBox="0 0 24 24"><path d="M12 14 2 9l10-5 10 5-10 5Zm0 0v7M6 10.6V16c0 1 2.7 3 6 3s6-2 6-3v-5.4"/></svg>Nuevo profesor</a>
+                        <a th:href="@{/horas-docentes}" sec:authorize="hasAnyRole('ADMIN','CAJERO','AUXILIAR')" class="topbar-dropdown-item">
+                            <svg viewBox="0 0 24 24"><path d="M20 7h-4V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2ZM10 5h4v2h-4V5Z"/></svg>Registrar horas docente</a>
+                        <a th:href="@{/asistencias}" sec:authorize="hasAnyRole('ADMIN','AUXILIAR')" class="topbar-dropdown-item">
+                            <svg viewBox="0 0 24 24"><path d="M3 7h4v4H3zM3 13h4v4H3zM9 7h12M9 13h12M9 19h12"/></svg>Registrar asistencia</a>
+                    </div>
+                </div>
+                <div class="topbar-dropdown">
+                    <button type="button" class="topbar-icon-btn" id="searchMenuBtn" aria-label="Buscar">
+                        <svg class="ic" viewBox="0 0 24 24"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM21 21l-4.35-4.35"/></svg>
+                    </button>
+                    <div class="topbar-dropdown-panel" id="searchMenuPanel" style="padding:12px">
+                        <form th:action="@{/buscar}" method="get" style="display:flex;gap:8px">
+                            <input type="text" name="q" placeholder="Alumno, profesor, curso..." aria-label="Buscar en el sistema" autocomplete="off" style="flex:1;padding:8px 11px;border:1px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:13px">
+                            <button type="submit" class="ui small primary button">Buscar</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="topbar-dropdown">
+                    <button type="button" class="topbar-icon-btn" id="notifMenuBtn" aria-label="Notificaciones">
+                        <svg class="ic" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        <span class="topbar-badge" th:if="${not #lists.isEmpty(notificaciones)}" th:text="${notificaciones.size()}"></span>
+                    </button>
+                    <div class="topbar-dropdown-panel" id="notifMenuPanel" style="min-width:280px">
+                        <div class="topbar-dropdown-title">Notificaciones</div>
+                        <a th:each="n : ${notificaciones}" th:href="@{${n.href()}}" class="topbar-dropdown-item" style="align-items:flex-start;flex-direction:column;gap:2px">
+                            <span class="strong" th:text="${n.titulo()}" style="color:var(--ink)"></span>
+                            <span style="font-size:11.5px;color:var(--ink-faint)" th:text="${n.detalle()}"></span>
+                        </a>
+                        <p th:if="${#lists.isEmpty(notificaciones)}" class="empty" style="padding:16px 10px">Sin notificaciones nuevas.</p>
+                    </div>
+                </div>
+                <div class="topbar-dropdown">
+                    <button type="button" class="av topbar-avatar-btn" id="profileMenuBtn" aria-label="Cuenta" th:attr="data-name=${#authentication?.name}">
+                        <img th:if="${usuarioActualTieneFoto}" th:src="@{/perfil/foto}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">
+                        <span th:unless="${usuarioActualTieneFoto}" class="av-initials">U</span>
+                    </button>
+                    <div class="topbar-dropdown-panel" id="profileMenuPanel" style="min-width:200px">
+                        <div style="padding:8px 10px 10px">
+                            <div class="strong" sec:authentication="name" style="color:var(--ink);font-size:13.5px">usuario</div>
+                            <div style="font-size:11.5px;color:var(--ink-faint);margin-top:2px">
+                                <span sec:authorize="hasRole('ADMIN')">Administrador</span>
+                                <span sec:authorize="hasRole('CAJERO')">Cajero</span>
+                                <span sec:authorize="hasRole('AUXILIAR')">Auxiliar</span>
+                            </div>
+                        </div>
+                        <div style="border-top:1px solid var(--line-soft);margin:2px 0 6px"></div>
+                        <a th:href="@{/perfil}" class="topbar-dropdown-item">
+                            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg>Mi perfil</a>
+                        <form th:action="@{/logout}" method="post" style="margin:0">
+                            <button type="submit" class="topbar-dropdown-item" style="width:100%;border:none;background:none;cursor:pointer;text-align:left;color:var(--rose-strong)">
+                                <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Cerrar sesión</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="wrap">
+                <div th:if="${mensajeExito}" class="ui positive message">
+                    <i class="close icon" onclick="this.parentElement.style.display='none'"></i>
+                    <span th:text="${mensajeExito}"></span>
+                </div>
+                <div th:if="${mensajeError}" class="ui negative message">
+                    <i class="close icon" onclick="this.parentElement.style.display='none'"></i>
+                    <span th:text="${mensajeError}"></span>
+                </div>
+                <div layout:fragment="contenido"></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    (function(){
+        var marca = document.body.getAttribute('data-marca');
+        if (marca && marca !== 'Lapreplus') {
+            document.title = document.title.replace('Lapreplus', marca);
+        }
+    })();
+
+    (function(){
+        var path = window.location.pathname;
+        var links = document.querySelectorAll('.sidebar .app-nav .item');
+        var best = null;
+        links.forEach(function(a){
+            var href = a.getAttribute('href');
+            if(href && href !== '/' && path.indexOf(href) === 0){
+                if(!best || href.length > best.getAttribute('href').length) best = a;
+            }
+        });
+        if(best){
+            best.classList.add('active');
+            var crumb = document.getElementById('crumb');
+            var title = document.getElementById('ptitle');
+            if(crumb) crumb.textContent = best.getAttribute('data-group') || 'Panel';
+            if(title) title.textContent = best.getAttribute('data-title') || best.textContent.trim();
+        }
+        document.querySelectorAll('.av').forEach(function(av){
+            var initials = av.querySelector('.av-initials');
+            if (!initials) return;
+            var n = av.getAttribute('data-name') || 'U';
+            initials.textContent = n.trim().substring(0,2).toUpperCase();
+        });
+    })();
+
+    (function(){
+        var sidebar = document.querySelector('.sidebar');
+        var backdrop = document.getElementById('sidebarBackdrop');
+        var toggle = document.getElementById('menuToggle');
+        if(!sidebar || !backdrop || !toggle) return;
+
+        function open(){
+            sidebar.classList.add('open');
+            backdrop.classList.add('show');
+            toggle.setAttribute('aria-expanded', 'true');
+        }
+        function close(){
+            sidebar.classList.remove('open');
+            backdrop.classList.remove('show');
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+        toggle.addEventListener('click', function(){
+            sidebar.classList.contains('open') ? close() : open();
+        });
+        backdrop.addEventListener('click', close);
+        sidebar.querySelectorAll('.app-nav .item').forEach(function(a){ a.addEventListener('click', close); });
+        document.addEventListener('keydown', function(e){ if(e.key === 'Escape') close(); });
+        window.addEventListener('resize', function(){ if(window.innerWidth > 920) close(); });
+    })();
+
+    (function(){
+        function closeAll(except){
+            document.querySelectorAll('.topbar-dropdown-panel.open').forEach(function(p){
+                if(p !== except) p.classList.remove('open');
+            });
+        }
+        function bindDropdown(btnId, panelId){
+            var btn = document.getElementById(btnId);
+            var panel = document.getElementById(panelId);
+            if(!btn || !panel) return;
+            btn.addEventListener('click', function(e){
+                e.stopPropagation();
+                var wasOpen = panel.classList.contains('open');
+                closeAll(null);
+                if(!wasOpen) panel.classList.add('open');
+            });
+        }
+        ['quickMenu', 'searchMenu', 'notifMenu', 'profileMenu'].forEach(function(name){
+            bindDropdown(name + 'Btn', name + 'Panel');
+        });
+        document.addEventListener('click', function(e){
+            document.querySelectorAll('.topbar-dropdown-panel.open').forEach(function(p){
+                if(!p.contains(e.target)) p.classList.remove('open');
+            });
+        });
+        document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeAll(null); });
+    })();
+</script>
+<th:block layout:fragment="scripts"></th:block>
+</body>
+</html>

@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${configuracion.nombreAcademia}">Academia</title>
+    <meta name="description" th:if="${configuracion.eslogan != null and !configuracion.eslogan.isEmpty()}"
+          th:content="${configuracion.eslogan}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/semantic-theme.css}">
+    <link th:if="${configuracion.faviconPresente}" rel="icon" th:href="@{/configuracion/favicon}">
+    <link th:if="${!configuracion.faviconPresente and configuracion.logoPresente}" rel="icon" th:href="@{/configuracion/logo}">
+    <script>
+        (function () {
+            var guardado = localStorage.getItem('pubTheme');
+            var tema = guardado || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (tema === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        })();
+    </script>
+    <style th:text="':root{--accent-raw:' + (${configuracion.colorAcento != null and !configuracion.colorAcento.isEmpty()} ? ${configuracion.colorAcento} : '#2563EB') + ';--sage:var(--accent-raw);--sage-strong:color-mix(in srgb, var(--accent-raw) 75%, black);--sage-hover:color-mix(in srgb, var(--accent-raw) 85%, black);--sage-soft:color-mix(in srgb, var(--accent-raw) 12%, white);}'"></style>
+    <style>
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+        body { background: var(--bg); margin: 0; transition: background-color .2s, color .2s; }
+
+        /* Modo oscuro (solo página pública) */
+        html[data-theme="dark"] {
+            --bg: #0F172A; --surface: #182437; --surface-2: #202F45;
+            --ink: #F1F5F9; --ink-soft: #C3CEDD; --ink-faint: #8695AA;
+            --line: #2D3E56; --line-soft: #263548;
+            --sage-soft: color-mix(in srgb, var(--accent-raw) 22%, black);
+            --sage-hover: color-mix(in srgb, var(--accent-raw) 78%, white);
+            --lav-soft: #262A4A; --rose-soft: #3A2224; --amber-soft: #392A15; --sky-soft: #163044;
+        }
+        html[data-theme="dark"] body {
+            background:
+                radial-gradient(1100px 520px at 14% -8%, rgba(37,99,235,.10), transparent 60%),
+                radial-gradient(900px 460px at 108% 0%, rgba(99,102,241,.08), transparent 55%),
+                var(--bg);
+        }
+        html[data-theme="dark"] .pub-nav { background: rgba(15,23,42,.86); }
+        html[data-theme="dark"] .pub-hero:not(.has-bg) .pub-exp-badge { color: var(--ink); }
+        html[data-theme="dark"] .pub-top { background: var(--surface); }
+
+        .pub-theme-toggle {
+            width: 38px; height: 38px; border-radius: 9px; border: 1px solid var(--line);
+            background: var(--surface); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--ink-soft); flex-shrink: 0;
+        }
+        .pub-theme-toggle:hover { color: var(--ink); background: var(--surface-2); }
+        .pub-theme-toggle svg { width: 17px; height: 17px; stroke: currentColor; stroke-width: 1.8; fill: none; }
+        .pub-theme-toggle .ic-moon { display: none; }
+        html[data-theme="dark"] .pub-theme-toggle .ic-sun { display: none; }
+        html[data-theme="dark"] .pub-theme-toggle .ic-moon { display: block; }
+
+        /* Nav */
+        .pub-nav {
+            position: sticky; top: 0; z-index: 40; background: rgba(244,247,252,.86); backdrop-filter: blur(10px);
+            border-bottom: 1px solid transparent; transition: border-color .2s, box-shadow .2s;
+        }
+        .pub-nav.scrolled { border-color: var(--line); box-shadow: var(--shadow-sm); }
+        .pub-nav-inner {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 32px; max-width: 1220px; margin: 0 auto; gap: 16px;
+        }
+        .pub-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0; }
+        .pub-seal {
+            width: 40px; height: 40px; border-radius: 11px; background: var(--sage-soft);
+            color: var(--sage-strong); display: flex; align-items: center; justify-content: center;
+            font-family: 'Fraunces', serif; font-weight: 600; font-size: 18px; overflow: hidden; flex-shrink: 0;
+        }
+        .pub-seal img { width: 100%; height: 100%; object-fit: contain; }
+        .pub-brand-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 17px; color: var(--ink); }
+
+        .pub-links { display: flex; align-items: center; gap: 2px; list-style: none; margin: 0; padding: 0; }
+        .pub-links a {
+            display: block; padding: 9px 12px; border-radius: 8px; font-size: 13px; font-weight: 500;
+            color: var(--ink-soft); text-decoration: none; transition: background .15s, color .15s; white-space: nowrap;
+        }
+        .pub-links a:hover { background: var(--surface-2); color: var(--ink); }
+        .pub-links a.active { color: var(--sage-strong); background: var(--sage-soft); }
+        .pub-nav-right { display: flex; align-items: center; gap: 10px; }
+        .pub-menu-toggle {
+            display: none; width: 38px; height: 38px; border-radius: 9px; border: 1px solid var(--line);
+            background: var(--surface); align-items: center; justify-content: center; cursor: pointer;
+        }
+        .pub-menu-toggle svg { width: 19px; height: 19px; stroke: var(--ink); stroke-width: 1.8; fill: none; }
+        .pub-nav-login { display: inline-flex; }
+
+        .pub-btn {
+            position: relative; overflow: hidden;
+            display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 10px;
+            font-size: 13.5px; font-weight: 600; text-decoration: none; transition: transform .15s, box-shadow .15s; white-space: nowrap;
+            border: none; cursor: pointer; font-family: inherit;
+        }
+        .pub-btn:active { transform: scale(.96); }
+        .pub-btn-primary { background: linear-gradient(150deg, var(--sage), var(--navy)); color: #fff; box-shadow: var(--shadow-sm); }
+        .pub-btn-primary::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.25) 45%, transparent 60%);
+            transform: translateX(-120%); transition: transform .5s ease;
+        }
+        .pub-btn-primary:hover::after { transform: translateX(120%); }
+        .pub-btn-primary:hover { background: linear-gradient(150deg, var(--sage-hover), var(--navy-deep)); transform: translateY(-1px); }
+        .pub-hero.has-bg .pub-btn-secondary { background: rgba(255,255,255,.14); color: #fff; border: 1px solid rgba(255,255,255,.35); }
+        .pub-btn-secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+        .pub-btn-secondary:hover { background: var(--surface-2); }
+        .pub-btn-block { width: 100%; justify-content: center; }
+
+        @media (max-width: 980px) {
+            .pub-links { display: none; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column;
+                         background: var(--surface); border-bottom: 1px solid var(--line); box-shadow: var(--shadow-md);
+                         padding: 10px 20px 16px; gap: 2px; max-height: calc(100vh - 68px); overflow-y: auto; }
+            .pub-links.open { display: flex; }
+            .pub-links a { padding: 12px 10px; }
+            .pub-menu-toggle { display: flex; }
+            .pub-nav-login { display: none; }
+        }
+
+        /* Redes sociales */
+        .pub-social { display: flex; align-items: center; gap: 8px; }
+        .pub-social a {
+            width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center;
+            color: var(--ink-soft); background: var(--surface-2); transition: background .12s, color .12s;
+        }
+        .pub-social a:hover { background: var(--sage-soft); color: var(--sage-strong); }
+        .pub-social svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 1.8; fill: none; }
+        .pub-footer .pub-social a { background: rgba(255,255,255,.06); color: var(--ink-faint); }
+
+        /* WhatsApp flotante */
+        .pub-whatsapp {
+            position: fixed; right: 22px; bottom: 22px; z-index: 50; width: 56px; height: 56px; border-radius: 50%;
+            background: #25D366; color: #fff; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 26px -8px rgba(37,211,102,.6); transition: transform .15s;
+        }
+        .pub-whatsapp:hover { transform: scale(1.06); }
+        .pub-whatsapp svg { width: 28px; height: 28px; fill: currentColor; }
+
+        /* Volver arriba */
+        .pub-top {
+            position: fixed; right: 22px; bottom: 88px; z-index: 50; width: 44px; height: 44px; border-radius: 50%;
+            background: var(--surface); border: 1px solid var(--line); color: var(--ink-soft);
+            display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md);
+            opacity: 0; pointer-events: none; transition: opacity .2s, transform .15s;
+        }
+        .pub-top.show { opacity: 1; pointer-events: auto; }
+        .pub-top:hover { color: var(--ink); transform: translateY(-2px); }
+        .pub-top svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+        /* Hero */
+        .pub-hero {
+            position: relative; max-width: 1220px; margin: 0 auto; padding: 56px 32px 72px;
+            border-radius: 28px; overflow: hidden; isolation: isolate; margin-top: 16px;
+        }
+        .pub-hero-bg { position: absolute; inset: 0; z-index: -1; background-size: cover; background-position: center; }
+        .pub-hero-bg::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(27,42,61,.55), rgba(27,42,61,.72));
+        }
+        .pub-hero-plain {
+            position: absolute; inset: 0; z-index: -1;
+            background:
+                radial-gradient(560px 360px at 15% 10%, var(--sage-soft), transparent 60%),
+                radial-gradient(480px 340px at 88% 90%, var(--lav-soft), transparent 60%),
+                radial-gradient(420px 320px at 60% -10%, color-mix(in srgb, var(--navy) 14%, transparent), transparent 65%),
+                var(--surface);
+        }
+        .pub-hero-plain::after {
+            content: ''; position: absolute; inset: 0; opacity: .5;
+            background-image: radial-gradient(color-mix(in srgb, var(--navy) 22%, transparent) 1.2px, transparent 1.2px);
+            background-size: 26px 26px; mask-image: linear-gradient(180deg, transparent, rgba(0,0,0,.5) 40%, transparent 85%);
+        }
+        .pub-hero-content { max-width: 640px; }
+        .pub-hero.has-bg .pub-hero-content { max-width: 680px; }
+        .pub-hero.has-bg h1, .pub-hero.has-bg p.pub-tag { color: #fff; }
+        .pub-eyebrow {
+            display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .06em;
+            text-transform: uppercase; color: var(--sage-strong); background: var(--sage-soft);
+            padding: 6px 14px; border-radius: 999px; margin-bottom: 18px;
+        }
+        .pub-hero.has-bg .pub-eyebrow { background: rgba(255,255,255,.18); color: #fff; }
+        .pub-hero h1 {
+            font-family: 'Fraunces', serif; font-weight: 600; font-size: clamp(30px, 4.2vw, 46px);
+            color: var(--ink); line-height: 1.12; margin: 0 0 16px;
+        }
+        .pub-hero p.pub-tag { font-size: 16px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 30px; max-width: 540px; }
+        .pub-cta-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .pub-exp-badge {
+            display: inline-flex; align-items: baseline; gap: 6px; margin-top: 28px; padding: 10px 16px;
+            background: rgba(255,255,255,.14); border-radius: 12px; color: #fff; backdrop-filter: blur(4px);
+        }
+        .pub-hero:not(.has-bg) .pub-exp-badge { background: var(--surface); border: 1px solid var(--line); color: var(--ink); box-shadow: var(--shadow-layer-1); }
+        .pub-exp-badge b { font-family: 'Fraunces', serif; font-size: 20px; }
+        .pub-exp-badge span { font-size: 12px; opacity: .85; }
+
+        /* Franja de cifras */
+        .pub-stats-strip { max-width: 1220px; margin: 28px auto 0; padding: 0 32px; }
+        .pub-stats-inner {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1px;
+            background: var(--line); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden;
+            box-shadow: var(--shadow-layer-1);
+        }
+        .pub-stat { position: relative; background: var(--surface); padding: 22px 18px; text-align: center; overflow: hidden; transition: background .2s ease; }
+        .pub-stat::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--sage), var(--navy)); opacity: 0; transition: opacity .2s ease; }
+        .pub-stat:hover { background: var(--sage-soft); }
+        .pub-stat:hover::before { opacity: 1; }
+        .pub-stat-num {
+            display: block; font-family: 'Fraunces', serif; font-weight: 600; font-size: 30px;
+            color: var(--sage-strong); line-height: 1.1; margin-bottom: 4px;
+        }
+        .pub-stat span { font-size: 12px; color: var(--ink-faint); }
+
+        /* Formas decorativas (manchas difuminadas frías) detrás de algunas secciones */
+        .pub-blob-host { position: relative; }
+        .pub-blob { position: absolute; border-radius: 50%; filter: blur(70px); z-index: 0; pointer-events: none; }
+        .pub-blob-navy { background: color-mix(in srgb, var(--navy) 55%, transparent); }
+        .pub-blob-sage { background: color-mix(in srgb, var(--sage) 45%, transparent); }
+        .pub-blob-lav { background: color-mix(in srgb, var(--lav) 42%, transparent); }
+        .pub-blob-host > *:not(.pub-blob) { position: relative; z-index: 1; }
+
+        /* Entrada al hacer scroll */
+        .pub-reveal { opacity: 0; transform: translateY(18px); transition: opacity .55s cubic-bezier(.22,.8,.36,1), transform .55s cubic-bezier(.22,.8,.36,1); }
+        .pub-reveal.pub-reveal-in { opacity: 1; transform: none; }
+
+        /* Interacción hover en tarjetas */
+        .pub-nivel-card, .pub-area-card, .pub-vm-card, .pub-curso-card, .pub-malla-area,
+        .pub-logro-card, .pub-test-card, .pub-sede-card, .pub-docente-card, .pub-evento {
+            transition: transform .2s cubic-bezier(.22,.8,.36,1), box-shadow .2s ease, border-color .2s ease;
+        }
+        .pub-nivel-card:hover, .pub-area-card:hover, .pub-vm-card:hover, .pub-curso-card:hover, .pub-malla-area:hover,
+        .pub-logro-card:hover, .pub-test-card:hover, .pub-sede-card:hover, .pub-evento:hover {
+            transform: translateY(-4px); box-shadow: var(--shadow-layer-hover); border-color: var(--sage-soft);
+        }
+        .pub-docente-card { transition: transform .2s cubic-bezier(.22,.8,.36,1); }
+        .pub-docente-card:hover { transform: translateY(-4px); }
+        .pub-docente-avatar { transition: box-shadow .2s ease, transform .2s ease; }
+        .pub-docente-card:hover .pub-docente-avatar { box-shadow: var(--shadow-layer-hover); transform: scale(1.04); }
+
+        /* Sections */
+        .pub-section { max-width: 1220px; margin: 0 auto; padding: 56px 32px; scroll-margin-top: 76px; }
+        .pub-section-head { text-align: center; max-width: 640px; margin: 0 auto 36px; }
+        .pub-section-head h2 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 27px; color: var(--ink); margin: 0 0 10px; }
+        .pub-section-head p { color: var(--ink-faint); font-size: 14.5px; margin: 0; line-height: 1.6; }
+
+        .pub-niveles { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+        .pub-nivel-card {
+            background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+            padding: 28px 24px; box-shadow: var(--shadow-layer-1); text-align: center;
+        }
+        .pub-nivel-icon, .pub-icon-circle {
+            width: 52px; height: 52px; border-radius: 14px; background: var(--sage-soft); color: var(--sage-strong);
+            display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;
+        }
+        .pub-nivel-icon svg, .pub-icon-circle svg { width: 26px; height: 26px; stroke: currentColor; stroke-width: 1.8; fill: none; }
+        .pub-nivel-card h3 { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; color: var(--ink); margin: 0 0 8px; }
+        .pub-nivel-card p { font-size: 13px; color: var(--ink-faint); margin: 0; line-height: 1.5; }
+        /* Ritmo de color frío entre las tarjetas de nivel, para que no se vea monocromo */
+        .pub-niveles .pub-nivel-card:nth-child(3n+2) .pub-nivel-icon { background: var(--sky-soft); color: var(--sky-strong); }
+        .pub-niveles .pub-nivel-card:nth-child(3n+3) .pub-nivel-icon { background: var(--lav-soft); color: var(--lav-strong); }
+
+        /* Áreas de Preuniversitario */
+        .pub-areas { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-top: 16px; }
+        .pub-area-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow-layer-1); }
+        .pub-area-card h4 { font-size: 14.5px; font-weight: 600; color: var(--sage-strong); margin: 0 0 6px; }
+        .pub-area-card p { font-size: 12.5px; color: var(--ink-faint); margin: 0; line-height: 1.55; }
+
+        /* Nosotros */
+        .pub-about-text { max-width: 760px; margin: 0 auto 32px; text-align: center; color: var(--ink-soft); font-size: 15px; line-height: 1.75; white-space: pre-line; }
+        .pub-vm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .pub-vm-card {
+            background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+            padding: 30px 28px; box-shadow: var(--shadow-layer-1);
+        }
+        .pub-vm-card .pub-vm-icon {
+            width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
+        }
+        .pub-vm-card.vision .pub-vm-icon { background: var(--sky-soft); color: var(--sky-strong); }
+        .pub-vm-card.mision .pub-vm-icon { background: var(--lav-soft); color: var(--lav-strong); }
+        .pub-vm-card .pub-vm-icon svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 1.8; fill: none; }
+        .pub-vm-card h3 { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; color: var(--ink); margin: 0 0 10px; }
+        .pub-vm-card p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.7; margin: 0; white-space: pre-line; }
+
+        /* Proceso de admisión */
+        .pub-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; counter-reset: pubstep; }
+        .pub-step { text-align: center; position: relative; }
+        .pub-step-num {
+            width: 44px; height: 44px; border-radius: 50%; background: var(--sage); color: #fff; font-family: 'Fraunces', serif;
+            font-weight: 600; font-size: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;
+            box-shadow: var(--shadow-md);
+        }
+        .pub-step h3 { font-size: 14.5px; font-weight: 600; color: var(--ink); margin: 0 0 6px; }
+        .pub-step p { font-size: 12.5px; color: var(--ink-faint); margin: 0; line-height: 1.5; }
+
+        /* Docentes */
+        .pub-docentes { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 22px; }
+        .pub-docente-card { text-align: center; }
+        .pub-docente-avatar {
+            width: 110px; height: 110px; border-radius: 50%; margin: 0 auto 14px; overflow: hidden;
+            background: var(--sage-soft); color: var(--sage-strong); display: flex; align-items: center; justify-content: center;
+            font-family: 'Fraunces', serif; font-weight: 600; font-size: 34px; border: 3px solid var(--surface); box-shadow: var(--shadow-layer-1);
+        }
+        .pub-docente-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .pub-docente-card h3 { font-size: 14.5px; font-weight: 600; color: var(--ink); margin: 0 0 3px; }
+        .pub-docente-card p { font-size: 12px; color: var(--ink-faint); margin: 0; }
+
+        /* Cursos */
+        .pub-cursos { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+        .pub-curso-card {
+            background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px;
+            box-shadow: var(--shadow-layer-1);
+        }
+        .pub-curso-card h3 { font-size: 15px; font-weight: 600; color: var(--ink); margin: 0 0 8px; }
+        .pub-curso-meta { display: flex; gap: 8px; flex-wrap: wrap; font-size: 11.5px; }
+        .pub-pill { display: inline-block; padding: 4px 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink-soft); }
+
+        /* Malla de cursos por área */
+        .pub-malla { margin-top: 44px; }
+        .pub-malla-head { text-align: center; margin-bottom: 26px; }
+        .pub-malla-head h3 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 20px; color: var(--ink); margin: 0 0 6px; }
+        .pub-malla-head p { font-size: 13px; color: var(--ink-faint); margin: 0; }
+        .pub-malla-nivel { margin-bottom: 30px; }
+        .pub-malla-nivel > h4 {
+            font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+            color: var(--sage-strong); margin: 0 0 14px; display: flex; align-items: center; gap: 10px;
+        }
+        .pub-malla-nivel > h4::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+        .pub-malla-areas { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+        .pub-malla-area { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow-layer-1); }
+        .pub-malla-area h5 { font-size: 13px; font-weight: 600; color: var(--ink); margin: 0 0 10px; }
+        .pub-malla-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+        /* Resultados de ingreso */
+        .pub-logros { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+        .pub-logro-card {
+            background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 22px;
+            box-shadow: var(--shadow-layer-1); text-align: center;
+        }
+        .pub-logro-avatar {
+            width: 68px; height: 68px; border-radius: 50%; margin: 0 auto 14px; overflow: hidden;
+            background: var(--amber-soft); color: var(--amber-strong); display: flex; align-items: center; justify-content: center;
+            font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px;
+        }
+        .pub-logro-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .pub-logro-card h3 { font-size: 14px; font-weight: 600; color: var(--ink); margin: 0 0 4px; }
+        .pub-logro-uni { font-size: 12.5px; color: var(--sage-strong); font-weight: 600; margin: 0 0 2px; }
+        .pub-logro-carrera { font-size: 11.5px; color: var(--ink-faint); margin: 0; }
+
+        /* Testimonios */
+        .pub-testimonios { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+        .pub-test-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-layer-1); }
+        .pub-test-quote { color: var(--sage-soft); width: 26px; height: 20px; margin-bottom: 10px; }
+        .pub-test-comment { font-size: 13.5px; color: var(--ink-soft); line-height: 1.65; margin: 0 0 16px; }
+        .pub-test-who { display: flex; align-items: center; gap: 10px; }
+        .pub-test-avatar {
+            width: 38px; height: 38px; border-radius: 50%; overflow: hidden; background: var(--lav-soft); color: var(--lav-strong);
+            display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; flex-shrink: 0;
+        }
+        .pub-test-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .pub-test-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+        .pub-test-role { font-size: 11.5px; color: var(--ink-faint); }
+
+        /* FAQ */
+        .pub-faq { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+        .pub-faq-item { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+        .pub-faq-item summary {
+            list-style: none; cursor: pointer; padding: 16px 20px; font-size: 13.5px; font-weight: 600; color: var(--ink);
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        }
+        .pub-faq-item summary::-webkit-details-marker { display: none; }
+        .pub-faq-item summary::after {
+            content: ''; width: 8px; height: 8px; border-right: 1.6px solid var(--ink-faint); border-bottom: 1.6px solid var(--ink-faint);
+            transform: rotate(45deg); transition: transform .15s; flex-shrink: 0;
+        }
+        .pub-faq-item[open] summary::after { transform: rotate(-135deg); }
+        .pub-faq-item p { padding: 0 20px 18px; margin: 0; font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+
+        /* Galería */
+        .pub-galeria { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+        .pub-galeria button {
+            display: block; width: 100%; border: none; padding: 0; margin: 0; cursor: pointer;
+            border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-layer-1); position: relative;
+            transition: transform .2s cubic-bezier(.22,.8,.36,1), box-shadow .2s ease;
+        }
+        .pub-galeria button:hover { transform: translateY(-4px); box-shadow: var(--shadow-layer-hover); }
+        .pub-galeria img { width: 100%; height: 160px; object-fit: cover; display: block; transition: transform .3s; }
+        .pub-galeria button:hover img { transform: scale(1.06); }
+
+        /* Lightbox de galería */
+        .pub-lightbox {
+            position: fixed; inset: 0; z-index: 200; background: rgba(10,15,25,.92);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: opacity .2s ease, visibility 0s linear .2s;
+        }
+        .pub-lightbox.open { opacity: 1; visibility: visible; transition: opacity .2s ease, visibility 0s linear 0s; }
+        .pub-lightbox-figure { max-width: min(88vw, 900px); max-height: 84vh; margin: 0; text-align: center; }
+        .pub-lightbox-figure img { max-width: 100%; max-height: 76vh; border-radius: 10px; box-shadow: 0 30px 70px -20px rgba(0,0,0,.6); display: block; margin: 0 auto; }
+        .pub-lightbox-figure figcaption { color: rgba(255,255,255,.82); font-size: 13px; margin-top: 14px; }
+        .pub-lightbox-close {
+            position: absolute; top: 20px; right: 20px; width: 42px; height: 42px; border-radius: 50%;
+            background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: #fff;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .pub-lightbox-close:hover { background: rgba(255,255,255,.18); }
+        .pub-lightbox-close svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; }
+        .pub-lightbox-nav {
+            position: absolute; top: 50%; transform: translateY(-50%); width: 48px; height: 48px; border-radius: 50%;
+            background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: #fff;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .pub-lightbox-nav:hover { background: rgba(255,255,255,.18); }
+        .pub-lightbox-nav svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2; fill: none; }
+        .pub-lightbox-prev { left: 18px; }
+        .pub-lightbox-next { right: 18px; }
+        @media (max-width: 640px) { .pub-lightbox-nav { width: 40px; height: 40px; } .pub-lightbox-prev { left: 8px; } .pub-lightbox-next { right: 8px; } }
+
+        /* Calendario */
+        .pub-eventos { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+        .pub-evento { display: flex; gap: 16px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 20px; box-shadow: var(--shadow-layer-1); }
+        .pub-evento-fecha {
+            width: 56px; height: 56px; border-radius: 12px; background: var(--sage-soft); color: var(--sage-strong);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .pub-evento-fecha .d { font-family: 'Fraunces', serif; font-weight: 600; font-size: 18px; line-height: 1; }
+        .pub-evento-fecha .m { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; }
+        .pub-evento-body h3 { font-size: 14px; font-weight: 600; color: var(--ink); margin: 0 0 3px; }
+        .pub-evento-body p { font-size: 12px; color: var(--ink-faint); margin: 0; line-height: 1.5; }
+
+        /* Sedes */
+        .pub-sedes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+        .pub-sede-card {
+            background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+            overflow: hidden; box-shadow: var(--shadow-layer-1);
+        }
+        .pub-sede-photo-wrap { position: relative; width: 100%; height: 160px; overflow: hidden; background: var(--surface-2); }
+        .pub-sede-photo-bg { position: absolute; inset: -12px; background-size: cover; background-position: center; filter: blur(20px) saturate(1.1) brightness(.92); transform: scale(1.1); }
+        .pub-sede-photo-bg::after { content: ''; position: absolute; inset: 0; background: rgba(15, 23, 42, .22); }
+        .pub-sede-photo { position: relative; width: 100%; height: 100%; object-fit: contain; object-position: center; display: block; }
+        .pub-sede-photo-empty {
+            width: 100%; height: 160px; background: var(--sage-soft); color: var(--sage-strong);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .pub-sede-photo-empty svg { width: 34px; height: 34px; stroke: currentColor; stroke-width: 1.6; fill: none; }
+        .pub-sede-body { padding: 18px 20px; }
+        .pub-sede-body h3 { font-size: 15px; font-weight: 600; color: var(--ink); margin: 0 0 10px; }
+        .pub-sede-row { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--ink-soft); margin-bottom: 6px; line-height: 1.5; }
+        .pub-sede-row svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 1.8; fill: none; flex-shrink: 0; margin-top: 1px; }
+        .pub-sede-map { width: 100%; height: 160px; border: 0; display: block; }
+
+        /* Contacto */
+        .pub-contact-wrap { display: grid; grid-template-columns: 1fr 1.2fr; gap: 28px; align-items: start; }
+        .pub-contact { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-layer-1); padding: 30px 28px; display: flex; flex-direction: column; gap: 20px; }
+        .pub-contact-item { display: flex; align-items: flex-start; gap: 12px; }
+        .pub-contact-icon {
+            width: 38px; height: 38px; border-radius: 10px; background: var(--sage-soft); color: var(--sage-strong);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .pub-contact-icon svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.8; fill: none; }
+        .pub-contact-item:nth-child(2) .pub-contact-icon { background: var(--sky-soft); color: var(--sky-strong); }
+        .pub-contact-item:nth-child(3) .pub-contact-icon { background: var(--lav-soft); color: var(--lav-strong); }
+        .pub-contact-item:nth-child(4) .pub-contact-icon { background: color-mix(in srgb, var(--navy) 14%, white); color: var(--navy); }
+        .pub-contact-label { font-size: 11px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
+        .pub-contact-value { font-size: 14px; color: var(--ink); font-weight: 500; word-break: break-word; }
+        .pub-form-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-layer-1); padding: 30px 28px; }
+        .pub-form-card h3 { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; color: var(--ink); margin: 0 0 4px; }
+        .pub-form-card > p { font-size: 12.5px; color: var(--ink-faint); margin: 0 0 20px; }
+        .pub-field { margin-bottom: 15px; }
+        .pub-field label { display: block; font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+        .pub-field input, .pub-field select, .pub-field textarea {
+            width: 100%; padding: 10px 13px; border: 1px solid var(--line); border-radius: var(--radius-sm);
+            font-family: inherit; font-size: 13.5px; color: var(--ink); background: var(--surface);
+        }
+        .pub-field input:focus, .pub-field select:focus, .pub-field textarea:focus { outline: none; border-color: var(--sage); box-shadow: 0 0 0 3px var(--sage-soft); }
+        .pub-form-msg { padding: 12px 16px; border-radius: var(--radius-sm); font-size: 12.5px; margin-bottom: 18px; }
+        .pub-form-msg.ok { background: var(--sage-soft); color: var(--sage-strong); }
+        .pub-form-msg.err { background: var(--rose-soft); color: var(--rose-strong); }
+        @media (max-width: 780px) { .pub-contact-wrap { grid-template-columns: 1fr; } }
+
+        .pub-footer {
+            max-width: 1220px; margin: 0 auto; padding: 28px 32px 96px;
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+            color: var(--ink-faint); font-size: 12px; border-top: 1px solid var(--line-soft); margin-top: 20px;
+        }
+        .pub-footer a { color: var(--ink-faint); text-decoration: none; }
+        .pub-footer a:hover { color: var(--sage-strong); }
+        .pub-footer-right { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+
+        @media (max-width: 640px) {
+            .pub-nav-inner, .pub-hero, .pub-section, .pub-footer { padding-left: 18px; padding-right: 18px; }
+            .pub-hero { padding-top: 40px; padding-bottom: 48px; border-radius: 20px; }
+            .pub-contact, .pub-form-card { padding: 22px 20px; }
+        }
+    </style>
+</head>
+<body th:with="tieneNosotros=${configuracion.mostrarVisionMision and ((configuracion.sobreNosotros != null and !configuracion.sobreNosotros.isEmpty()) or (configuracion.vision != null and !configuracion.vision.isEmpty()) or (configuracion.mision != null and !configuracion.mision.isEmpty()))},
+                 tieneAreas=${(configuracion.descripcionIngenierias != null and !configuracion.descripcionIngenierias.isEmpty()) or (configuracion.descripcionBiomedicas != null and !configuracion.descripcionBiomedicas.isEmpty()) or (configuracion.descripcionSociales != null and !configuracion.descripcionSociales.isEmpty())},
+                 tieneAdmision=${configuracion.mostrarProcesoAdmision and not #lists.isEmpty(pasosAdmision)},
+                 tieneDocentes=${configuracion.mostrarDocentes and not #lists.isEmpty(docentes)},
+                 tieneCursos=${configuracion.mostrarCursos and not #lists.isEmpty(cursosDestacados)},
+                 tieneLogros=${configuracion.mostrarLogros and not #lists.isEmpty(logros)},
+                 tieneTestimonios=${configuracion.mostrarTestimonios and not #lists.isEmpty(testimonios)},
+                 tieneFaq=${configuracion.mostrarFaq and not #lists.isEmpty(preguntas)},
+                 tieneGaleria=${configuracion.mostrarGaleria and not #lists.isEmpty(fotosGaleria)},
+                 tieneCalendario=${configuracion.mostrarCalendario and not #lists.isEmpty(eventos)},
+                 tieneSedes=${configuracion.mostrarSedes and not #lists.isEmpty(sedes)},
+                 tieneFormContacto=${configuracion.mostrarFormularioContacto},
+                 tieneContactoInfo=${(configuracion.telefonoContacto != null and !configuracion.telefonoContacto.isEmpty()) or (configuracion.direccion != null and !configuracion.direccion.isEmpty()) or (configuracion.correoContacto != null and !configuracion.correoContacto.isEmpty())},
+                 tieneRedes=${(configuracion.facebookUrl != null and !configuracion.facebookUrl.isEmpty()) or (configuracion.instagramUrl != null and !configuracion.instagramUrl.isEmpty()) or (configuracion.tiktokUrl != null and !configuracion.tiktokUrl.isEmpty())}">
+
+<nav class="pub-nav" id="pubNav">
+    <div class="pub-nav-inner">
+        <a th:href="@{/}" class="pub-brand">
+            <div class="pub-seal">
+                <img th:if="${configuracion.logoPresente}" th:src="@{/configuracion/logo}" alt="Logo">
+                <span th:unless="${configuracion.logoPresente}"
+                      th:text="${configuracion.nombreAcademia != null and !configuracion.nombreAcademia.isEmpty()} ? ${#strings.substring(configuracion.nombreAcademia, 0, 1)} : 'A'"></span>
+            </div>
+            <span class="pub-brand-name" th:text="${configuracion.nombreAcademia} ?: 'Academia'">Academia</span>
+        </a>
+        <ul class="pub-links" id="pubLinks">
+            <li><a href="#inicio">Inicio</a></li>
+            <li><a href="#niveles">Niveles</a></li>
+            <li th:if="${tieneNosotros}"><a href="#nosotros">Nosotros</a></li>
+            <li th:if="${tieneLogros}"><a href="#resultados">Resultados</a></li>
+            <li th:if="${tieneDocentes}"><a href="#docentes">Docentes</a></li>
+            <li th:if="${tieneCursos}"><a href="#cursos">Cursos</a></li>
+            <li th:if="${tieneFaq}"><a href="#faq">Preguntas</a></li>
+            <li th:if="${tieneSedes}"><a href="#sedes">Sedes</a></li>
+            <li th:if="${tieneContactoInfo or tieneFormContacto}"><a href="#contacto">Contacto</a></li>
+        </ul>
+        <div class="pub-nav-right">
+            <div class="pub-social" th:if="${tieneRedes}">
+                <a th:if="${configuracion.facebookUrl != null and !configuracion.facebookUrl.isEmpty()}" th:href="${configuracion.facebookUrl}" target="_blank" rel="noopener" aria-label="Facebook">
+                    <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3Z"/></svg>
+                </a>
+                <a th:if="${configuracion.instagramUrl != null and !configuracion.instagramUrl.isEmpty()}" th:href="${configuracion.instagramUrl}" target="_blank" rel="noopener" aria-label="Instagram">
+                    <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+                </a>
+                <a th:if="${configuracion.tiktokUrl != null and !configuracion.tiktokUrl.isEmpty()}" th:href="${configuracion.tiktokUrl}" target="_blank" rel="noopener" aria-label="TikTok">
+                    <svg viewBox="0 0 24 24"><path d="M16 3v10.5a3.5 3.5 0 1 1-3-3.46V6.5A6.5 6.5 0 1 0 19 13V8.5a6.47 6.47 0 0 0 3-1V4.5a4.5 4.5 0 0 1-6-1.5Z"/></svg>
+                </a>
+            </div>
+            <button type="button" class="pub-theme-toggle" id="pubThemeToggle" aria-label="Cambiar a modo oscuro">
+                <svg class="ic-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <svg class="ic-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+            </button>
+            <a th:href="@{/login}" class="pub-btn pub-btn-secondary pub-nav-login">
+                <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;stroke-width:1.8;fill:none"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+                Ingresar
+            </a>
+            <button type="button" class="pub-menu-toggle" id="pubMenuToggle" aria-label="Abrir menú" aria-expanded="false">
+                <svg id="pubMenuIcon" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<section class="pub-hero" id="inicio" th:classappend="${configuracion.fondoLoginPresente} ? 'has-bg'">
+    <div th:if="${configuracion.fondoLoginPresente}" class="pub-hero-bg"
+         th:style="'background-image:url(' + @{/configuracion/fondo-login} + ')'"></div>
+    <div th:unless="${configuracion.fondoLoginPresente}" class="pub-hero-plain"></div>
+
+    <div class="pub-hero-content">
+        <span class="pub-eyebrow">Bienvenido</span>
+        <h1 th:text="${configuracion.nombreAcademia} ?: 'Nuestra academia'">Nuestra academia</h1>
+        <p class="pub-tag"
+           th:text="${configuracion.eslogan != null and !configuracion.eslogan.isEmpty()} ? ${configuracion.eslogan} : 'Formamos estudiantes de Primaria, Secundaria y Preuniversitario con un sistema de matrículas y seguimiento académico moderno.'">
+            Formamos estudiantes con un sistema de matrículas y seguimiento académico moderno.
+        </p>
+        <div class="pub-cta-row">
+            <a th:href="@{/login}" class="pub-btn pub-btn-primary">Ingresar al sistema</a>
+            <a href="#niveles" class="pub-btn pub-btn-secondary">Ver niveles</a>
+        </div>
+        <div class="pub-exp-badge" th:if="${anosExperiencia != null}">
+            <b th:text="'+' + ${anosExperiencia}"></b>
+            <span>años formando estudiantes</span>
+        </div>
+    </div>
+</section>
+
+<section class="pub-stats-strip" th:if="${totalAlumnos > 0 or totalCursos > 0 or totalSedes > 0}">
+    <div class="pub-stats-inner">
+        <div class="pub-stat" th:if="${totalAlumnos > 0}">
+            <b class="pub-stat-num" th:data-count="${totalAlumnos}">0</b>
+            <span>Alumnos matriculados</span>
+        </div>
+        <div class="pub-stat" th:if="${totalCursos > 0}">
+            <b class="pub-stat-num" th:data-count="${totalCursos}">0</b>
+            <span>Cursos activos</span>
+        </div>
+        <div class="pub-stat" th:if="${totalSedes > 0}">
+            <b class="pub-stat-num" th:data-count="${totalSedes}">0</b>
+            <span>Sedes</span>
+        </div>
+        <div class="pub-stat" th:if="${anosExperiencia != null}">
+            <b class="pub-stat-num" th:data-count="${anosExperiencia}">0</b>
+            <span>Años de experiencia</span>
+        </div>
+    </div>
+</section>
+
+<section class="pub-section" id="niveles">
+    <div class="pub-section-head">
+        <h2>Niveles que ofrecemos</h2>
+        <p>Programas independientes para cada etapa educativa, cada uno con su propio plan de estudios.</p>
+    </div>
+    <div class="pub-niveles">
+        <div class="pub-nivel-card" th:each="nivel : ${niveles}">
+            <div class="pub-nivel-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 3 2 8l10 5 10-5-10-5ZM2 8v8l10 5 10-5V8M12 13v8"/></svg>
+            </div>
+            <h3 th:text="${nivel.etiqueta}">Nivel</h3>
+            <p th:switch="${nivel.name()}">
+                <span th:case="'PRIMARIA'">Bases sólidas en los primeros años escolares, del 1° al 6° grado.</span>
+                <span th:case="'SECUNDARIA'">Acompañamiento académico del 1° al 5° grado de secundaria.</span>
+                <span th:case="'PREUNIVERSITARIO'">Preparación intensiva para el ingreso a la universidad.</span>
+                <span th:case="*" th:text="${nivel.etiqueta}"></span>
+            </p>
+        </div>
+    </div>
+    <div class="pub-areas" th:if="${tieneAreas}">
+        <div class="pub-area-card" th:if="${configuracion.descripcionIngenierias != null and !configuracion.descripcionIngenierias.isEmpty()}">
+            <h4>Ingenierías</h4>
+            <p th:text="${configuracion.descripcionIngenierias}"></p>
+        </div>
+        <div class="pub-area-card" th:if="${configuracion.descripcionBiomedicas != null and !configuracion.descripcionBiomedicas.isEmpty()}">
+            <h4>Biomédicas</h4>
+            <p th:text="${configuracion.descripcionBiomedicas}"></p>
+        </div>
+        <div class="pub-area-card" th:if="${configuracion.descripcionSociales != null and !configuracion.descripcionSociales.isEmpty()}">
+            <h4>Sociales</h4>
+            <p th:text="${configuracion.descripcionSociales}"></p>
+        </div>
+    </div>
+</section>
+
+<section class="pub-section pub-blob-host" id="nosotros" th:if="${tieneNosotros}">
+    <div class="pub-blob pub-blob-navy" aria-hidden="true" style="width:340px;height:340px;top:-120px;left:-140px;"></div>
+    <div class="pub-blob pub-blob-sage" aria-hidden="true" style="width:260px;height:260px;bottom:-100px;right:-100px;"></div>
+    <div class="pub-section-head">
+        <h2>Sobre nosotros</h2>
+    </div>
+    <p class="pub-about-text" th:if="${configuracion.sobreNosotros != null and !configuracion.sobreNosotros.isEmpty()}"
+       th:text="${configuracion.sobreNosotros}"></p>
+    <div class="pub-vm-grid" th:if="${(configuracion.vision != null and !configuracion.vision.isEmpty()) or (configuracion.mision != null and !configuracion.mision.isEmpty())}">
+        <div class="pub-vm-card vision" th:if="${configuracion.vision != null and !configuracion.vision.isEmpty()}">
+            <div class="pub-vm-icon"><svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg></div>
+            <h3>Visión</h3>
+            <p th:text="${configuracion.vision}"></p>
+        </div>
+        <div class="pub-vm-card mision" th:if="${configuracion.mision != null and !configuracion.mision.isEmpty()}">
+            <div class="pub-vm-icon"><svg viewBox="0 0 24 24"><path d="m12 2 3 7 7 1-5.5 5 1.5 7-6-3.5L6 22l1.5-7L2 10l7-1 3-7Z"/></svg></div>
+            <h3>Misión</h3>
+            <p th:text="${configuracion.mision}"></p>
+        </div>
+    </div>
+</section>
+
+<section class="pub-section" id="admision" th:if="${tieneAdmision}">
+    <div class="pub-section-head">
+        <h2>Proceso de admisión</h2>
+        <p>Matricularte es simple, en cuatro pasos.</p>
+    </div>
+    <div class="pub-steps">
+        <div class="pub-step pub-reveal" th:each="paso, it : ${pasosAdmision}">
+            <div class="pub-step-num" th:text="${it.count}"></div>
+            <h3 th:text="${paso.titulo}"></h3>
+            <p th:text="${paso.descripcion}"></p>
+        </div>
+    </div>
+</section>
+
+<section class="pub-section pub-blob-host" id="resultados" th:if="${tieneLogros}">
+    <div class="pub-blob pub-blob-lav" aria-hidden="true" style="width:300px;height:300px;top:-80px;right:-120px;"></div>
+    <div class="pub-section-head">
+        <h2>Resultados de ingreso</h2>
+        <p>Alumnos que lograron ingresar a la universidad de su elección.</p>
+    </div>
+    <div class="pub-logros">
+        <div class="pub-logro-card" th:each="l : ${logros}">
+            <div class="pub-logro-avatar">
+                <img th:if="${l.fotoPresente}" th:src="@{/logros-ingreso/{id}/foto(id=${l.id})}" alt="">
+                <span th:unless="${l.fotoPresente}" th:text="${#strings.substring(l.nombreAlumno,0,1)}"></span>
+            </div>
+            <h3 th:text="${l.nombreAlumno}"></h3>
+            <p class="pub-logro-uni" th:text="${l.universidad}"></p>
+            <p class="pub-logro-carrera" th:text="${(l.carrera ?: '') + (l.anioIngreso != null ? ' · ' + l.anioIngreso : '')}"></p>
+        </div>
+    </div>
+</section>
+
+<section class="pub-section" id="docentes" th:if="${tieneDocentes}">
+    <div class="pub-section-head">
+        <h2>Nuestros docentes</h2>
+        <p>Profesionales que acompañan a los estudiantes en cada nivel.</p>
+    </div>
+    <div class="pub-docentes">
+        <div class="pub-docente-card" th:each="p : ${docentes}">
+            <div class="pub-docente-avatar">
+                <img th:if="${p.fotoPresente}" th:src="@{/profesores/{id}/foto(id=${p.id})}" alt="">
+                <span th:unless="${p.fotoPresente}" th:text="${#strings.substring(p.nombre,0,1)}"></span>
+            </div>
+            <h3 th:text="${p.nombreCompleto}"></h3>
+            <p th:if="${p.especialidad != null and !p.especialidad.isEmpty()}" th:text="${p.especialidad}"></p>
+        </div>
+    </div>
+</section>
+
+<section class="pub-section" id="cursos" th:if="${tieneCursos}">
+    <div class="pub-section-head">
+        <h2>Cursos destacados</h2>
+        <p>Algunos de los cursos que dictamos en nuestros distintos niveles.</p>
+    </div>
+    <div class="pub-cursos">
+        <div class="pub-curso-card" th:each="c : ${cursosDestacados}">
+            <h3 th:text="${c.nombre}"></h3>
+            <div class="pub-curso-meta">
+                <span class="pub-pill" th:if="${c.nivel != null}" th:text="${c.nivel.etiqueta}"></span>
+                <span class="pub-pill" th:text="${c.horas} + ' h/sem'"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="pub-malla" th:if="${not #maps.isEmpty(mallaCursos)}">
+        <div class="pub-malla-head">
+            <h3>Malla de cursos por área</h3>
+            <p>Todos nuestros cursos activos, organizados por nivel y área.</p>
+        </div>
+        <div class="pub-malla-nivel" th:each="nivelEntry : ${mallaCursos}">
+            <h4 th:text="${nivelEntry.key.etiqueta}"></h4>
+            <div class="pub-malla-areas">
+                <div class="pub-malla-area" th:each="areaEntry : ${nivelEntry.value}">
+                    <h5 th:text="${areaEntry.key}"></h5>
+                    <div class="pub-malla-chips">
+                        <span class="pub-pill" th:each="curso : ${areaEntry.value}" th:text="${curso.nombre}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="pub-section" id="testimonios" th:if="${tieneTestimonios}">
+    <div class="pub-section-head">
+        <h2>Lo que dicen de nosotros</h2>
+        <p>Opiniones de nuestros alumnos y padres de familia.</p>
+    </div>
+    <div class="pub-testimonios">
+        <div class="pub-test-card" th:each="t : ${testimonios}">
+            <svg class="pub-test-quote" viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 4C6 4 3 7 3 11.5S6 19 9.5 19c.3 0 .5-.2.5-.5s-.2-.5-.5-.5C7 18 5 15.8 5 12.9c.6.4 1.3.6 2 .6 2.2 0 4-1.8 4-4s-1.8-4-4-4zm10 0c-3.5 0-6.5 3-6.5 7.5S16 19 19.5 19c.3 0 .5-.2.5-.5s-.2-.5-.5-.5c-2.5 0-4.5-2.2-4.5-5.1.6.4 1.3.6 2 .6 2.2 0 4-1.8 4-4s-1.8-4-4-4z"/></svg>
+            <p class="pub-test-comment" th:text="${t.comentario}"></p>
+            <div class="pub-test-who">
+                <div class="pub-test-avatar">
+                    <img th:if="${t.fotoPresente}" th:src="@{/testimonios/{id}/foto(id=${t.id})}" alt="">
+                    <span th:unless="${t.fotoPresente}" th:text="${#strings.substring(t.nombre,0,1)}"></span>
+                </div>
+                <div>
+                    <div class="pub-test-name" th:text="${t.nombre}"></div>
+                    <div class="pub-test-role" th:if="${t.rol != null and !t.rol.isEmpty()}" th:text="${t.rol}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="pub-section" id="faq" th:if="${tieneFaq}">
+    <div class="pub-section-head">
+        <h2>Preguntas frecuentes</h2>
+        <p>Resolvemos las dudas más comunes sobre matrículas, horarios y pagos.</p>
+    </div>
+    <div class="pub-faq">
+        <details class="pub-faq-item" th:each="p : ${preguntas}">
+            <summary th:text="${p.pregunta}"></summary>
+            <p th:text="${p.respuesta}"></p>
+        </details>
+    </div>
+</section>
+
+<section class="pub-section" id="galeria" th:if="${tieneGaleria}">
+    <div class="pub-section-head">
+        <h2>Galería</h2>
+        <p>Un vistazo a nuestras instalaciones y actividades.</p>
+    </div>
+    <div class="pub-galeria" id="pubGaleria">
+        <button type="button" th:each="f, it : ${fotosGaleria}" th:data-index="${it.index}"
+                th:data-desc="${f.descripcion} ?: ''" class="pub-reveal">
+            <img th:src="@{/galeria/{id}/imagen(id=${f.id})}" th:alt="${f.descripcion} ?: ''" loading="lazy">
+        </button>
+    </div>
+</section>
+
+<div class="pub-lightbox" id="pubLightbox" role="dialog" aria-modal="true" aria-label="Imagen ampliada">
+    <button type="button" class="pub-lightbox-close" id="pubLightboxClose" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <button type="button" class="pub-lightbox-nav pub-lightbox-prev" id="pubLightboxPrev" aria-label="Anterior">
+        <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <figure class="pub-lightbox-figure">
+        <img id="pubLightboxImg" src="" alt="">
+        <figcaption id="pubLightboxCaption"></figcaption>
+    </figure>
+    <button type="button" class="pub-lightbox-nav pub-lightbox-next" id="pubLightboxNext" aria-label="Siguiente">
+        <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+</div>
+
+<section class="pub-section" id="calendario" th:if="${tieneCalendario}">
+    <div class="pub-section-head">
+        <h2>Próximos eventos</h2>
+        <p>Fechas importantes del calendario académico.</p>
+    </div>
+    <div class="pub-eventos">
+        <div class="pub-evento" th:each="e : ${eventos}">
+            <div class="pub-evento-fecha">
+                <span class="d" th:text="${#temporals.dayOfMonth(e.fecha)}"></span>
+                <span class="m" th:text="${#temporals.formatMonth(e.fecha, 'es')}"></span>
+            </div>
+            <div class="pub-evento-body">
+                <h3 th:text="${e.titulo}"></h3>
+                <p th:text="${(e.tipo != null ? e.tipo + ' · ' : '') + (e.descripcion ?: '')}"></p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="pub-section" id="sedes" th:if="${tieneSedes}">
+    <div class="pub-section-head">
+        <h2>Nuestras sedes</h2>
+        <p>Encuentra el local más cercano a ti.</p>
+    </div>
+    <div class="pub-sedes">
+        <div class="pub-sede-card" th:each="s : ${sedes}">
+            <div th:if="${s.fotoPresente}" class="pub-sede-photo-wrap">
+                <div class="pub-sede-photo-bg" th:style="'background-image:url(' + @{/sedes/{id}/foto(id=${s.id})} + ')'"></div>
+                <img th:src="@{/sedes/{id}/foto(id=${s.id})}" alt="" class="pub-sede-photo">
+            </div>
+            <div th:unless="${s.fotoPresente}" class="pub-sede-photo-empty">
+                <svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1m-6 4h1m4 0h1m-6 4h1m4 0h1"/></svg>
+            </div>
+            <div class="pub-sede-body">
+                <h3 th:text="${s.nombre}"></h3>
+                <div class="pub-sede-row">
+                    <svg viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span th:text="${s.direccion}"></span>
+                </div>
+                <div class="pub-sede-row" th:if="${s.telefono != null and !s.telefono.isEmpty()}">
+                    <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
+                    <span th:text="${s.telefono}"></span>
+                </div>
+                <div class="pub-sede-row" th:if="${s.horario != null and !s.horario.isEmpty()}">
+                    <svg viewBox="0 0 24 24"><path d="M12 6v6l4 2M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20Z"/></svg>
+                    <span th:text="${s.horario}"></span>
+                </div>
+            </div>
+            <iframe class="pub-sede-map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                    th:src="'https://maps.google.com/maps?q=' + ${#uris.escapeQueryParam(s.direccion)} + '&output=embed'"></iframe>
+        </div>
+    </div>
+</section>
+
+<section class="pub-section pub-blob-host" id="contacto" th:if="${tieneContactoInfo or tieneFormContacto}">
+    <div class="pub-blob pub-blob-navy" aria-hidden="true" style="width:380px;height:380px;top:-140px;left:50%;transform:translateX(-50%);"></div>
+    <div class="pub-section-head">
+        <h2>Contáctanos</h2>
+        <p>Escríbenos o visítanos para más información sobre matrículas y horarios.</p>
+    </div>
+    <div class="pub-contact-wrap">
+        <div class="pub-contact" th:if="${tieneContactoInfo}">
+            <div class="pub-contact-item" th:if="${configuracion.telefonoContacto != null and !configuracion.telefonoContacto.isEmpty()}">
+                <div class="pub-contact-icon">
+                    <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
+                </div>
+                <div>
+                    <div class="pub-contact-label">Teléfono</div>
+                    <div class="pub-contact-value" th:text="${configuracion.telefonoContacto}"></div>
+                </div>
+            </div>
+            <div class="pub-contact-item" th:if="${configuracion.correoContacto != null and !configuracion.correoContacto.isEmpty()}">
+                <div class="pub-contact-icon">
+                    <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4V4Zm0 0 8 8 8-8"/></svg>
+                </div>
+                <div>
+                    <div class="pub-contact-label">Correo</div>
+                    <div class="pub-contact-value" th:text="${configuracion.correoContacto}"></div>
+                </div>
+            </div>
+            <div class="pub-contact-item" th:if="${configuracion.direccion != null and !configuracion.direccion.isEmpty()}">
+                <div class="pub-contact-icon">
+                    <svg viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <div>
+                    <div class="pub-contact-label">Dirección</div>
+                    <div class="pub-contact-value" th:text="${configuracion.direccion}"></div>
+                </div>
+            </div>
+            <div class="pub-contact-item" th:if="${configuracion.whatsappNumero != null and !configuracion.whatsappNumero.isEmpty()}">
+                <div class="pub-contact-icon">
+                    <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
+                </div>
+                <div>
+                    <div class="pub-contact-label">WhatsApp</div>
+                    <a class="pub-contact-value" style="text-decoration:none"
+                       th:href="'https://wa.me/' + ${#strings.replace(configuracion.whatsappNumero,' ','')}" target="_blank" rel="noopener"
+                       th:text="${configuracion.whatsappNumero}"></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="pub-form-card" id="contacto-form" th:if="${tieneFormContacto}">
+            <h3>Solicita información</h3>
+            <p>Déjanos tus datos y nos pondremos en contacto contigo.</p>
+            <div class="pub-form-msg ok" th:if="${mensajeExitoContacto != null}" th:text="${mensajeExitoContacto}"></div>
+            <div class="pub-form-msg err" th:if="${mensajeErrorContacto != null}" th:text="${mensajeErrorContacto}"></div>
+            <form th:action="@{/solicitud-informacion}" th:object="${solicitudForm}" method="post">
+                <div class="pub-field">
+                    <label for="pubNombre">Nombre completo</label>
+                    <input type="text" th:field="*{nombre}" id="pubNombre" placeholder="Tu nombre">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+                    <div class="pub-field">
+                        <label for="pubTelefono">Teléfono</label>
+                        <input type="text" th:field="*{telefono}" id="pubTelefono" placeholder="9XXXXXXXX">
+                    </div>
+                    <div class="pub-field">
+                        <label for="pubCorreo">Correo <span style="font-weight:400;color:var(--ink-faint)">(opcional)</span></label>
+                        <input type="email" th:field="*{correo}" id="pubCorreo" placeholder="correo@ejemplo.com">
+                    </div>
+                </div>
+                <div class="pub-field">
+                    <label for="pubNivel">Nivel de interés <span style="font-weight:400;color:var(--ink-faint)">(opcional)</span></label>
+                    <select th:field="*{nivelInteres}" id="pubNivel">
+                        <option value="">-- Selecciona --</option>
+                        <option th:each="n : ${niveles}" th:value="${n}" th:text="${n.etiqueta}"></option>
+                    </select>
+                </div>
+                <div class="pub-field">
+                    <label for="pubMensaje">Mensaje <span style="font-weight:400;color:var(--ink-faint)">(opcional)</span></label>
+                    <textarea th:field="*{mensaje}" id="pubMensaje" rows="3" placeholder="Cuéntanos en qué podemos ayudarte"></textarea>
+                </div>
+                <button type="submit" class="pub-btn pub-btn-primary pub-btn-block">Enviar solicitud</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<footer class="pub-footer">
+    <span th:text="'© ' + ${#calendars.format(#calendars.createNow(), 'yyyy')} + ' ' + (${configuracion.nombreAcademia} ?: 'Academia') + '. Todos los derechos reservados.'"></span>
+    <div class="pub-footer-right">
+        <div class="pub-social" th:if="${tieneRedes}">
+            <a th:if="${configuracion.facebookUrl != null and !configuracion.facebookUrl.isEmpty()}" th:href="${configuracion.facebookUrl}" target="_blank" rel="noopener" aria-label="Facebook">
+                <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3Z"/></svg>
+            </a>
+            <a th:if="${configuracion.instagramUrl != null and !configuracion.instagramUrl.isEmpty()}" th:href="${configuracion.instagramUrl}" target="_blank" rel="noopener" aria-label="Instagram">
+                <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+            </a>
+            <a th:if="${configuracion.tiktokUrl != null and !configuracion.tiktokUrl.isEmpty()}" th:href="${configuracion.tiktokUrl}" target="_blank" rel="noopener" aria-label="TikTok">
+                <svg viewBox="0 0 24 24"><path d="M16 3v10.5a3.5 3.5 0 1 1-3-3.46V6.5A6.5 6.5 0 1 0 19 13V8.5a6.47 6.47 0 0 0 3-1V4.5a4.5 4.5 0 0 1-6-1.5Z"/></svg>
+            </a>
+        </div>
+        <a th:href="@{/login}">Acceso para personal autorizado →</a>
+    </div>
+</footer>
+
+<a th:if="${configuracion.whatsappNumero != null and !configuracion.whatsappNumero.isEmpty()}"
+   class="pub-whatsapp" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"
+   th:href="'https://wa.me/' + ${#strings.replace(configuracion.whatsappNumero,' ','')}">
+    <svg viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm5.8 14.03c-.24.68-1.4 1.3-1.93 1.37-.5.08-1.11.11-1.79-.11a16.3 16.3 0 0 1-1.65-.61c-2.9-1.25-4.79-4.17-4.93-4.36-.14-.19-1.18-1.57-1.18-3 0-1.42.75-2.12 1.01-2.41.27-.29.58-.36.78-.36.19 0 .39 0 .55.01.18.01.42-.07.65.5.24.58.82 2 .89 2.15.07.15.12.32.02.51-.09.19-.14.31-.28.48-.14.16-.29.36-.42.48-.14.13-.28.28-.12.55.16.27.72 1.19 1.55 1.93 1.06.95 1.96 1.24 2.23 1.38.27.14.43.12.59-.07.16-.19.68-.79.86-1.06.18-.27.36-.22.6-.13.24.09 1.55.73 1.82.86.27.14.44.2.51.32.07.11.07.65-.17 1.33Z"/></svg>
+</a>
+
+<button type="button" class="pub-top" id="pubTop" aria-label="Volver arriba">
+    <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<script>
+    (function () {
+        var nav = document.getElementById('pubNav');
+        var toggle = document.getElementById('pubMenuToggle');
+        var links = document.getElementById('pubLinks');
+        var menuIcon = document.getElementById('pubMenuIcon');
+        var iconMenu = menuIcon.innerHTML;
+        var iconClose = '<path d="M18 6 6 18M6 6l12 12"/>';
+
+        toggle.addEventListener('click', function () {
+            var abierto = links.classList.toggle('open');
+            toggle.setAttribute('aria-expanded', abierto ? 'true' : 'false');
+            menuIcon.innerHTML = abierto ? iconClose : iconMenu;
+        });
+
+        var navLinks = links.querySelectorAll('a');
+        navLinks.forEach(function (a) {
+            a.addEventListener('click', function () {
+                links.classList.remove('open');
+                toggle.setAttribute('aria-expanded', 'false');
+                menuIcon.innerHTML = iconMenu;
+            });
+        });
+
+        var topBtn = document.getElementById('pubTop');
+        window.addEventListener('scroll', function () {
+            nav.classList.toggle('scrolled', window.scrollY > 8);
+            topBtn.classList.toggle('show', window.scrollY > 500);
+        });
+        topBtn.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        var themeToggle = document.getElementById('pubThemeToggle');
+        themeToggle.addEventListener('click', function () {
+            var esOscuro = document.documentElement.getAttribute('data-theme') === 'dark';
+            if (esOscuro) {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('pubTheme', 'light');
+                themeToggle.setAttribute('aria-label', 'Cambiar a modo oscuro');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('pubTheme', 'dark');
+                themeToggle.setAttribute('aria-label', 'Cambiar a modo claro');
+            }
+        });
+
+        var secciones = [];
+        navLinks.forEach(function (a) {
+            var href = a.getAttribute('href');
+            if (!href || href.charAt(0) !== '#') return;
+            var id = href.replace('#', '');
+            var el = document.getElementById(id);
+            if (el) secciones.push({ id: id, el: el, link: a });
+        });
+
+        if ('IntersectionObserver' in window && secciones.length) {
+            var observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        secciones.forEach(function (s) { s.link.classList.remove('active'); });
+                        var activa = secciones.find(function (s) { return s.el === entry.target; });
+                        if (activa) activa.link.classList.add('active');
+                    }
+                });
+            }, { rootMargin: '-40% 0px -55% 0px' });
+            secciones.forEach(function (s) { observer.observe(s.el); });
+        }
+    })();
+
+    (function () {
+        var revealSelector = '.pub-nivel-card, .pub-area-card, .pub-vm-card, .pub-curso-card, .pub-malla-area, ' +
+            '.pub-logro-card, .pub-test-card, .pub-sede-card, .pub-docente-card, .pub-evento, .pub-faq-item, .pub-step';
+        var revealEls = document.querySelectorAll(revealSelector);
+        revealEls.forEach(function (el) { el.classList.add('pub-reveal'); });
+        var allReveal = document.querySelectorAll('.pub-reveal');
+
+        if ('IntersectionObserver' in window) {
+            var revealObserver = new IntersectionObserver(function (entries, obs) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('pub-reveal-in');
+                        obs.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+            allReveal.forEach(function (el, i) {
+                el.style.transitionDelay = Math.min(i % 6, 5) * 0.05 + 's';
+                revealObserver.observe(el);
+            });
+        } else {
+            allReveal.forEach(function (el) { el.classList.add('pub-reveal-in'); });
+        }
+
+        var statNums = document.querySelectorAll('.pub-stat-num');
+        if (statNums.length && 'IntersectionObserver' in window) {
+            var statObserver = new IntersectionObserver(function (entries, obs) {
+                entries.forEach(function (entry) {
+                    if (!entry.isIntersecting) return;
+                    var el = entry.target;
+                    var target = parseInt(el.getAttribute('data-count'), 10) || 0;
+                    var start = 0;
+                    var duration = 900;
+                    var startTime = null;
+                    function step(ts) {
+                        if (!startTime) startTime = ts;
+                        var progress = Math.min((ts - startTime) / duration, 1);
+                        var eased = 1 - Math.pow(1 - progress, 3);
+                        el.textContent = Math.round(start + (target - start) * eased);
+                        if (progress < 1) requestAnimationFrame(step);
+                        else el.textContent = target;
+                    }
+                    requestAnimationFrame(step);
+                    obs.unobserve(el);
+                });
+            }, { threshold: 0.4 });
+            statNums.forEach(function (el) { statObserver.observe(el); });
+        }
+    })();
+
+    (function () {
+        var galeria = document.getElementById('pubGaleria');
+        var lightbox = document.getElementById('pubLightbox');
+        if (!galeria || !lightbox) return;
+        var items = Array.from(galeria.querySelectorAll('button'));
+        if (!items.length) return;
+
+        var img = document.getElementById('pubLightboxImg');
+        var caption = document.getElementById('pubLightboxCaption');
+        var closeBtn = document.getElementById('pubLightboxClose');
+        var prevBtn = document.getElementById('pubLightboxPrev');
+        var nextBtn = document.getElementById('pubLightboxNext');
+        var current = 0;
+
+        function show(index) {
+            current = (index + items.length) % items.length;
+            var btn = items[current];
+            var src = btn.querySelector('img').getAttribute('src');
+            img.setAttribute('src', src);
+            caption.textContent = btn.getAttribute('data-desc') || '';
+        }
+        function open(index) {
+            show(index);
+            lightbox.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function close() {
+            lightbox.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        items.forEach(function (btn, i) {
+            btn.addEventListener('click', function () { open(i); });
+        });
+        closeBtn.addEventListener('click', close);
+        prevBtn.addEventListener('click', function () { show(current - 1); });
+        nextBtn.addEventListener('click', function () { show(current + 1); });
+        lightbox.addEventListener('click', function (e) {
+            if (e.target === lightbox) close();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (!lightbox.classList.contains('open')) return;
+            if (e.key === 'Escape') close();
+            if (e.key === 'ArrowLeft') show(current - 1);
+            if (e.key === 'ArrowRight') show(current + 1);
+        });
+    })();
+</script>
+
+</body>
+</html>

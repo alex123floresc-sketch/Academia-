@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head><title>Horarios</title></head>
+<div layout:fragment="contenido">
+
+    <div class="card-head" style="border:none;padding:0 0 6px">
+        <div>
+            <h2 style="font-family:'Fraunces',serif;font-weight:500;font-size:20px">Horarios</h2>
+            <p style="font-size:12px;color:var(--ink-faint)">Elige un nivel para ver y gestionar su horario semanal. Cada nivel tiene su propia grilla, totalmente independiente de las demás</p>
+        </div>
+    </div>
+
+    <div class="card" style="margin-bottom:22px">
+        <div class="card-head">
+            <div><h2>Ciclo académico</h2><p>El ciclo se comparte entre niveles, pero cada nivel tiene su propio horario</p></div>
+        </div>
+        <div style="padding:18px 20px">
+            <form th:action="@{/horarios}" method="get" style="max-width:280px">
+                <label for="cicloId" style="display:block;font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:7px">Ciclo</label>
+                <select name="cicloId" id="cicloId" onchange="this.form.submit()">
+                    <option th:each="c : ${ciclos}" th:value="${c.id}" th:text="${c.nombre}"
+                            th:selected="${cicloSel != null and cicloSel.id == c.id}"></option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <div class="note" th:unless="${cicloSel != null}">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0ZM12 9v4M12 17h.01"/></svg>
+        <div>No hay un <b>ciclo activo</b> configurado. Actívalo desde Ciclos o elige uno arriba para ver sus horarios.</div>
+    </div>
+
+    <div class="ui three stackable cards nivel-picker stagger-cards">
+        <a class="ui raised card" th:each="n : ${resumenNiveles}"
+           th:href="@{/horarios(cicloId=${cicloSel != null ? cicloSel.id : null}, nivel=${n.key})}">
+            <div class="content">
+                <div class="ui blue ribbon label" th:text="${n.key.etiqueta}"></div>
+            </div>
+            <div class="content">
+                <div class="ui statistic">
+                    <div class="value" th:text="${n.value}"></div>
+                    <div class="label" th:text="'Bloque' + (${n.value == 1} ? '' : 's') + ' horario' + (${n.value == 1} ? '' : 's') + ' definido' + (${n.value == 1} ? '' : 's')"></div>
+                </div>
+            </div>
+            <div class="extra content">
+                <i class="right chevron icon"></i>Ver horario de este nivel
+            </div>
+        </a>
+    </div>
+</div>
+
+<th:block layout:fragment="estilos">
+    <style>
+        .nivel-picker .card{cursor:pointer;transition:.12s}
+        .nivel-picker .card:hover{transform:translateY(-2px)}
+        .nivel-picker .ui.statistic .value{font-family:'Fraunces',serif !important}
+        .nivel-picker .extra.content{color:var(--sage-strong) !important;font-weight:600;font-size:12.5px}
+    </style>
+</th:block>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Horario</title>
+    <style type="text/css">
+        @page { size: A4 landscape; margin: 1.4cm; }
+        .turno-title { font-size: 11px; font-weight: bold; margin: 18px 0 8px; padding: 7px 12px;
+                        color: #fff; border-radius: 6px; text-transform: uppercase; letter-spacing: .04em; }
+        .turno-title-manana { background-color: #92400E; }
+        .turno-title-tarde { background-color: #4338CA; }
+        .turno-title-noche { background-color: #0369A1; }
+        table.horario-grid { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+        table.horario-grid th { background: #EEF3FA; color: #57687D; font-size: 8px; text-transform: uppercase;
+                                 letter-spacing: .04em; text-align: center; padding: 5px 4px; border: 1px solid #DCE6F2; }
+        table.horario-grid th.th-hora { text-align: left; width: 70px; }
+        table.horario-grid td { border: 1px solid #DCE6F2; padding: 5px; vertical-align: top; text-align: center; }
+        table.horario-grid td.hora { text-align: left; white-space: nowrap; font-weight: bold; font-size: 8.5px; color: #1B2A3D; background: #F7FAFD; }
+        table.horario-grid td.receso { font-style: italic; color: #8FA0B5; font-size: 8.5px; background: #F7FAFD; }
+        .curso-box { border-radius: 5px; padding: 4px 6px; margin-bottom: 3px; text-align: left; }
+        .curso-box:last-child { margin-bottom: 0; }
+        .curso-box-manana { background: #FDECD1; border: .5pt solid #D97706; }
+        .curso-box-tarde { background: #E8E7FC; border: .5pt solid #6366F1; }
+        .curso-box-noche { background: #E0F2FE; border: .5pt solid #0EA5E9; }
+        .curso-nombre { font-weight: bold; font-size: 8px; color: #1B2A3D; }
+        .curso-extra { font-size: 7px; color: #57687D; margin-top: 1px; }
+        .celda-vacia { color: #B7C4D6; font-size: 7.5px; font-style: italic; }
+    </style>
+    <th:block th:replace="~{fragments/pdf :: estilos}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/pdf :: encabezado(${titulo})}"></div>
+
+<th:block th:each="turno : ${turnos}" th:with="claseTurno='turno-title-' + ${#strings.toLowerCase(turno.name())}, cajaTurno='curso-box-' + ${#strings.toLowerCase(turno.name())}">
+    <div class="turno-title" th:classappend="${claseTurno}" th:text="${turno.etiqueta}">Turno</div>
+    <table class="horario-grid">
+        <thead>
+        <tr>
+            <th class="th-hora">Hora</th>
+            <th th:each="dia : ${dias}" th:text="${dia.etiqueta}">Día</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="fila : ${grilla.get(turno)}">
+            <td class="hora" th:text="${fila.bloque.horaInicio} + '-' + ${fila.bloque.horaFin}">-</td>
+            <td th:if="${fila.bloque.receso}" colspan="6" class="receso">Receso</td>
+            <th:block th:unless="${fila.bloque.receso}">
+                <td th:each="dia : ${dias}">
+                    <div class="curso-box" th:classappend="${cajaTurno}" th:each="h, iter : ${fila.cursosDe(dia)}">
+                        <div class="curso-nombre" th:text="${h.curso.nombre}">-</div>
+                        <div class="curso-extra"
+                             th:text="(${h.aula != null and !h.aula.isEmpty()} ? 'Aula ' + ${h.aula} : '') + (${h.curso.profesor != null} ? ' · ' + ${h.curso.profesor.nombreCompleto} : '')"></div>
+                    </div>
+                    <div class="celda-vacia" th:if="${#lists.isEmpty(fila.cursosDe(dia))}">Sin curso</div>
+                </td>
+            </th:block>
+        </tr>
+        <tr th:if="${#lists.isEmpty(grilla.get(turno))}">
+            <td colspan="7">Sin bloques horarios definidos.</td>
+        </tr>
+        </tbody>
+    </table>
+</th:block>
+
+<div th:replace="~{fragments/pdf :: pie}"></div>
+</body>
+</html>

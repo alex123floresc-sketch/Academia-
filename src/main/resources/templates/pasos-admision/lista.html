@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Proceso de admisión</title></head>
+<div layout:fragment="contenido">
+    <div class="card">
+        <div class="card-head">
+            <div><h2>Proceso de admisión</h2><p>Pasos que se muestran en la página web pública, en el orden indicado</p></div>
+            <a th:href="@{/pasos-admision/nuevo}" class="ui small primary button">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo paso</a>
+        </div>
+        <table>
+            <thead><tr><th>Orden</th><th>Título</th><th>Descripción</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="p : ${pasos}">
+                <td th:text="${p.orden}"></td>
+                <td class="strong" th:text="${p.titulo}"></td>
+                <td th:text="${p.descripcion}"></td>
+                <td>
+                    <span th:if="${p.activo}" class="pill pill-sage">Activo</span>
+                    <span th:unless="${p.activo}" class="pill pill-gray">Inactivo</span>
+                </td>
+                <td>
+                    <div class="rowact">
+                        <a th:href="@{/pasos-admision/editar/{id}(id=${p.id})}" class="ui small basic button">Editar</a>
+                        <form class="tform" th:action="@{/pasos-admision/eliminar/{id}(id=${p.id})}" method="post">
+                            <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar este paso?')">Eliminar</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(pasos)}"><td colspan="5" class="empty">No hay pasos de admisión registrados aún.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</html>

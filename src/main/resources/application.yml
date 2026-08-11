@@ -1,0 +1,41 @@
+server:
+  port: ${PORT:9090}
+  servlet:
+    session:
+      timeout: 60m
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/Academia?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:mysql123@}
+    hikari:
+      # Varios usuarios a la vez: suficientes conexiones para que nadie quede esperando
+      # detrás de un reporte o PDF lento, y timeouts explícitos para fallar con un error
+      # claro en vez de quedarse trabado indefinidamente si el pool se agota.
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 20000
+      validation-timeout: 5000
+      max-lifetime: 1800000
+      keepalive-time: 300000
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: ${SHOW_SQL:true}
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    cache: ${THYMELEAF_CACHE:false}
+    encoding: UTF-8
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB

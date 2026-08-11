@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Ingresos por mes</title>
+    <style type="text/css">@page { size: A4; margin: 1.8cm; }</style>
+    <th:block th:replace="~{fragments/pdf :: estilos}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/pdf :: encabezado('Ingresos cobrados por mes - ' + ${nivel.etiqueta})}"></div>
+
+<div class="pdf-section">Resumen general</div>
+<table class="pdf-info">
+    <tr>
+        <td class="k">Nivel</td>
+        <td class="v" th:text="${nivel.etiqueta}">-</td>
+        <td class="k">Total acumulado</td>
+        <td class="v" th:text="${marcaMoneda} + ' ' + ${totalAcumulado}">S/ 0</td>
+    </tr>
+    <tr>
+        <td class="k">Promedio mensual</td>
+        <td class="v" th:text="${marcaMoneda} + ' ' + ${promedioMensual}">S/ 0</td>
+        <td class="k"></td>
+        <td class="v"></td>
+    </tr>
+    <tr>
+        <td class="k">Mes de mayor ingreso</td>
+        <td class="v" th:text="${mesMayor != null} ? (${mesMayor.mes} + ' (' + ${marcaMoneda} + ' ' + ${mesMayor.total} + ')') : '-'">-</td>
+        <td class="k">Mes de menor ingreso</td>
+        <td class="v" th:text="${mesMenor != null} ? (${mesMenor.mes} + ' (' + ${marcaMoneda} + ' ' + ${mesMenor.total} + ')') : '-'">-</td>
+    </tr>
+</table>
+
+<div class="pdf-chart" th:if="${chartDataUri != null}">
+    <img th:src="${chartDataUri}" alt="Gráfico de ingresos por mes"/>
+</div>
+
+<div class="pdf-section">Detalle por mes</div>
+<table class="pdf-table">
+    <thead>
+    <tr><th>Mes</th><th>Total cobrado</th></tr>
+    </thead>
+    <tbody>
+    <tr th:each="fila : ${filas}">
+        <td th:text="${fila.mes}">-</td>
+        <td class="num" th:text="${marcaMoneda} + ' ' + ${fila.total}">0</td>
+    </tr>
+    </tbody>
+</table>
+<p class="pdf-empty" th:if="${#lists.isEmpty(filas)}">Sin datos disponibles.</p>
+<p class="pdf-total" th:unless="${#lists.isEmpty(filas)}">Total acumulado: <span th:text="${marcaMoneda} + ' ' + ${totalAcumulado}">S/ 0</span></p>
+
+<div th:replace="~{fragments/pdf :: pie}"></div>
+</body>
+</html>

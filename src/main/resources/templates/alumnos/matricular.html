@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Matricular alumno</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/alumnos/{id}/expediente(id=${alumno.id})}" class="page-back">← Volver al expediente</a>
+    <h2 class="page-title" th:text="'Matricular a ' + ${alumno.nombre} + ' ' + ${alumno.apellido}"></h2>
+
+    <div class="form-card">
+        <div th:if="${error}" class="field-error" style="margin-bottom:14px" th:text="${error}"></div>
+
+        <form th:action="@{/alumnos/{id}/matricular(id=${alumno.id})}" method="post">
+            <p class="hint" style="margin:0 0 14px">
+                El alumno queda matriculado automáticamente en el área elegida, con todos sus cursos.
+                Nivel: <b th:text="${alumno.nivel != null} ? ${alumno.nivel.etiqueta} : '-'"></b> (no se puede cambiar aquí).
+            </p>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="cicloId">Ciclo</label>
+                    <select name="cicloId" id="cicloId">
+                        <option th:each="c : ${ciclos}" th:value="${c.id}" th:text="${c.nombre}"
+                                th:selected="${cicloActivo != null and c.id == cicloActivo.id}"></option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="turno">Turno</label>
+                    <select name="turno" id="turno">
+                        <option th:each="t : ${turnos}" th:value="${t}" th:text="${t.etiqueta}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="field">
+                <label for="area">Área</label>
+                <select name="area" id="area">
+                    <option th:each="a : ${areas}" th:value="${a}" th:text="${a}"
+                            th:selected="${a == alumno.area}"></option>
+                </select>
+            </div>
+
+            <div class="pay-box">
+                <div class="pt">
+                    <svg style="width:17px;height:17px;stroke:currentColor;stroke-width:1.9;fill:none" viewBox="0 0 24 24">
+                        <path d="M2 7h20v12H2zM2 11h20"/>
+                    </svg>
+                    Pago de matrícula
+                </div>
+                <div class="grid-2">
+                    <div class="field" style="margin-bottom:12px">
+                        <label for="conceptoMatricula" style="color:var(--sage-strong)">Concepto matrícula</label>
+                        <input type="text" name="conceptoMatricula" id="conceptoMatricula" value="Matrícula">
+                    </div>
+                    <div class="field" style="margin-bottom:12px">
+                        <label for="montoMatricula" style="color:var(--sage-strong)" th:text="'Monto (' + ${marcaMoneda} + ')'">Monto</label>
+                        <input type="number" step="0.01" min="0" name="montoMatricula" id="montoMatricula" th:value="${configuracion.montoMatricula}" class="js-monto">
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="field" style="margin-bottom:12px">
+                        <label for="conceptoPension" style="color:var(--sage-strong)">Concepto pensión</label>
+                        <input type="text" name="conceptoPension" id="conceptoPension" value="Pensión">
+                    </div>
+                    <div class="field" style="margin-bottom:6px">
+                        <label for="montoPension" style="color:var(--sage-strong)" th:text="'Monto (' + ${marcaMoneda} + ')'">Monto</label>
+                        <input type="number" step="0.01" min="0" name="montoPension" id="montoPension" th:value="${configuracion.montoPension}" class="js-monto">
+                    </div>
+                </div>
+                <div class="field" style="margin-bottom:6px;max-width:260px">
+                    <label for="numeroCuotas" style="color:var(--sage-strong)">Número de cuotas a generar</label>
+                    <input type="number" step="1" min="1" name="numeroCuotas" id="numeroCuotas" th:value="${configuracion.numeroCuotasPension}">
+                </div>
+                <p class="hint" style="color:var(--sage-strong);margin:0 0 4px">
+                    Deja el monto de pensión en 0 si no quieres generarla. Aumenta el número de cuotas si el padre
+                    quiere pagar varios meses por adelantado; se espaciarán cada
+                    <b th:text="${configuracion.diasEntreCuotas}"></b> días. Estos valores por defecto vienen de
+                    <a th:href="@{/configuracion}">Configuración de precios</a> y se pueden ajustar aquí solo para esta matrícula.
+                </p>
+                <div class="pay-row total">
+                    <span>Total a cobrar hoy</span>
+                    <span id="totalPago" th:text="${marcaMoneda} + ' 0.00'">S/ 0.00</span>
+                </div>
+            </div>
+
+            <div class="form-foot">
+                <button type="submit" class="ui primary button">Matricular</button>
+                <a th:href="@{/alumnos/{id}/expediente(id=${alumno.id})}" class="ui basic button">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:inline="javascript">
+        (function () {
+            var moneda = /*[[${marcaMoneda}]]*/ 'S/';
+            var montos = document.querySelectorAll('.js-monto');
+            var totalPago = document.getElementById('totalPago');
+
+            function actualizarTotal() {
+                var t = 0;
+                montos.forEach(function (i) { t += parseFloat(i.value) || 0; });
+                totalPago.textContent = moneda + ' ' + t.toFixed(2);
+            }
+
+            montos.forEach(function (i) { i.addEventListener('input', actualizarTotal); });
+            actualizarTotal();
+        })();
+    </script>
+</th:block>
+</html>

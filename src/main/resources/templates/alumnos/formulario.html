@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Alumno</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/alumnos}" class="page-back">← Volver a la lista</a>
+    <h2 class="page-title" th:text="${alumnoForm.id} ? 'Editar alumno' : 'Nuevo alumno'"></h2>
+
+    <div class="form-card">
+        <form th:action="@{/alumnos/guardar}" th:object="${alumnoForm}" method="post" enctype="multipart/form-data">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="field">
+                <label for="foto">Fotografía <span class="hint">opcional, para el carnet de estudiante</span></label>
+                <div style="display:flex;align-items:center;gap:14px">
+                    <img th:if="${tieneFoto}" th:src="@{/alumnos/{id}/foto(id=${alumnoForm.id})}" alt="Foto actual"
+                         style="width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)">
+                    <div th:unless="${tieneFoto}" style="width:64px;height:64px;border-radius:10px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-size:10px;text-align:center">Sin foto</div>
+                    <input type="file" th:field="*{foto}" accept="image/*" style="flex:1">
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" th:field="*{nombre}" placeholder="Nombre">
+                    <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+                </div>
+                <div class="field">
+                    <label for="apellido">Apellido</label>
+                    <input type="text" th:field="*{apellido}" placeholder="Apellido">
+                    <span class="field-error" th:if="${#fields.hasErrors('apellido')}" th:errors="*{apellido}"></span>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="dni">DNI</label>
+                    <input type="text" th:field="*{dni}" placeholder="12345678" maxlength="8">
+                    <span class="field-error" th:if="${#fields.hasErrors('dni')}" th:errors="*{dni}"></span>
+                </div>
+                <div class="field">
+                    <label for="celular">Celular <span class="hint">opcional</span></label>
+                    <input type="text" th:field="*{celular}" placeholder="9XXXXXXXX">
+                    <span class="field-error" th:if="${#fields.hasErrors('celular')}" th:errors="*{celular}"></span>
+                </div>
+            </div>
+            <div class="field">
+                <label for="email">Correo <span class="hint">opcional</span></label>
+                <input type="email" th:field="*{email}" placeholder="correo@ejemplo.com">
+                <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="nombrePadre">Nombre del padre/apoderado <span class="hint">opcional</span></label>
+                    <input type="text" th:field="*{nombrePadre}" placeholder="Nombre completo">
+                    <span class="field-error" th:if="${#fields.hasErrors('nombrePadre')}" th:errors="*{nombrePadre}"></span>
+                </div>
+                <div class="field">
+                    <label for="telefonoPadre">Teléfono del padre/apoderado <span class="hint">opcional</span></label>
+                    <input type="text" th:field="*{telefonoPadre}" placeholder="9XXXXXXXX">
+                    <span class="field-error" th:if="${#fields.hasErrors('telefonoPadre')}" th:errors="*{telefonoPadre}"></span>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="nivel">Nivel</label>
+                    <select th:field="*{nivel}" id="nivel">
+                        <option value="">-- Seleccione --</option>
+                        <option th:each="n : ${niveles}" th:value="${n}" th:text="${n.etiqueta}"></option>
+                    </select>
+                    <span class="field-error" th:if="${#fields.hasErrors('nivel')}" th:errors="*{nivel}"></span>
+                </div>
+                <div class="field">
+                    <label for="area">Área <span class="hint" id="areaHint">o grado, según el nivel</span></label>
+                    <select th:field="*{area}" id="area">
+                        <option value="">-- Elige un nivel primero --</option>
+                    </select>
+                    <span class="field-error" th:if="${#fields.hasErrors('area')}" th:errors="*{area}"></span>
+                </div>
+            </div>
+
+            <div th:if="${alumnoForm.id == null}" id="matriculaBox">
+                <div class="form-divider">Matrícula</div>
+                <p class="hint" style="margin:-6px 0 14px">
+                    El alumno queda matriculado automáticamente en el área elegida arriba, con todos sus cursos.
+                </p>
+                <div class="grid-2">
+                    <div class="field">
+                        <label for="cicloId">Ciclo</label>
+                        <select name="cicloId" id="cicloId">
+                            <option th:each="c : ${ciclos}" th:value="${c.id}" th:text="${c.nombre}"
+                                    th:selected="${cicloActivo != null and c.id == cicloActivo.id}"></option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="turno">Turno</label>
+                        <select name="turno" id="turno">
+                            <option th:each="t : ${turnos}" th:value="${t}" th:text="${t.etiqueta}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pay-box">
+                    <div class="pt">
+                        <svg style="width:17px;height:17px;stroke:currentColor;stroke-width:1.9;fill:none" viewBox="0 0 24 24">
+                            <path d="M2 7h20v12H2zM2 11h20"/>
+                        </svg>
+                        Pago de matrícula
+                    </div>
+                    <div class="grid-2">
+                        <div class="field" style="margin-bottom:12px">
+                            <label for="conceptoMatricula" style="color:var(--sage-strong)">Concepto matrícula</label>
+                            <input type="text" name="conceptoMatricula" id="conceptoMatricula" value="Matrícula">
+                        </div>
+                        <div class="field" style="margin-bottom:12px">
+                            <label for="montoMatricula" style="color:var(--sage-strong)" th:text="'Monto (' + ${marcaMoneda} + ')'">Monto</label>
+                            <input type="number" step="0.01" min="0" name="montoMatricula" id="montoMatricula" th:value="${configuracion.montoMatricula}" class="js-monto">
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="field" style="margin-bottom:12px">
+                            <label for="conceptoPension" style="color:var(--sage-strong)">Concepto pensión</label>
+                            <input type="text" name="conceptoPension" id="conceptoPension" value="Pensión">
+                        </div>
+                        <div class="field" style="margin-bottom:6px">
+                            <label for="montoPension" style="color:var(--sage-strong)" th:text="'Monto (' + ${marcaMoneda} + ')'">Monto</label>
+                            <input type="number" step="0.01" min="0" name="montoPension" id="montoPension" th:value="${configuracion.montoPension}" class="js-monto">
+                        </div>
+                    </div>
+                    <div class="field" style="margin-bottom:6px;max-width:260px">
+                        <label for="numeroCuotas" style="color:var(--sage-strong)">Número de cuotas a generar</label>
+                        <input type="number" step="1" min="1" name="numeroCuotas" id="numeroCuotas" th:value="${configuracion.numeroCuotasPension}">
+                    </div>
+                    <p class="hint" style="color:var(--sage-strong);margin:0 0 4px">
+                        Deja el monto de pensión en 0 si no quieres generarla. Aumenta el número de cuotas si el padre
+                        quiere pagar varios meses por adelantado; se espaciarán cada
+                        <b th:text="${configuracion.diasEntreCuotas}"></b> días. Estos valores por defecto vienen de
+                        <a th:href="@{/configuracion}">Configuración de precios</a> y se pueden ajustar aquí solo para esta matrícula.
+                    </p>
+                    <div class="pay-row total">
+                        <span>Total a cobrar hoy</span>
+                        <span id="totalPago" th:text="${marcaMoneda} + ' 0.00'">S/ 0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-foot">
+                <button type="submit" class="ui primary button">Guardar</button>
+                <a th:href="@{/alumnos}" class="ui basic button">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:inline="javascript">
+        (function () {
+            /*<![CDATA[*/
+            var areasPorNivel = /*[[${areasPorNivel}]]*/ {};
+            var areaActual = /*[[${alumnoForm.area}]]*/ '';
+            /*]]>*/
+            var nivelSelect = document.getElementById('nivel');
+            var areaSelect = document.getElementById('area');
+
+            function actualizarAreas() {
+                var opciones = areasPorNivel[nivelSelect.value] || [];
+                var actual = areaSelect.value || areaActual;
+                var html = '<option value="">-- Seleccione --</option>';
+                opciones.forEach(function (a) {
+                    html += '<option value="' + a + '"' + (a === actual ? ' selected' : '') + '>' + a + '</option>';
+                });
+                areaSelect.innerHTML = html;
+            }
+
+            nivelSelect.addEventListener('change', actualizarAreas);
+            if (nivelSelect.value) actualizarAreas();
+        })();
+    </script>
+    <th:block th:if="${alumnoForm.id == null}">
+        <script th:inline="javascript">
+            (function () {
+                var moneda = /*[[${marcaMoneda}]]*/ 'S/';
+                var montos = document.querySelectorAll('.js-monto');
+                var totalPago = document.getElementById('totalPago');
+
+                function actualizarTotal() {
+                    var t = 0;
+                    montos.forEach(function (i) { t += parseFloat(i.value) || 0; });
+                    totalPago.textContent = moneda + ' ' + t.toFixed(2);
+                }
+
+                montos.forEach(function (i) { i.addEventListener('input', actualizarTotal); });
+                actualizarTotal();
+            })();
+        </script>
+    </th:block>
+</th:block>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head>
+    <title>Alumnos</title>
+</head>
+<div layout:fragment="contenido">
+
+    <div class="metrics">
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Total alumnos</div>
+            <div class="val" th:text="${totalAlumnos}">0</div>
+            <div class="delta" th:text="'en ' + ${nivel.etiqueta}">registrados en la academia</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--rose)"></span>Con deuda pendiente</div>
+            <div class="val" th:text="${totalConDeuda}">0</div>
+            <div class="delta" th:classappend="${totalConDeuda > 0} ? 'down' : ''">al menos un pago pendiente</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sky)"></span>Al día</div>
+            <div class="val" th:text="${totalAlDia}">0</div>
+            <div class="delta">sin pagos pendientes</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--lav)"></span>En esta vista</div>
+            <div class="val" th:text="${pagina.totalElements}">0</div>
+            <div class="delta">según el filtro aplicado</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-head">
+            <div>
+                <h2>Alumnos</h2>
+                <p th:text="${area != null and area != ''} ? ('Alumnos de ' + ${nivel.etiqueta} + ' · ' + ${area}) : ('Alumnos de ' + ${nivel.etiqueta} + ', todas las áreas')"></p>
+            </div>
+            <div class="rowact" style="align-items:center">
+                <div th:replace="~{fragments/vista-switch :: switch('alumnos')}"></div>
+                <a th:href="@{/alumnos/nuevo(nivel=${nivel})}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="ui small primary button">
+                    <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo alumno
+                </a>
+            </div>
+        </div>
+        <div class="filter-row">
+            <span class="filter-row-label">Nivel</span>
+            <div class="area-tabs">
+                <a class="area-tab" th:each="n : ${niveles}" th:classappend="${n == nivel} ? ' active'"
+                   th:href="@{/alumnos(q=${q}, nivel=${n})}" th:text="${n.etiqueta}"></a>
+            </div>
+        </div>
+        <div class="filter-row" style="padding-bottom:14px">
+            <span class="filter-row-label">Área</span>
+            <div class="area-tabs">
+                <a class="area-tab" th:classappend="${area == null or area == ''} ? ' active'" th:href="@{/alumnos(q=${q}, nivel=${nivel})}">Todas</a>
+                <a class="area-tab" th:each="a : ${areas}" th:classappend="${a == area} ? ' active'"
+                   th:href="@{/alumnos(q=${q}, nivel=${nivel}, area=${a})}" th:text="${a}"></a>
+            </div>
+        </div>
+        <div class="searchbar">
+            <form method="get" th:action="@{/alumnos}" style="display:flex;gap:8px;flex:1">
+                <input type="hidden" name="nivel" th:value="${nivel}">
+                <input type="hidden" name="area" th:value="${area}">
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre, apellido, DNI o correo..." aria-label="Buscar alumno">
+                <button type="submit" class="ui small basic button">Buscar</button>
+            </form>
+        </div>
+        <div data-view-panel="list" data-view-group="alumnos">
+            <table>
+                <thead>
+                <tr>
+                    <th>DNI</th>
+                    <th>Alumno</th>
+                    <th>Correo</th>
+                    <th>Área</th>
+                    <th>Celular</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="alumno : ${alumnos}">
+                    <td th:text="${alumno.dni} ?: '-'"></td>
+                    <td>
+                        <div class="alumno-row">
+                            <div class="alumno-avatar" th:text="${#strings.substring(alumno.nombre,0,1) + #strings.substring(alumno.apellido,0,1)}"></div>
+                            <span class="strong" th:text="${alumno.nombre + ' ' + alumno.apellido}"></span>
+                        </div>
+                    </td>
+                    <td th:text="${alumno.email} ?: '-'"></td>
+                    <td><span class="pill pill-lav" th:text="${alumno.area}"></span></td>
+                    <td th:text="${alumno.celular} ?: '-'"></td>
+
+                    <td>
+                            <span th:if="${deuda.containsKey(alumno.id) and deuda.get(alumno.id) > 0}"
+                                  class="pill pill-amber" th:text="${deuda.get(alumno.id)} + ' pend.'"></span>
+                        <span th:unless="${deuda.containsKey(alumno.id) and deuda.get(alumno.id) > 0}"
+                              class="pill pill-sage">Al día</span>
+                    </td>
+
+                    <td sec:authorize="hasAnyRole('ADMIN','CAJERO')">
+                        <div class="rowact">
+                            <a th:href="@{/alumnos/{id}/expediente(id=${alumno.id})}" class="ui small basic button">Expediente</a>
+                            <a th:href="@{/alumnos/{id}/carnet(id=${alumno.id})}" class="ui small basic button">Carnet</a>
+                            <a th:href="@{/alumnos/editar/{id}(id=${alumno.id})}" class="ui small basic button">Editar</a>
+                            <form class="tform" th:action="@{/alumnos/eliminar/{id}(id=${alumno.id})}" method="post">
+                                <input type="hidden" name="nivel" th:value="${nivel}">
+                                <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar alumno?')">Eliminar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(alumnos)}">
+                    <td colspan="7" class="empty"
+                        th:text="${(q != null and !#strings.isEmpty(q)) or (area != null and !#strings.isEmpty(area))} ? 'Ningún alumno coincide con el filtro aplicado.' : 'No hay alumnos registrados aún.'"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div data-view-panel="grid" data-view-group="alumnos" hidden>
+            <div class="entity-grid stagger-cards" th:if="${not #lists.isEmpty(alumnos)}">
+                <div class="entity-card" th:each="alumno : ${alumnos}">
+                    <div class="entity-card-top">
+                        <div class="entity-avatar" th:text="${#strings.substring(alumno.nombre,0,1) + #strings.substring(alumno.apellido,0,1)}"></div>
+                        <div style="min-width:0">
+                            <div class="entity-card-name" th:text="${alumno.nombre + ' ' + alumno.apellido}"></div>
+                            <div class="entity-card-sub" th:text="'DNI ' + (${alumno.dni} ?: '-')"></div>
+                        </div>
+                    </div>
+                    <div class="entity-card-meta">
+                        <div class="entity-card-meta-row"><span class="k">Área</span><span class="pill pill-lav" th:text="${alumno.area}"></span></div>
+                        <div class="entity-card-meta-row"><span class="k">Correo</span><span class="v" th:text="${alumno.email} ?: '-'"></span></div>
+                        <div class="entity-card-meta-row"><span class="k">Celular</span><span class="v" th:text="${alumno.celular} ?: '-'"></span></div>
+                        <div class="entity-card-meta-row">
+                            <span class="k">Estado</span>
+                            <span th:if="${deuda.containsKey(alumno.id) and deuda.get(alumno.id) > 0}"
+                                  class="pill pill-amber" th:text="${deuda.get(alumno.id)} + ' pend.'"></span>
+                            <span th:unless="${deuda.containsKey(alumno.id) and deuda.get(alumno.id) > 0}"
+                                  class="pill pill-sage">Al día</span>
+                        </div>
+                    </div>
+                    <div class="entity-card-foot" sec:authorize="hasAnyRole('ADMIN','CAJERO')">
+                        <a th:href="@{/alumnos/{id}/expediente(id=${alumno.id})}" class="ui small basic button">Expediente</a>
+                        <a th:href="@{/alumnos/{id}/carnet(id=${alumno.id})}" class="ui small basic button">Carnet</a>
+                        <a th:href="@{/alumnos/editar/{id}(id=${alumno.id})}" class="ui small basic button">Editar</a>
+                        <form class="tform" th:action="@{/alumnos/eliminar/{id}(id=${alumno.id})}" method="post">
+                            <input type="hidden" name="nivel" th:value="${nivel}">
+                            <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar alumno?')">Eliminar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <p th:if="${#lists.isEmpty(alumnos)}" class="empty"
+               th:text="${(q != null and !#strings.isEmpty(q)) or (area != null and !#strings.isEmpty(area))} ? 'Ningún alumno coincide con el filtro aplicado.' : 'No hay alumnos registrados aún.'"></p>
+        </div>
+
+        <div th:replace="~{fragments/paginacion :: paginacionNivelArea(${pagina}, '/alumnos', ${q}, ${nivel}, ${area})}"></div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:src="@{/js/vista-toggle.js}"></script>
+</th:block>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Registrar horas</title>
+</head>
+<div layout:fragment="contenido">
+    <a th:href="@{/horas-docentes(profesorId=${horario.curso.profesor.id})}" class="page-back">&laquo; Volver</a>
+
+    <div class="card-head" style="border:none;padding:14px 0 6px">
+        <div><h2 style="font-family:'Fraunces',serif;font-weight:500;font-size:20px">Registrar horas dictadas</h2>
+            <p style="font-size:12px;color:var(--ink-faint)">Anota la hora real de inicio y fin de la clase</p></div>
+    </div>
+
+    <div class="card" style="padding:0;margin-bottom:16px">
+        <div class="hd-card" style="border:none;padding:18px 20px">
+            <div class="hd-card-curso" style="font-size:16px" th:text="${horario.curso.nombre}">Curso</div>
+            <div class="hd-card-meta" style="font-size:12.5px;margin-top:5px"
+                 th:text="${horario.curso.profesor.nombreCompleto} + ' · ' + ${horario.diaSemana.etiqueta} + ' · ' + ${horario.turno.etiqueta} + ' · ' + ${horario.horaInicio} + '-' + ${horario.horaFin} + (${horario.aula != null} ? ' · Aula ' + ${horario.aula} : '')"></div>
+            <div class="hd-card-status" style="margin-top:12px">
+                <span th:if="${registroDeHoy != null and registroDeHoy.horaLlegada != null}" class="pill pill-sage"
+                      th:text="'Llegó hoy a las ' + ${#temporals.format(registroDeHoy.horaLlegada, 'HH:mm')}"></span>
+                <span th:unless="${registroDeHoy != null and registroDeHoy.horaLlegada != null}" class="pill pill-gray">Sin llegada registrada hoy</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <div th:if="${error}" class="field-error" style="margin-bottom:14px" th:text="${error}"></div>
+
+        <p class="hint" style="margin:0 0 16px">
+            Este curso está programado los <b th:text="${horario.diaSemana.etiqueta}"></b>, de
+            <b th:text="${horario.horaInicio} + ' a ' + ${horario.horaFin}"></b>. La fecha elegida debe caer en ese día,
+            y las horas solo se pueden ajustar hasta 30 minutos antes o después de lo programado.
+        </p>
+
+        <div class="note" id="avisoDia" style="display:none;background:var(--rose-soft);border-color:#F3C9CE;color:var(--rose-strong)">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+            <div>La fecha elegida no cae un <span th:text="${horario.diaSemana.etiqueta}"></span>. Elige otra fecha antes de guardar.</div>
+        </div>
+
+        <form class="ui form" th:action="@{/horas-docentes/registrar}" method="post" id="formRegistrarHoras">
+            <input type="hidden" name="horarioId" th:value="${horario.id}">
+            <div class="grid-3">
+                <div class="field">
+                    <label for="campoFecha">Fecha de la clase</label>
+                    <input type="date" name="fecha" th:value="${fecha}" id="campoFecha" required>
+                </div>
+                <div class="field">
+                    <label for="campoHoraInicio">Hora inicio</label>
+                    <input type="time" name="horaInicio" id="campoHoraInicio" th:value="${horaInicioSel}"
+                           th:attr="min=${horaInicioMin}, max=${horaFinMax}" required>
+                </div>
+                <div class="field">
+                    <label for="campoHoraFin">Hora fin</label>
+                    <input type="time" name="horaFin" id="campoHoraFin" th:value="${horaFinSel}"
+                           th:attr="min=${horaInicioMin}, max=${horaFinMax}" required>
+                </div>
+            </div>
+            <div class="field">
+                <label for="campoObservaciones">Observaciones <span class="hint">opcional</span></label>
+                <input type="text" name="observaciones" id="campoObservaciones" th:value="${observacionesSel}" placeholder="Ej. clase de recuperación, salió antes, etc.">
+            </div>
+            <div class="form-foot">
+                <button type="submit" class="ui primary button" id="btnGuardarHoras">
+                    <svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+                    Guardar horas
+                </button>
+                <a th:href="@{/horas-docentes(profesorId=${horario.curso.profesor.id})}" class="ui basic button">Cancelar</a>
+            </div>
+        </form>
+    </div>
+
+    <script th:inline="javascript">
+        (function () {
+            var diaEsperado = /*[[${diaSemanaJs}]]*/ 1;
+            var campoFecha = document.getElementById('campoFecha');
+            var aviso = document.getElementById('avisoDia');
+            var boton = document.getElementById('btnGuardarHoras');
+
+            function validar() {
+                if (!campoFecha.value) return;
+                var partes = campoFecha.value.split('-').map(Number);
+                var fecha = new Date(partes[0], partes[1] - 1, partes[2]);
+                var coincide = fecha.getDay() === diaEsperado;
+                aviso.style.display = coincide ? 'none' : 'flex';
+                boton.disabled = !coincide;
+            }
+
+            campoFecha.addEventListener('change', validar);
+            validar();
+        })();
+    </script>
+</div>
+</html>

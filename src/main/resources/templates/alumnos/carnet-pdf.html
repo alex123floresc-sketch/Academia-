@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="'Carnet · ' + ${alumno.nombreCompleto}">Carnet</title>
+    <style type="text/css">
+        @page { size: A4; margin: 20mm; }
+        body { font-family: Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+        .face { display: inline-block; vertical-align: top; width: 85.6mm; height: 54mm; border-radius: 3mm;
+                overflow: hidden; position: relative; background: #ffffff; border: 0.3mm solid #DCE6F2; }
+        .face + .face { margin-left: 8mm; }
+
+        .front .head { background: #1E40AF; color: #ffffff; padding: 2.2mm 3mm; }
+        .front .brand { font-size: 3.6mm; font-weight: bold; }
+        .front .sub { font-size: 1.9mm; text-transform: uppercase; letter-spacing: 0.3mm; opacity: 0.9; }
+        .front .body-row { padding: 2.6mm 3mm; }
+        .photo { width: 19mm; height: 24mm; border: 0.3mm solid #DCE6F2; background: #EEF3FA; }
+        .photo img { width: 19mm; height: 24mm; }
+        .data { padding-left: 3mm; }
+        .name { font-size: 3.1mm; font-weight: bold; color: #1E40AF; text-transform: uppercase; }
+        .row { font-size: 2.3mm; color: #57687D; margin-top: 1mm; }
+        .row b { color: #1B2A3D; }
+        .front .foot { position: absolute; left: 0; right: 0; bottom: 0; background: #EEF3FA;
+                        padding: 1.4mm 3mm; font-size: 1.9mm; color: #8FA0B5; text-align: center; }
+
+        .back { background: #E4EDFC; text-align: center; }
+        .back .head { background: #1E40AF; color: #ffffff; padding: 1.8mm 3mm; font-size: 2.1mm;
+                       text-transform: uppercase; letter-spacing: 0.3mm; text-align: left; }
+        .back .qr { width: 19mm; height: 19mm; background: #ffffff; border: 0.3mm solid #DCE6F2; margin-top: 3mm; }
+        .back .code { font-size: 2.6mm; font-weight: bold; color: #1E40AF; margin-top: 2mm; }
+        .back .dni { font-size: 1.9mm; color: #57687D; margin-top: 1mm; }
+        .back .note { font-size: 1.7mm; color: #57687D; padding: 0 6mm; margin-top: 2mm; }
+    </style>
+</head>
+<body>
+
+<div class="face front">
+    <div class="head">
+        <div class="brand" th:text="${marcaNombre}">Lapreplus</div>
+        <div class="sub">Carnet de estudiante</div>
+    </div>
+    <table class="body-row" style="width:100%;border-collapse:collapse">
+        <tr>
+            <td class="photo" style="width:19mm">
+                <img th:if="${fotoDataUri != null}" th:src="${fotoDataUri}" alt="Foto"/>
+            </td>
+            <td class="data" style="vertical-align:top">
+                <div class="name" th:text="${alumno.nombreCompleto}">Nombre Apellido</div>
+                <div class="row"><b>DNI</b> <span th:text="${alumno.dni} ?: '-'"></span></div>
+                <div class="row"><b>Área</b> <span th:text="${alumno.area} ?: '-'"></span></div>
+                <div class="row"><b>Ciclo</b>
+                    <span th:text="${matriculaVigente != null} ? ${matriculaVigente.semestre.nombre} : 'No matriculado'"></span></div>
+                <div class="row" th:if="${matriculaVigente != null}">
+                    <b>Vigencia</b>
+                    <span th:text="${#temporals.format(matriculaVigente.semestre.fechaInicio,'dd/MM/yy')} + ' - ' + ${#temporals.format(matriculaVigente.semestre.fechaFin,'dd/MM/yy')}"></span>
+                </div>
+            </td>
+        </tr>
+    </table>
+    <div class="foot">Documento de identificación estudiantil · No transferible</div>
+</div>
+
+<div class="face back">
+    <div class="head">Reverso · Uso estudiantil</div>
+    <img class="qr" th:src="${qrDataUri}" alt="Código QR"/>
+    <div class="code" th:text="'ALU-' + ${alumno.id}">ALU-0</div>
+    <div class="dni" th:text="'DNI ' + (${alumno.dni} ?: '-')">DNI -</div>
+    <div class="note" th:text="'Este carnet es propiedad de ' + ${marcaNombre} + '. Si lo encuentra, por favor devuélvalo a la institución.'">Este carnet es propiedad de Lapreplus. Si lo encuentra, por favor devuélvalo a la institución.</div>
+</div>
+
+</body>
+</html>

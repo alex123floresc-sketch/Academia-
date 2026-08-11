@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Áreas</title>
+</head>
+<div layout:fragment="contenido">
+    <a th:href="@{/areas}" class="page-back">&laquo; Volver a niveles</a>
+
+    <h2 class="page-title" th:text="'Áreas de ' + ${nivel.etiqueta}"></h2>
+    <p class="hint" style="margin-top:-14px;margin-bottom:20px">Elige un área para ver y asignar sus cursos.</p>
+
+    <div class="ui three stackable cards area-select-picker stagger-cards">
+        <a class="ui raised card" th:each="r : ${resumenes}" th:href="@{/areas(nivel=${nivel}, area=${r.nombre})}">
+            <div class="content">
+                <div class="ui blue ribbon label" th:text="${r.nombre}"></div>
+            </div>
+            <div class="content">
+                <div class="ui three tiny statistics">
+                    <div class="statistic">
+                        <div class="value" th:text="${r.cursos}"></div>
+                        <div class="label" th:text="'Curso' + (${r.cursos == 1} ? '' : 's')"></div>
+                    </div>
+                    <div class="statistic">
+                        <div class="value" th:text="${r.profesores}"></div>
+                        <div class="label" th:text="'Profesor' + (${r.profesores == 1} ? '' : 'es')"></div>
+                    </div>
+                    <div class="statistic">
+                        <div class="value" th:text="${r.alumnos}"></div>
+                        <div class="label" th:text="'Alumno' + (${r.alumnos == 1} ? '' : 's')"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="extra content">
+                <i class="right chevron icon"></i>Ver y asignar cursos
+            </div>
+        </a>
+    </div>
+</div>
+
+<th:block layout:fragment="estilos">
+    <style>
+        .area-select-picker .card{cursor:pointer;transition:.12s}
+        .area-select-picker .card:hover{transform:translateY(-2px)}
+        .area-select-picker .ui.statistics .statistic .value{font-family:'Fraunces',serif !important}
+        .area-select-picker .extra.content{color:var(--sage-strong) !important;font-weight:600;font-size:12.5px}
+    </style>
+</th:block>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Asistencia de docentes</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/asistencias}" class="page-back">&larr; Volver</a>
+    <div class="card-head" style="border:none;padding:14px 0 6px">
+        <div><h2 style="font-family:'Fraunces',serif;font-weight:500;font-size:20px">Asistencia de docentes</h2>
+            <p style="font-size:12px;color:var(--ink-faint)">Cursos programados hoy según el horario; marca la llegada del profesor a la hora que le toca dictar</p></div>
+    </div>
+
+    <div th:if="${ciclo == null}" class="note">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+        <div>No hay un ciclo activo configurado. Activa un ciclo para poder registrar la asistencia de docentes.</div>
+    </div>
+
+    <div th:if="${ciclo != null and diaHoy == null}" class="note">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+        <div>No hay clases programadas los domingos.</div>
+    </div>
+
+    <form th:if="${ciclo != null and diaHoy != null}" th:action="@{/asistencias/docentes}" method="get" class="filters">
+        <select name="turno" onchange="this.form.submit()">
+            <option th:each="t : ${turnos}" th:value="${t}" th:text="${t.etiqueta}"
+                    th:selected="${turnoSel == t}"></option>
+        </select>
+        <span class="pill pill-sky" th:text="${diaHoy.etiqueta} + ' · ' + ${ciclo.nombre}"></span>
+    </form>
+
+    <div class="card" style="padding:0;margin-top:16px" th:if="${ciclo != null and diaHoy != null}">
+        <div class="card-head">
+            <div><h2>Cursos de hoy</h2><p th:text="${diaHoy.etiqueta} + ' · ' + ${turnoSel.etiqueta}"></p></div>
+        </div>
+        <div class="hd-schedule">
+            <div class="hd-card" th:each="h : ${horarios}" th:with="reg=${registrosHoy.get(h.id)}">
+                <div class="hd-card-curso" th:text="${h.curso.nombre}">Curso</div>
+                <div class="hd-card-meta"
+                     th:text="(${h.curso.profesor != null} ? ${h.curso.profesor.nombreCompleto} : 'Sin profesor asignado') + ' · ' + ${h.horaInicio} + '-' + ${h.horaFin} + (${h.aula != null} ? ' · Aula ' + ${h.aula} : '')"></div>
+                <div class="hd-card-status">
+                    <span th:if="${reg == null}" class="pill pill-gray">Sin registrar</span>
+                    <span th:if="${reg != null}" class="pill pill-sage" th:text="'Llegó ' + ${#temporals.format(reg.horaLlegada, 'HH:mm')}"></span>
+                </div>
+                <div class="hd-card-actions">
+                    <form th:if="${reg == null and h.curso.profesor != null}" th:action="@{/asistencias/docentes/marcar}" method="post">
+                        <input type="hidden" name="horarioId" th:value="${h.id}">
+                        <input type="hidden" name="turno" th:value="${turnoSel}">
+                        <button type="submit" class="ui small primary button">Marcar llegada</button>
+                    </form>
+                    <span th:if="${reg == null and h.curso.profesor == null}" style="font-size:11.5px;color:var(--ink-faint)">Asigna un profesor al curso para poder marcar llegada.</span>
+                </div>
+            </div>
+        </div>
+        <p th:if="${#lists.isEmpty(horarios)}" class="empty">No hay cursos programados para este turno.</p>
+    </div>
+</div>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head>
+    <title>Inicio</title>
+</head>
+<div layout:fragment="contenido">
+
+    <div class="card" style="margin-bottom:22px">
+        <div style="padding:26px 28px">
+            <p style="font-size:12px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px" th:text="${#temporals.format(hoy, 'dd/MM/yyyy')}"></p>
+            <h1 style="font-family:'Fraunces',serif;font-weight:600;font-size:26px;color:var(--ink)"
+                th:text="'Hola' + (${nombreUsuario != null} ? ', ' + ${nombreUsuario} : '') + '.'"></h1>
+            <p style="font-size:13.5px;color:var(--ink-soft);margin-top:6px">
+                <span sec:authorize="hasRole('ADMIN')">Administrador</span>
+                <span sec:authorize="hasRole('CAJERO')">Cajero</span>
+                <span sec:authorize="hasRole('AUXILIAR')">Auxiliar</span>
+                · Bienvenido a <span th:text="${marcaNombre}">Lapreplus</span>.
+            </p>
+        </div>
+    </div>
+
+    <h2 class="page-title" style="font-size:16px;margin-bottom:16px">Accesos directos</h2>
+    <div class="quick-tiles">
+        <a th:href="@{/alumnos}" class="quick-tile">
+            <div class="quick-tile-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg></div>
+            <div><div class="quick-tile-label">Alumnos</div><div class="quick-tile-sub">Ver el registro general</div></div>
+        </a>
+        <a th:href="@{/alumnos/nuevo}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="quick-tile">
+            <div class="quick-tile-icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+            <div><div class="quick-tile-label">Nuevo alumno</div><div class="quick-tile-sub">Registrar un alumno nuevo</div></div>
+        </a>
+        <a th:href="@{/pagos}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="quick-tile">
+            <div class="quick-tile-icon"><svg viewBox="0 0 24 24"><path d="M2 7h20v12H2zM2 11h20M6 15h4"/></svg></div>
+            <div><div class="quick-tile-label">Pagos</div><div class="quick-tile-sub">Cobrar cuotas y pensiones</div></div>
+        </a>
+        <a th:href="@{/horarios}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="quick-tile">
+            <div class="quick-tile-icon"><svg viewBox="0 0 24 24"><path d="M12 6v6l4 2M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20Z"/></svg></div>
+            <div><div class="quick-tile-label">Horarios</div><div class="quick-tile-sub">Ver la grilla semanal</div></div>
+        </a>
+        <a th:href="@{/asistencias}" sec:authorize="hasAnyRole('ADMIN','AUXILIAR')" class="quick-tile">
+            <div class="quick-tile-icon"><svg viewBox="0 0 24 24"><path d="M3 7h4v4H3zM3 13h4v4H3zM9 7h12M9 13h12M9 19h12"/></svg></div>
+            <div><div class="quick-tile-label">Asistencia</div><div class="quick-tile-sub">Registrar entrada de alumnos</div></div>
+        </a>
+        <a th:href="@{/horas-docentes}" sec:authorize="hasAnyRole('ADMIN','CAJERO')" class="quick-tile">
+            <div class="quick-tile-icon"><svg viewBox="0 0 24 24"><path d="M20 7h-4V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2ZM10 5h4v2h-4V5Z"/></svg></div>
+            <div><div class="quick-tile-label">Horas docentes</div><div class="quick-tile-sub">Llegada, horas y pagos</div></div>
+        </a>
+        <a th:href="@{/reportes}" sec:authorize="hasRole('ADMIN')" class="quick-tile">
+            <div class="quick-tile-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18M7 15l4-4 3 3 5-6"/></svg></div>
+            <div><div class="quick-tile-label">Reportes</div><div class="quick-tile-sub">Exportar PDF y Excel</div></div>
+        </a>
+    </div>
+</div>
+</html>

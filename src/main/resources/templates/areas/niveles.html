@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Áreas</title></head>
+<div layout:fragment="contenido">
+
+    <h2 class="page-title">Áreas</h2>
+    <p class="hint" style="margin-top:-14px;margin-bottom:20px">Elige un nivel para gestionar sus áreas y asignar cursos. Cada nivel es completamente independiente.</p>
+
+    <div class="ui three stackable cards nivel-picker stagger-cards">
+        <a class="ui raised card" th:each="n : ${resumenNiveles}" th:href="@{/areas(nivel=${n.key})}">
+            <div class="content">
+                <div class="ui blue ribbon label" th:text="${n.key.etiqueta}"></div>
+            </div>
+            <div class="content">
+                <div class="ui statistic">
+                    <div class="value" th:text="${n.value}"></div>
+                    <div class="label" th:text="'Curso' + (${n.value == 1} ? '' : 's') + ' registrado' + (${n.value == 1} ? '' : 's')"></div>
+                </div>
+            </div>
+            <div class="extra content">
+                <i class="right chevron icon"></i>Ver áreas de este nivel
+            </div>
+        </a>
+    </div>
+</div>
+
+<th:block layout:fragment="estilos">
+    <style>
+        .nivel-picker .card{cursor:pointer;transition:.12s}
+        .nivel-picker .card:hover{transform:translateY(-2px)}
+        .nivel-picker .ui.statistic .value{font-family:'Fraunces',serif !important}
+        .nivel-picker .extra.content{color:var(--sage-strong) !important;font-weight:600;font-size:12.5px}
+    </style>
+</th:block>
+</html>

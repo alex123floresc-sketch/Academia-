@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Alumnos morosos</title>
+    <style type="text/css">@page { size: A4; margin: 1.8cm; }</style>
+    <th:block th:replace="~{fragments/pdf :: estilos}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/pdf :: encabezado('Alumnos con pagos vencidos - ' + ${nivel.etiqueta})}"></div>
+
+<div class="pdf-section">Resumen general</div>
+<table class="pdf-info">
+    <tr>
+        <td class="k">Nivel</td>
+        <td class="v" th:text="${nivel.etiqueta}">-</td>
+        <td class="k">Alumnos morosos</td>
+        <td class="v" th:text="${totalAlumnosMorosos}">0</td>
+    </tr>
+    <tr>
+        <td class="k">Pagos vencidos</td>
+        <td class="v" th:text="${totalPagosVencidos}">0</td>
+        <td class="k"></td>
+        <td class="v"></td>
+    </tr>
+    <tr>
+        <td class="k">Monto total adeudado</td>
+        <td class="v" th:text="${marcaMoneda} + ' ' + ${totalAdeudado}">S/ 0</td>
+        <td class="k">Promedio adeudado por alumno</td>
+        <td class="v" th:text="${marcaMoneda} + ' ' + ${promedioAdeudado}">S/ 0</td>
+    </tr>
+</table>
+
+<div class="pdf-chart" th:if="${chartDataUri != null}">
+    <img th:src="${chartDataUri}" alt="Gráfico de monto adeudado por alumno"/>
+</div>
+
+<div class="pdf-section">Detalle por alumno</div>
+<table class="pdf-table">
+    <thead>
+    <tr><th>Alumno</th><th>Correo</th><th>Pagos vencidos</th><th>Monto adeudado</th></tr>
+    </thead>
+    <tbody>
+    <tr th:each="fila : ${filas}">
+        <td th:text="${fila.nombre} + ' ' + ${fila.apellido}">-</td>
+        <td th:text="${fila.email} ?: '-'">-</td>
+        <td class="center" th:text="${fila.pagosVencidos}">0</td>
+        <td class="num" th:text="${marcaMoneda} + ' ' + ${fila.montoAdeudado}">0</td>
+    </tr>
+    </tbody>
+</table>
+<p class="pdf-empty" th:if="${#lists.isEmpty(filas)}">Sin alumnos morosos.</p>
+<p class="pdf-total" th:unless="${#lists.isEmpty(filas)}">Total adeudado: <span th:text="${marcaMoneda} + ' ' + ${totalAdeudado}">S/ 0</span></p>
+
+<div th:replace="~{fragments/pdf :: pie}"></div>
+</body>
+</html>

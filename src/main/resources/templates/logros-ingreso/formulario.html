@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Resultado de ingreso</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/logros-ingreso}" class="page-back">← Volver a resultados de ingreso</a>
+    <h2 class="page-title" th:text="${logroForm.id} ? 'Editar resultado' : 'Nuevo resultado'"></h2>
+
+    <div class="form-card">
+        <form th:action="@{/logros-ingreso/guardar}" th:object="${logroForm}" method="post" enctype="multipart/form-data">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="field">
+                <label for="foto">Fotografía <span class="hint">opcional</span></label>
+                <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                    <img th:if="${logroForm.id != null and (logroForm.foto == null or logroForm.foto.empty)}" th:src="@{/logros-ingreso/{id}/foto(id=${logroForm.id})}" alt="Foto actual"
+                         style="width:64px;height:64px;object-fit:cover;border-radius:50%;border:1px solid var(--line)">
+                    <input type="file" th:field="*{foto}" accept="image/*" style="flex:1;min-width:200px">
+                    <label class="check-inline" th:if="${logroForm.id != null}" style="margin:0">
+                        <input type="checkbox" th:field="*{quitarFoto}">
+                        <span style="font-weight:400;font-size:12px;color:var(--ink-soft)">Quitar foto actual</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="field">
+                    <label for="nombreAlumno">Nombre del alumno</label>
+                    <input type="text" th:field="*{nombreAlumno}" placeholder="Ej. Carlos Ramírez">
+                    <span class="field-error" th:if="${#fields.hasErrors('nombreAlumno')}" th:errors="*{nombreAlumno}"></span>
+                </div>
+                <div class="field">
+                    <label for="universidad">Universidad</label>
+                    <input type="text" th:field="*{universidad}" placeholder="Ej. Universidad Nacional Mayor de San Marcos">
+                    <span class="field-error" th:if="${#fields.hasErrors('universidad')}" th:errors="*{universidad}"></span>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="carrera">Carrera <span class="hint">opcional</span></label>
+                    <input type="text" th:field="*{carrera}" placeholder="Ej. Ingeniería Civil">
+                    <span class="field-error" th:if="${#fields.hasErrors('carrera')}" th:errors="*{carrera}"></span>
+                </div>
+                <div class="field">
+                    <label for="anioIngreso">Año de ingreso <span class="hint">opcional</span></label>
+                    <input type="number" step="1" min="2000" th:field="*{anioIngreso}">
+                    <span class="field-error" th:if="${#fields.hasErrors('anioIngreso')}" th:errors="*{anioIngreso}"></span>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="orden">Orden <span class="hint">menor número aparece primero</span></label>
+                    <input type="number" step="1" min="0" th:field="*{orden}">
+                    <span class="field-error" th:if="${#fields.hasErrors('orden')}" th:errors="*{orden}"></span>
+                </div>
+                <div class="field">
+                    <label class="check-inline" style="margin-top:30px">
+                        <input type="checkbox" th:field="*{activo}">
+                        <span>Activo (se muestra en la página pública)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-foot">
+                <button type="submit" class="ui primary button">Guardar</button>
+                <a th:href="@{/logros-ingreso}" class="ui basic button">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</html>

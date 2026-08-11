@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Ciclos</title></head>
+<div layout:fragment="contenido">
+    <div class="card">
+        <div class="card-head">
+            <div><h2>Ciclos</h2><p>Periodos de preparación de la academia</p></div>
+            <a th:href="@{/ciclos/nuevo}" class="ui small primary button">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo ciclo</a>
+        </div>
+        <div class="searchbar">
+            <form method="get" th:action="@{/ciclos}" style="display:flex;gap:8px;flex:1">
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre..." aria-label="Buscar ciclo">
+                <button type="submit" class="ui small basic button">Buscar</button>
+            </form>
+        </div>
+        <table>
+            <thead><tr><th>Ciclo</th><th>Inicio</th><th>Fin</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="ciclo : ${ciclos}">
+                <td class="strong" th:text="${ciclo.nombre}"></td>
+                <td th:text="${ciclo.fechaInicio}"></td>
+                <td th:text="${ciclo.fechaFin}"></td>
+                <td>
+                    <span th:if="${ciclo.activo}" class="pill pill-sage"><span class="d"></span>Activo</span>
+                    <span th:unless="${ciclo.activo}" class="pill pill-gray">Inactivo</span>
+                </td>
+                <td>
+                    <div class="rowact">
+                        <a th:href="@{/ciclos/editar/{id}(id=${ciclo.id})}" class="ui small basic button">Editar</a>
+                        <form class="tform" th:action="@{/ciclos/eliminar/{id}(id=${ciclo.id})}" method="post">
+                            <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar ciclo?')">Eliminar</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(ciclos)}"><td colspan="5" class="empty">No hay ciclos registrados aún.</td></tr>
+            </tbody>
+        </table>
+        <div th:replace="~{fragments/paginacion :: paginacion(${pagina}, '/ciclos', ${q})}"></div>
+    </div>
+</div>
+</html>

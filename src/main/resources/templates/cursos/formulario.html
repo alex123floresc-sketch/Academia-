@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Curso</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/cursos(nivel=${nivelContexto},area=${area})}" class="page-back">← Volver a la lista</a>
+    <h2 class="page-title" th:text="${cursoForm.id} ? 'Editar curso' : 'Nuevo curso'"></h2>
+
+    <div class="form-card">
+        <form th:action="@{/cursos/guardar}" th:object="${cursoForm}" method="post">
+            <input type="hidden" th:field="*{id}">
+            <input type="hidden" name="area" th:value="${area}">
+            <div class="grid-2">
+                <div class="field">
+                    <label for="codigo">Código <span class="hint">identificador único</span></label>
+                    <input type="text" th:field="*{codigo}" placeholder="Ej. MAT-ARI" autocomplete="off">
+                    <span class="field-error" th:if="${#fields.hasErrors('codigo')}" th:errors="*{codigo}"></span>
+                </div>
+                <div class="field">
+                    <label for="horas">Horas semanales</label>
+                    <input type="number" min="1" max="40" th:field="*{horas}" placeholder="Ej. 6">
+                    <span class="field-error" th:if="${#fields.hasErrors('horas')}" th:errors="*{horas}"></span>
+                </div>
+            </div>
+            <div class="field">
+                <label for="nombre">Nombre</label>
+                <input type="text" th:field="*{nombre}" placeholder="Ej. Aritmética" autocomplete="off">
+                <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+            </div>
+            <div class="field">
+                <label for="nivel">Nivel <span class="hint">define qué alumnos y horarios pueden usar este curso</span></label>
+                <select th:field="*{nivel}">
+                    <option value="">-- Seleccione --</option>
+                    <option th:each="n : ${niveles}" th:value="${n}" th:text="${n.etiqueta}"></option>
+                </select>
+                <span class="field-error" th:if="${#fields.hasErrors('nivel')}" th:errors="*{nivel}"></span>
+            </div>
+            <div class="field">
+                <label>Profesor <span class="hint">opcional, se puede asignar después</span></label>
+                <div class="combo" id="comboProfesor" th:attr="data-selected=${cursoForm.profesorId}">
+                    <input type="text" class="combo-input" placeholder="Buscar profesor... (opcional)" autocomplete="off">
+                    <button type="button" class="combo-clear" aria-label="Quitar selección">&times;</button>
+                    <input type="hidden" name="profesorId" class="combo-value">
+                    <div class="combo-panel">
+                        <div class="combo-row" th:each="p : ${profesores}"
+                             th:attr="data-valor=${p.id},data-texto=${p.nombreCompleto},data-buscar=${#strings.toLowerCase(p.nombreCompleto)}">
+                            <div class="cn" th:text="${p.nombreCompleto}"></div>
+                        </div>
+                        <p class="combo-empty" style="display:none">Sin resultados.</p>
+                    </div>
+                </div>
+            </div>
+            <label class="check-inline" style="margin:4px 0 19px">
+                <input type="checkbox" th:field="*{destacadoWeb}">
+                <span>Destacar en la página web (aparece en la sección de cursos)</span>
+            </label>
+            <div class="form-foot">
+                <button type="submit" class="ui primary button">Guardar</button>
+                <a th:href="@{/cursos(nivel=${nivelContexto},area=${area})}" class="ui basic button">Cancelar</a>
+            </div>
+        </form>
+    </div>
+
+    <script th:src="@{/js/buscador-select.js}"></script>
+    <script>initCombo('comboProfesor');</script>
+</div>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head><title>Pagos</title></head>
+<div layout:fragment="contenido">
+
+    <div class="metrics" style="grid-template-columns:repeat(3,1fr)">
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Cobrado</div>
+            <div class="val" th:text="${marcaMoneda} + ' ' + ${cobrado}">S/ 0</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--amber)"></span>Por cobrar</div>
+            <div class="val" th:text="${marcaMoneda} + ' ' + ${porCobrar}">S/ 0</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--rose)"></span>Vencido</div>
+            <div class="val" th:text="${marcaMoneda} + ' ' + ${vencido}">S/ 0</div>
+        </div>
+    </div>
+
+    <div class="note">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 8v8m-3-5h6M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"/></svg>
+        <div>Control de <b>matrícula, pensiones y deuda</b> de la academia.</div>
+    </div>
+
+    <div class="card">
+        <div class="card-head"><div><h2>Cuotas y pensiones</h2><p>Seguimiento de pagos, agrupado por alumno</p></div></div>
+        <div class="searchbar">
+            <form method="get" th:action="@{/pagos}" style="display:flex;gap:8px;flex:1">
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar por alumno o concepto..." aria-label="Buscar pago">
+                <button type="submit" class="ui small basic button">Buscar</button>
+            </form>
+        </div>
+        <div th:if="${#lists.isEmpty(alumnos)}" class="empty">No hay pagos registrados aún.</div>
+    </div>
+
+    <div class="card" style="margin-top:16px" th:each="alumno : ${alumnos}">
+        <div class="card-head">
+            <div>
+                <h2 th:text="${alumno.nombre + ' ' + alumno.apellido}">Alumno</h2>
+                <p th:text="'DNI ' + (${alumno.dni} ?: '-')">-</p>
+            </div>
+            <a th:href="@{/alumnos/{id}/expediente(id=${alumno.id})}" class="ui small basic button">Ver expediente</a>
+        </div>
+        <table>
+            <thead><tr><th>Concepto</th><th>Vence</th><th>Monto</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="pago : ${pagosPorAlumno.get(alumno.id)}">
+                <td>
+                    <a th:href="@{/pagos/{id}(id=${pago.id})}" class="strong" style="text-decoration:none;color:inherit"
+                       th:text="${pago.concepto}"></a>
+                </td>
+                <td th:text="${pago.fechaVencimiento}"></td>
+                <td>
+                    <div class="strong" th:text="${marcaMoneda} + ' ' + ${pago.monto}"></div>
+                    <div th:if="${pago.estado == 'PARCIAL'}" class="hint" th:text="'Saldo: ' + ${marcaMoneda} + ' ' + ${pago.saldo}"></div>
+                </td>
+                <td>
+                    <span th:if="${pago.estado == 'PAGADO'}" class="pill pill-sage">Pagado</span>
+                    <span th:if="${pago.estado == 'PENDIENTE'}" class="pill pill-amber">Pendiente</span>
+                    <span th:if="${pago.estado == 'PARCIAL'}" class="pill pill-sky">Parcial</span>
+                    <span th:if="${pago.estado == 'VENCIDO'}" class="pill pill-rose">Vencido</span>
+                </td>
+                <td>
+                    <form class="tform" th:if="${pago.estado != 'PAGADO'}"
+                          th:action="@{/pagos/registrar/{id}(id=${pago.id})}" method="post"
+                          sec:authorize="hasAnyRole('ADMIN','CAJERO')"
+                          style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                        <input type="number" name="monto" step="0.01" min="0.01" th:max="${pago.saldo}" th:value="${pago.saldo}"
+                               style="width:90px;padding:5px 8px;border:1px solid var(--line);border-radius:7px;font-size:12px;font-family:inherit">
+                        <select name="metodo" style="padding:5px 8px;border:1px solid var(--line);border-radius:7px;font-size:12px;font-family:inherit">
+                            <option value="EFECTIVO">Efectivo</option>
+                            <option value="YAPE">Yape</option>
+                            <option value="TRANSFERENCIA">Transferencia</option>
+                        </select>
+                        <button type="submit" class="ui small primary button">Cobrar</button>
+                    </form>
+                    <span th:if="${pago.estado == 'PAGADO'}" class="pill pill-sage" th:text="${pago.metodo}">-</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card" th:if="${!#lists.isEmpty(alumnos)}" style="margin-top:16px">
+        <div th:replace="~{fragments/paginacion :: paginacion(${pagina}, '/pagos', ${q})}"></div>
+    </div>
+</div>
+</html>

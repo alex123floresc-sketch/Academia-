@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head><title>Cursos</title></head>
+<div layout:fragment="contenido">
+
+    <div class="card-head" style="border:none;padding:0 0 6px">
+        <div>
+            <h2 style="font-family:'Fraunces',serif;font-weight:500;font-size:20px">Cursos</h2>
+            <p style="font-size:12px;color:var(--ink-faint)">Elige un nivel para ver y gestionar sus cursos. Cada nivel es completamente independiente</p>
+        </div>
+    </div>
+
+    <div class="ui three stackable cards nivel-picker stagger-cards">
+        <a class="ui raised card" th:each="n : ${resumenNiveles}" th:href="@{/cursos(nivel=${n.key})}">
+            <div class="content">
+                <div class="ui blue ribbon label" th:text="${n.key.etiqueta}"></div>
+            </div>
+            <div class="content">
+                <div class="ui statistic">
+                    <div class="value" th:text="${n.value}"></div>
+                    <div class="label" th:text="'Curso' + (${n.value == 1} ? '' : 's') + ' registrado' + (${n.value == 1} ? '' : 's')"></div>
+                </div>
+            </div>
+            <div class="extra content">
+                <i class="right chevron icon"></i>Ver cursos de este nivel
+            </div>
+        </a>
+    </div>
+</div>
+
+<th:block layout:fragment="estilos">
+    <style>
+        .nivel-picker .card{cursor:pointer;transition:.12s}
+        .nivel-picker .card:hover{transform:translateY(-2px)}
+        .nivel-picker .ui.statistic .value{font-family:'Fraunces',serif !important}
+        .nivel-picker .extra.content{color:var(--sage-strong) !important;font-weight:600;font-size:12.5px}
+    </style>
+</th:block>
+</html>

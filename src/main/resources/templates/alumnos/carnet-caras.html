@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title>Fragmentos</title></head>
+<body>
+<div th:fragment="caras(alumno, matriculaVigente)" class="carnet-wrap">
+    <div class="carnet-col">
+        <span class="cc-label">Anverso</span>
+        <div class="carnet-face carnet-front">
+            <div class="cf-head">
+                <div class="cf-seal">
+                    <img th:if="${marcaTieneLogo}" th:src="@{/configuracion/logo}" alt="Logo" style="width:100%;height:100%;object-fit:contain">
+                    <svg th:unless="${marcaTieneLogo}" th:replace="~{fragments/logo :: marca}"></svg>
+                </div>
+                <div class="cf-title"><b th:text="${marcaNombre}">Lapreplus</b><span>Carnet de estudiante</span></div>
+            </div>
+            <div class="cf-body">
+                <div class="cf-photo">
+                    <img th:if="${alumno.fotoPresente}" th:src="@{/alumnos/{id}/foto(id=${alumno.id})}" alt="Foto del alumno">
+                    <svg th:unless="${alumno.fotoPresente}" class="cf-noimg" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></svg>
+                </div>
+                <div class="cf-data">
+                    <div class="cf-name" th:text="${alumno.nombreCompleto}">Nombre Apellido</div>
+                    <div class="cf-row"><b>DNI</b> <span th:text="${alumno.dni} ?: '-'"></span></div>
+                    <div class="cf-row"><b>Área</b> <span th:text="${alumno.area} ?: '-'"></span></div>
+                    <div class="cf-row"><b>Ciclo</b>
+                        <span th:text="${matriculaVigente != null} ? ${matriculaVigente.semestre.nombre} : 'No matriculado'"></span></div>
+                    <div class="cf-row" th:if="${matriculaVigente != null}">
+                        <b>Vigencia</b>
+                        <span th:text="${#temporals.format(matriculaVigente.semestre.fechaInicio,'dd/MM/yy')} + ' - ' + ${#temporals.format(matriculaVigente.semestre.fechaFin,'dd/MM/yy')}"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="cf-foot">Documento de identificación estudiantil · No transferible</div>
+        </div>
+    </div>
+
+    <div class="carnet-col">
+        <span class="cc-label">Reverso</span>
+        <div class="carnet-face carnet-back">
+            <div class="cb-pattern"></div>
+            <div class="cb-head">
+                <span>Reverso · Uso estudiantil</span>
+                <span class="cb-serial" th:text="'N° ' + ${#numbers.formatInteger(alumno.id, 6)}"></span>
+            </div>
+            <div class="cb-body">
+                <img class="cb-qr" th:src="@{/alumnos/{id}/qr(id=${alumno.id})}" alt="Código QR del alumno">
+                <div class="cb-code" th:text="'ALU-' + ${alumno.id}"></div>
+                <div class="cb-dni" th:text="'DNI ' + (${alumno.dni} ?: '-')"></div>
+            </div>
+            <p class="cb-note" th:text="'Este carnet es propiedad de ' + ${marcaNombre} + '. Si lo encuentra, por favor devuélvalo a la institución.'">Este carnet es propiedad de Lapreplus. Si lo encuentra, por favor devuélvalo a la institución.</p>
+            <div class="cb-sign">
+                <div class="cb-sign-line">
+                    <div class="cb-sign-mark" th:text="${marcaNombre}">Lapreplus</div>
+                    <div class="cb-sign-label">Firma autorizada</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Configuración</title></head>
+<div layout:fragment="contenido">
+    <h2 class="page-title">Configuración</h2>
+
+    <div class="form-card" style="max-width:820px">
+        <form th:action="@{/configuracion/guardar}" th:object="${configuracionForm}" method="post" enctype="multipart/form-data">
+
+            <div class="form-divider">Identidad de la academia</div>
+            <p class="hint" style="margin:-4px 0 18px 0">
+                El nombre y el logo se usan en el menú, la pantalla de ingreso, los carnets y los documentos PDF.
+            </p>
+            <div class="field">
+                <label for="logo">Logo <span class="hint">opcional, si no subes uno se usa el ícono por defecto</span></label>
+                <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                    <img th:if="${configuracion.logoPresente}" th:src="@{/configuracion/logo}" alt="Logo actual" id="logoPreview"
+                         style="width:64px;height:64px;object-fit:contain;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);padding:6px">
+                    <div th:unless="${configuracion.logoPresente}" id="logoPreviewEmpty"
+                         style="width:64px;height:64px;border-radius:10px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-size:10px;text-align:center">Sin logo</div>
+                    <img id="logoPreviewNueva" style="display:none;width:64px;height:64px;object-fit:contain;border-radius:10px;border:1px solid var(--sage);background:var(--surface-2);padding:6px" alt="Nuevo logo">
+                    <input type="file" th:field="*{logo}" accept="image/*" style="flex:1;min-width:200px" id="logoInput">
+                    <label class="check-inline" th:if="${configuracion.logoPresente}" style="margin:0">
+                        <input type="checkbox" th:field="*{quitarLogo}" id="quitarLogo">
+                        <span style="font-weight:400;font-size:12px;color:var(--ink-soft)">Quitar logo actual</span>
+                    </label>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="nombreAcademia">Nombre de la academia</label>
+                    <input type="text" th:field="*{nombreAcademia}" placeholder="Ej. Lapreplus">
+                    <span class="field-error" th:if="${#fields.hasErrors('nombreAcademia')}" th:errors="*{nombreAcademia}"></span>
+                </div>
+                <div class="field">
+                    <label for="colorAcento">Color de acento <span class="hint">opcional</span></label>
+                    <div style="display:flex;align-items:center;gap:10px">
+                        <input type="color" name="colorAcento" id="colorAcento" style="width:44px;height:38px;padding:2px;flex-shrink:0"
+                               th:value="${configuracionForm.colorAcento != null and !configuracionForm.colorAcento.isEmpty()} ? ${configuracionForm.colorAcento} : '#2563EB'">
+                        <input type="text" id="colorAcentoTexto" placeholder="#2563EB" maxlength="7" style="flex:1" oninput="document.getElementById('colorAcento').value=this.value">
+                    </div>
+                    <span class="field-error" th:if="${#fields.hasErrors('colorAcento')}" th:errors="*{colorAcento}"></span>
+                    <p class="hint" style="margin-top:6px">Cambia el color principal de botones, enlaces y acentos en toda la app.</p>
+                </div>
+            </div>
+            <div class="field">
+                <label for="eslogan">Eslogan / lema <span class="hint">opcional</span></label>
+                <input type="text" th:field="*{eslogan}" placeholder="Ej. Formando el futuro" maxlength="120">
+                <span class="field-error" th:if="${#fields.hasErrors('eslogan')}" th:errors="*{eslogan}"></span>
+                <p class="hint" style="margin-top:6px">Se muestra debajo del nombre de la academia en el menú y en la pantalla de ingreso.</p>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="telefonoContacto">Teléfono de contacto <span class="hint">opcional</span></label>
+                    <input type="text" th:field="*{telefonoContacto}" placeholder="9XXXXXXXX">
+                    <span class="field-error" th:if="${#fields.hasErrors('telefonoContacto')}" th:errors="*{telefonoContacto}"></span>
+                </div>
+                <div class="field">
+                    <label for="correoContacto">Correo de contacto <span class="hint">opcional</span></label>
+                    <input type="email" th:field="*{correoContacto}" placeholder="contacto@academia.com">
+                    <span class="field-error" th:if="${#fields.hasErrors('correoContacto')}" th:errors="*{correoContacto}"></span>
+                </div>
+            </div>
+            <div class="field">
+                <label for="direccion">Dirección <span class="hint">opcional</span></label>
+                <input type="text" th:field="*{direccion}" placeholder="Av. Ejemplo 123">
+                <span class="field-error" th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></span>
+            </div>
+
+            <div class="form-divider">Imágenes del sitio</div>
+            <p class="hint" style="margin:-4px 0 18px 0">
+                El favicon aparece en la pestaña del navegador (si no subes uno, se usa el logo). La imagen de fondo se muestra detrás del formulario de ingreso.
+            </p>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="faviconInput">Favicon <span class="hint">opcional</span></label>
+                    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                        <img th:if="${configuracion.faviconPresente}" th:src="@{/configuracion/favicon}" alt="Favicon actual"
+                             style="width:40px;height:40px;object-fit:contain;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);padding:4px">
+                        <div th:unless="${configuracion.faviconPresente}"
+                             style="width:40px;height:40px;border-radius:8px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-size:9px;text-align:center">Sin favicon</div>
+                        <input type="file" th:field="*{favicon}" accept="image/*" style="flex:1;min-width:180px" id="faviconInput">
+                        <label class="check-inline" th:if="${configuracion.faviconPresente}" style="margin:0">
+                            <input type="checkbox" th:field="*{quitarFavicon}">
+                            <span style="font-weight:400;font-size:12px;color:var(--ink-soft)">Quitar favicon actual</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="fondoLoginInput">Imagen de fondo del ingreso <span class="hint">opcional</span></label>
+                    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                        <img th:if="${configuracion.fondoLoginPresente}" th:src="@{/configuracion/fondo-login}" alt="Fondo actual"
+                             style="width:64px;height:40px;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:var(--surface-2)">
+                        <div th:unless="${configuracion.fondoLoginPresente}"
+                             style="width:64px;height:40px;border-radius:8px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-size:9px;text-align:center">Sin imagen</div>
+                        <input type="file" th:field="*{fondoLogin}" accept="image/*" style="flex:1;min-width:180px" id="fondoLoginInput">
+                        <label class="check-inline" th:if="${configuracion.fondoLoginPresente}" style="margin:0">
+                            <input type="checkbox" th:field="*{quitarFondoLogin}">
+                            <span style="font-weight:400;font-size:12px;color:var(--ink-soft)">Quitar imagen actual</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-divider">Precios de matrícula</div>
+            <p class="hint" style="margin:-4px 0 18px 0">
+                Estos son los montos que se usarán como precio por defecto al matricular a un alumno.
+                Se pueden ajustar en cada matrícula si un caso particular lo requiere.
+            </p>
+            <div class="field" style="max-width:200px">
+                <label for="simboloMoneda">Símbolo de moneda</label>
+                <input type="text" th:field="*{simboloMoneda}" placeholder="S/" maxlength="5">
+                <span class="field-error" th:if="${#fields.hasErrors('simboloMoneda')}" th:errors="*{simboloMoneda}"></span>
+                <p class="hint" style="margin-top:6px">Se usa en todos los montos mostrados en el sistema, recibos y reportes.</p>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="montoMatricula">Precio de matrícula</label>
+                    <input type="number" step="0.01" min="0" th:field="*{montoMatricula}">
+                    <span class="field-error" th:if="${#fields.hasErrors('montoMatricula')}" th:errors="*{montoMatricula}"></span>
+                </div>
+                <div class="field">
+                    <label for="montoPension">Precio de pensión <span class="hint">por cuota</span></label>
+                    <input type="number" step="0.01" min="0" th:field="*{montoPension}">
+                    <span class="field-error" th:if="${#fields.hasErrors('montoPension')}" th:errors="*{montoPension}"></span>
+                </div>
+            </div>
+
+            <div class="form-divider">Cuotas de pensión</div>
+            <p class="hint" style="margin:-4px 0 18px 0">
+                Al matricular a un alumno se generan automáticamente estas cuotas de pensión, espaciadas por los días indicados.
+            </p>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="numeroCuotasPension">Número de cuotas</label>
+                    <input type="number" step="1" min="1" th:field="*{numeroCuotasPension}">
+                    <span class="field-error" th:if="${#fields.hasErrors('numeroCuotasPension')}" th:errors="*{numeroCuotasPension}"></span>
+                </div>
+                <div class="field">
+                    <label for="diasEntreCuotas">Días entre cada cuota</label>
+                    <input type="number" step="1" min="1" th:field="*{diasEntreCuotas}">
+                    <span class="field-error" th:if="${#fields.hasErrors('diasEntreCuotas')}" th:errors="*{diasEntreCuotas}"></span>
+                </div>
+            </div>
+
+            <div class="form-divider">Vencimientos y avisos</div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="diasGraciaVencimiento">Días de gracia antes de marcar un pago como vencido</label>
+                    <input type="number" step="1" min="0" th:field="*{diasGraciaVencimiento}">
+                    <span class="field-error" th:if="${#fields.hasErrors('diasGraciaVencimiento')}" th:errors="*{diasGraciaVencimiento}"></span>
+                    <p class="hint" style="margin-top:6px">El proceso automático diario que marca pagos vencidos esperará estos días extra después de la fecha de vencimiento.</p>
+                </div>
+                <div class="field">
+                    <label for="diasAvisoVencimiento">Días de anticipación para "próximos vencimientos"</label>
+                    <input type="number" step="1" min="1" th:field="*{diasAvisoVencimiento}">
+                    <span class="field-error" th:if="${#fields.hasErrors('diasAvisoVencimiento')}" th:errors="*{diasAvisoVencimiento}"></span>
+                    <p class="hint" style="margin-top:6px">Ventana que usa el panel Resumen para avisar de pagos por vencer.</p>
+                </div>
+            </div>
+
+            <div class="form-divider">Reglas operativas</div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="cupoPorTurno">Cupo de alumnos por turno</label>
+                    <input type="number" step="1" min="1" th:field="*{cupoPorTurno}">
+                    <span class="field-error" th:if="${#fields.hasErrors('cupoPorTurno')}" th:errors="*{cupoPorTurno}"></span>
+                    <p class="hint" style="margin-top:6px">Usado para calcular el aforo por turno en el panel Resumen.</p>
+                </div>
+                <div class="field">
+                    <label for="toleranciaMinutosHorasDocentes">Tolerancia para registrar horas docentes (min)</label>
+                    <input type="number" step="1" min="0" th:field="*{toleranciaMinutosHorasDocentes}">
+                    <span class="field-error" th:if="${#fields.hasErrors('toleranciaMinutosHorasDocentes')}" th:errors="*{toleranciaMinutosHorasDocentes}"></span>
+                    <p class="hint" style="margin-top:6px">Margen antes/después del horario programado en el que se puede registrar la llegada o las horas dictadas.</p>
+                </div>
+            </div>
+
+            <div class="form-divider">Página web pública</div>
+            <p class="hint" style="margin:-4px 0 18px 0">
+                Contenido y secciones que se muestran en la página de inicio pública (<a th:href="@{/}" target="_blank">verla</a>),
+                la que ve cualquier visitante sin iniciar sesión.
+            </p>
+            <div class="field">
+                <label for="sobreNosotros">Sobre la academia <span class="hint">opcional</span></label>
+                <textarea th:field="*{sobreNosotros}" rows="4" placeholder="Un párrafo breve contando quiénes somos, historia, valores..."></textarea>
+                <span class="field-error" th:if="${#fields.hasErrors('sobreNosotros')}" th:errors="*{sobreNosotros}"></span>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="vision">Visión <span class="hint">opcional</span></label>
+                    <textarea th:field="*{vision}" rows="3"></textarea>
+                    <span class="field-error" th:if="${#fields.hasErrors('vision')}" th:errors="*{vision}"></span>
+                </div>
+                <div class="field">
+                    <label for="mision">Misión <span class="hint">opcional</span></label>
+                    <textarea th:field="*{mision}" rows="3"></textarea>
+                    <span class="field-error" th:if="${#fields.hasErrors('mision')}" th:errors="*{mision}"></span>
+                </div>
+            </div>
+            <div class="field" style="max-width:200px">
+                <label for="anioFundacion">Año de fundación <span class="hint">opcional</span></label>
+                <input type="number" step="1" min="1900" th:field="*{anioFundacion}" placeholder="Ej. 2014">
+                <span class="field-error" th:if="${#fields.hasErrors('anioFundacion')}" th:errors="*{anioFundacion}"></span>
+                <p class="hint" style="margin-top:6px">Se usa para mostrar "+X años de experiencia" en la página pública.</p>
+            </div>
+
+            <div class="form-divider" style="font-size:13px;margin-top:22px">Descripción de cada área (Preuniversitario)</div>
+            <div class="field">
+                <label for="descripcionIngenierias">Ingenierías <span class="hint">opcional</span></label>
+                <input type="text" th:field="*{descripcionIngenierias}" placeholder="Ej. Ingeniería civil, industrial, sistemas, mecánica...">
+                <span class="field-error" th:if="${#fields.hasErrors('descripcionIngenierias')}" th:errors="*{descripcionIngenierias}"></span>
+            </div>
+            <div class="field">
+                <label for="descripcionBiomedicas">Biomédicas <span class="hint">opcional</span></label>
+                <input type="text" th:field="*{descripcionBiomedicas}" placeholder="Ej. Medicina, enfermería, obstetricia, farmacia...">
+                <span class="field-error" th:if="${#fields.hasErrors('descripcionBiomedicas')}" th:errors="*{descripcionBiomedicas}"></span>
+            </div>
+            <div class="field">
+                <label for="descripcionSociales">Sociales <span class="hint">opcional</span></label>
+                <input type="text" th:field="*{descripcionSociales}" placeholder="Ej. Derecho, administración, economía, educación...">
+                <span class="field-error" th:if="${#fields.hasErrors('descripcionSociales')}" th:errors="*{descripcionSociales}"></span>
+            </div>
+
+            <div class="form-divider" style="font-size:13px;margin-top:22px">Contacto y redes sociales</div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="whatsappNumero">WhatsApp <span class="hint">opcional, con código de país</span></label>
+                    <input type="text" th:field="*{whatsappNumero}" placeholder="519XXXXXXXX">
+                    <span class="field-error" th:if="${#fields.hasErrors('whatsappNumero')}" th:errors="*{whatsappNumero}"></span>
+                    <p class="hint" style="margin-top:6px">Muestra un botón flotante de WhatsApp en la página pública.</p>
+                </div>
+                <div class="field">
+                    <label for="facebookUrl">Facebook <span class="hint">opcional, URL completa</span></label>
+                    <input type="text" th:field="*{facebookUrl}" placeholder="https://facebook.com/...">
+                    <span class="field-error" th:if="${#fields.hasErrors('facebookUrl')}" th:errors="*{facebookUrl}"></span>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="instagramUrl">Instagram <span class="hint">opcional, URL completa</span></label>
+                    <input type="text" th:field="*{instagramUrl}" placeholder="https://instagram.com/...">
+                    <span class="field-error" th:if="${#fields.hasErrors('instagramUrl')}" th:errors="*{instagramUrl}"></span>
+                </div>
+                <div class="field">
+                    <label for="tiktokUrl">TikTok <span class="hint">opcional, URL completa</span></label>
+                    <input type="text" th:field="*{tiktokUrl}" placeholder="https://tiktok.com/@...">
+                    <span class="field-error" th:if="${#fields.hasErrors('tiktokUrl')}" th:errors="*{tiktokUrl}"></span>
+                </div>
+            </div>
+
+            <p class="hint" style="margin:18px 0 8px">Qué secciones mostrar en la página pública:</p>
+            <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:19px">
+                <label class="check-inline">
+                    <input type="checkbox" th:field="*{mostrarVisionMision}">
+                    <span>Sobre nosotros / Visión / Misión</span>
+                </label>
+                <label class="check-inline">
+                    <input type="checkbox" th:field="*{mostrarDocentes}">
+                    <span>Docentes destacados</span>
+                </label>
+                <label class="check-inline">
+                    <input type="checkbox" th:field="*{mostrarCursos}">
+                    <span>Cursos destacados</span>
+                </label>
+                <label class="check-inline">
+                    <input type="checkbox" th:field="*{mostrarSedes}">
+                    <span>Sedes</span>
+                </label>
+                <label class="check-inline">
+                    <input type="checkbox" th:field="*{mostrarProcesoAdmision}">
+                    <span>Proceso de admisión</span>
+                </label>
+                <label class="check-inline">
+                    <input type="checkbox" th:field="*{mostrarFaq}">
+                    <span>Preguntas frecuentes</span>
+                </label>
+                <label class="check-inline">
+                    <input type="checkbox" th:field="*{mostrarTestimonios}">
+                    <span>Testimonios</span>
+                </label>
+                <label class="check-inline">
+                    <input type="checkbox" th:field="*{mostrarLogros}">
+                    <span>Resultados de ingreso</span>
+                </label>
+                <label class="check-inline">
+                    <input type="checkbox" th:field="*{mostrarGaleria}">
+                    <span>Galería de fotos</span>
+                </label>
+                <label class="check-inline">
+                    <input type="checkbox" th:field="*{mostrarCalendario}">
+                    <span>Calendario académico</span>
+                </label>
+                <label class="check-inline">
+                    <input type="checkbox" th:field="*{mostrarFormularioContacto}">
+                    <span>Formulario "Solicita información"</span>
+                </label>
+            </div>
+            <p class="hint" style="margin:-10px 0 18px 0">
+                Marca a los docentes y cursos que quieres destacar desde su propio formulario de edición
+                (<a th:href="@{/profesores}">Profesores</a> / <a th:href="@{/cursos}">Cursos</a>), y administra locales,
+                preguntas frecuentes, testimonios, resultados de ingreso, galería y calendario desde el menú lateral.
+            </p>
+
+            <div class="form-foot">
+                <button type="submit" class="ui primary button">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:inline="javascript">
+        (function () {
+            var colorInicial = /*[[${configuracion.colorAcento}]]*/ '';
+            var colorPicker = document.getElementById('colorAcento');
+            var colorTexto = document.getElementById('colorAcentoTexto');
+            if (colorInicial) {
+                colorPicker.value = colorInicial;
+                colorTexto.value = colorInicial;
+            }
+            colorPicker.addEventListener('input', function () { colorTexto.value = colorPicker.value; });
+
+            var logoInput = document.getElementById('logoInput');
+            var preview = document.getElementById('logoPreviewNueva');
+            logoInput.addEventListener('change', function () {
+                var archivo = logoInput.files && logoInput.files[0];
+                if (!archivo) { preview.style.display = 'none'; return; }
+                var lector = new FileReader();
+                lector.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'inline-block';
+                };
+                lector.readAsDataURL(archivo);
+            });
+        })();
+    </script>
+</th:block>
+</html>

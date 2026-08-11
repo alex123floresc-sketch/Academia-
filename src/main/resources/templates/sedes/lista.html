@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Sedes</title></head>
+<div layout:fragment="contenido">
+    <div class="card">
+        <div class="card-head">
+            <div><h2>Sedes</h2><p>Locales de la academia que se muestran en la página web pública</p></div>
+            <a th:href="@{/sedes/nuevo}" class="ui small primary button">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nueva sede</a>
+        </div>
+        <table>
+            <thead><tr><th></th><th>Nombre</th><th>Dirección</th><th>Teléfono</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="s : ${sedes}">
+                <td style="width:52px">
+                    <img th:if="${s.fotoPresente}" th:src="@{/sedes/{id}/foto(id=${s.id})}" alt=""
+                         class="alumno-avatar" style="object-fit:cover">
+                    <div th:unless="${s.fotoPresente}" class="alumno-avatar" th:text="${#strings.substring(s.nombre,0,1)}"></div>
+                </td>
+                <td class="strong" th:text="${s.nombre}"></td>
+                <td th:text="${s.direccion}"></td>
+                <td th:text="${s.telefono} ?: '-'"></td>
+                <td>
+                    <span th:if="${s.activa}" class="pill pill-sage">Activa</span>
+                    <span th:unless="${s.activa}" class="pill pill-gray">Inactiva</span>
+                </td>
+                <td>
+                    <div class="rowact">
+                        <a th:href="@{/sedes/editar/{id}(id=${s.id})}" class="ui small basic button">Editar</a>
+                        <form class="tform" th:action="@{/sedes/eliminar/{id}(id=${s.id})}" method="post">
+                            <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar esta sede?')">Eliminar</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(sedes)}"><td colspan="6" class="empty">No hay sedes registradas aún.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</html>

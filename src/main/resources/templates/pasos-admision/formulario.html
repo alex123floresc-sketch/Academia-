@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Paso de admisión</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/pasos-admision}" class="page-back">← Volver al proceso de admisión</a>
+    <h2 class="page-title" th:text="${pasoForm.id} ? 'Editar paso' : 'Nuevo paso'"></h2>
+
+    <div class="form-card">
+        <form th:action="@{/pasos-admision/guardar}" th:object="${pasoForm}" method="post">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="field">
+                <label for="titulo">Título</label>
+                <input type="text" th:field="*{titulo}" placeholder="Ej. Elige tu nivel">
+                <span class="field-error" th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}"></span>
+            </div>
+            <div class="field">
+                <label for="descripcion">Descripción</label>
+                <textarea th:field="*{descripcion}" rows="3"></textarea>
+                <span class="field-error" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></span>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="orden">Orden <span class="hint">menor número aparece primero</span></label>
+                    <input type="number" step="1" min="0" th:field="*{orden}">
+                    <span class="field-error" th:if="${#fields.hasErrors('orden')}" th:errors="*{orden}"></span>
+                </div>
+                <div class="field">
+                    <label class="check-inline" style="margin-top:30px">
+                        <input type="checkbox" th:field="*{activo}">
+                        <span>Activo (se muestra en la página pública)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-foot">
+                <button type="submit" class="ui primary button">Guardar</button>
+                <a th:href="@{/pasos-admision}" class="ui basic button">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="'Ingresar · ' + ${marcaNombre}">Ingresar · Lapreplus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.5.0/semantic.min.css">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/semantic-theme.css}">
+    <link th:if="${marcaTieneFavicon}" rel="icon" th:href="@{/configuracion/favicon}">
+    <link th:if="${!marcaTieneFavicon and marcaTieneLogo}" rel="icon" th:href="@{/configuracion/logo}">
+    <style th:if="${marcaColor != null and !marcaColor.isEmpty()}" th:text="':root{--sage:' + ${marcaColor} + ';--sage-strong:color-mix(in srgb, ' + ${marcaColor} + ' 75%, black);--sage-hover:color-mix(in srgb, ' + ${marcaColor} + ' 85%, black);--sage-soft:color-mix(in srgb, ' + ${marcaColor} + ' 12%, white);}'"></style>
+    <style>
+        body{background:var(--bg)}
+        .login-wrap{
+            position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;overflow:hidden;
+            background:
+                radial-gradient(480px 320px at 12% 8%, var(--sage-soft), transparent 60%),
+                radial-gradient(420px 300px at 90% 92%, var(--lav-soft), transparent 60%),
+                radial-gradient(360px 300px at 50% 100%, color-mix(in srgb, var(--navy) 12%, transparent), transparent 65%);
+            background-size:cover;background-position:center;
+        }
+        .login-wrap:not(.has-bg)::after{
+            content:'';position:absolute;width:420px;height:420px;border-radius:50%;
+            background:color-mix(in srgb, var(--navy) 45%, transparent);filter:blur(90px);
+            top:-160px;left:-140px;z-index:0;pointer-events:none;
+        }
+        /* Cuando hay una imagen de fondo personalizada, un velo oscuro detrás de la tarjeta
+           garantiza que el título, el eslogan y el pie sigan siendo legibles sin importar
+           qué tan clara o recargada sea la imagen que suba el administrador. */
+        .login-wrap.has-bg::before{
+            content:'';position:absolute;inset:0;
+            background:linear-gradient(180deg, rgba(15,23,42,.58), rgba(15,23,42,.7));
+        }
+        .login-card{position:relative;z-index:1;width:100%;max-width:380px;animation:loginIn .4s cubic-bezier(.22,.8,.36,1) backwards}
+        @keyframes loginIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+        .login-box{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:34px 30px;box-shadow:0 24px 48px -20px rgba(15,23,42,.45)}
+        .login-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--sage),var(--navy) 70%)}
+        .login-head{text-align:center;margin-bottom:28px}
+        .login-head .seal{width:56px;height:56px;border-radius:16px;background:linear-gradient(150deg,var(--sage),var(--navy));color:#fff;display:inline-flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:27px;border:1px solid var(--navy-soft);margin-bottom:14px;box-shadow:0 10px 22px -10px rgba(15,30,61,.5)}
+        .login-head .seal img{background:var(--surface)}
+        .login-head .seal svg{width:30px;height:30px}
+        .login-head h1{font-family:'Fraunces',serif;font-weight:600;font-size:21px;color:var(--ink)}
+        .login-head p{font-size:12.5px;color:var(--ink-faint);margin-top:4px}
+        .login-wrap.has-bg .login-head h1,.login-wrap.has-bg .login-head p{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.35)}
+        .login-box label{display:block;font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:6px}
+        .login-box .field{margin-bottom:17px}
+        .login-box input{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:14.5px;color:var(--ink);background:var(--surface)}
+        .login-box input:focus{outline:none;border-color:var(--sage);box-shadow:0 0 0 3px var(--sage-soft)}
+        .pw-wrap{position:relative}
+        .pw-wrap input{padding-right:44px}
+        .pw-toggle{all:unset;position:absolute;right:4px;top:50%;transform:translateY(-50%);width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);cursor:pointer;border-radius:8px}
+        .pw-toggle:hover{background:var(--surface-2);color:var(--ink-soft)}
+        .pw-toggle svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.8;fill:none}
+        .login-box .ui.button{width:100%;justify-content:center;padding:12px;font-size:13.5px;margin-top:6px}
+        .login-foot{position:relative;z-index:1;text-align:center;font-size:11.5px;color:var(--ink-faint);margin-top:22px}
+        .login-wrap.has-bg .login-foot{color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(0,0,0,.35)}
+    </style>
+</head>
+<body>
+<div class="login-wrap" th:classappend="${marcaTieneFondoLogin} ? 'has-bg'"
+     th:style="${marcaTieneFondoLogin} ? ('background-image:url(' + @{/configuracion/fondo-login} + ')')">
+    <div class="login-card">
+        <div class="login-head">
+            <div class="seal">
+                <img th:if="${marcaTieneLogo}" th:src="@{/configuracion/logo}" alt="Logo" style="width:100%;height:100%;object-fit:contain;border-radius:inherit">
+                <svg th:unless="${marcaTieneLogo}" th:replace="~{fragments/logo :: marca}"></svg>
+            </div>
+            <h1 th:text="${marcaNombre}">Lapreplus</h1>
+            <p th:text="${marcaEslogan != null and !marcaEslogan.isEmpty()} ? ${marcaEslogan} : 'Sistema de matrículas'">Sistema de matrículas</p>
+        </div>
+        <div class="login-box">
+            <div th:if="${param.error}" class="ui negative message">Usuario o contraseña incorrectos.</div>
+            <div th:if="${param.logout}" class="note" style="margin-bottom:16px">Sesión cerrada correctamente.</div>
+            <form th:action="@{/login}" method="post">
+                <div class="field">
+                    <label for="username">Usuario</label>
+                    <input id="username" type="text" name="username" required autofocus autocomplete="username">
+                </div>
+                <div class="field">
+                    <label for="password">Contraseña</label>
+                    <div class="pw-wrap">
+                        <input id="password" type="password" name="password" required autocomplete="current-password">
+                        <button type="button" class="pw-toggle" id="pwToggle" aria-label="Mostrar contraseña">
+                            <svg id="pwIcon" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="ui primary button">Ingresar</button>
+            </form>
+        </div>
+        <p class="login-foot" th:text="${marcaNombre} + ' · Acceso restringido a personal autorizado'">Lapreplus · Acceso restringido a personal autorizado</p>
+    </div>
+</div>
+<script>
+    (function(){
+        var toggle = document.getElementById('pwToggle');
+        var input = document.getElementById('password');
+        var icon = document.getElementById('pwIcon');
+        var eyeOff = '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-11-7-11-7a20.6 20.6 0 0 1 5.06-5.94M9.9 4.24A10.6 10.6 0 0 1 12 4c7 0 11 7 11 7a20.6 20.6 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/>';
+        var eyeOn = icon.innerHTML;
+        toggle.addEventListener('click', function(){
+            var hidden = input.type === 'password';
+            input.type = hidden ? 'text' : 'password';
+            icon.innerHTML = hidden ? eyeOff : eyeOn;
+            toggle.setAttribute('aria-label', hidden ? 'Ocultar contraseña' : 'Mostrar contraseña');
+        });
+    })();
+</script>
+</body>
+</html>

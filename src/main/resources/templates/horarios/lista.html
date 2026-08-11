@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head><title>Horarios</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/horarios(cicloId=${cicloSel != null ? cicloSel.id : null}, nivel=${nivel})}" class="page-back">&laquo; Volver a áreas</a>
+
+    <div class="card-head" style="border:none;padding:0 0 6px">
+        <div><h2 style="font-family:'Fraunces',serif;font-weight:500;font-size:20px" th:text="'Horario de ' + ${nivel.etiqueta} + ' · ' + ${area}"></h2><p style="font-size:12px;color:var(--ink-faint)" th:text="(${cicloSel != null} ? ${cicloSel.nombre} + ' · ' : '') + 'Grilla semanal por turno: define las horas primero y luego asigna los cursos a cada casilla'"></p></div>
+        <a th:if="${cicloSel != null}" th:href="@{/horarios/pdf(cicloId=${cicloSel.id}, nivel=${nivel}, area=${area})}" class="ui basic small button">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>Descargar PDF</a>
+    </div>
+
+    <div class="metrics" style="grid-template-columns:repeat(3,1fr)" th:if="${cicloSel != null}">
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Bloques horarios</div>
+            <div class="val" th:text="${totalBloques}">0</div>
+            <div class="delta">definidos para este nivel, área y ciclo</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sky)"></span>Cursos asignados</div>
+            <div class="val" th:text="${totalAsignaciones}">0</div>
+            <div class="delta">casillas curso × día ocupadas</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--lav)"></span>Nivel y área activos</div>
+            <div class="val" style="font-size:17px" th:text="${nivel.etiqueta} + ' · ' + ${area}">-</div>
+            <div class="delta" th:text="${cicloSel.nombre}">-</div>
+        </div>
+    </div>
+
+    <div class="turno-block" th:each="turno : ${turnos}"
+         th:with="claseTurno='tb-' + ${#strings.toLowerCase(turno.name())}">
+        <div class="tb-head" th:classappend="${claseTurno}">
+            <svg class="ic" th:if="${turno.name() == 'MANANA'}" viewBox="0 0 24 24"><path d="M12 3v2m0 14v2M4.2 4.2l1.4 1.4m12.8 12.8 1.4 1.4M3 12h2m14 0h2M4.2 19.8l1.4-1.4m12.8-12.8 1.4-1.4M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/></svg>
+            <svg class="ic" th:if="${turno.name() == 'TARDE'}" viewBox="0 0 24 24"><path d="M12 3v6m5.66-.34-1.42 1.42M3 18h18M18.34 8.66l1.42-1.42M6.34 8.66 4.92 7.24M12 9a5 5 0 0 1 5 5H7a5 5 0 0 1 5-5Z"/></svg>
+            <svg class="ic" th:if="${turno.name() == 'NOCHE'}" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>
+            <span th:text="${turno.etiqueta}"></span>
+            <span class="tb-count" th:text="${#lists.size(grilla.get(turno))} + ' bloque(s)'"></span>
+        </div>
+        <div class="tb-body">
+            <div class="hscroll">
+                <table class="htable">
+                    <thead>
+                    <tr>
+                        <th class="htable-hora-head">Hora</th>
+                        <th th:each="dia : ${dias}" th:classappend="${dia == diaHoy} ? 'is-today' : ''" th:text="${dia.etiqueta}"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="fila : ${grilla.get(turno)}" th:classappend="${fila.bloque.receso} ? 'fila-receso' : ''">
+                        <td class="htable-hora">
+                            <span th:text="${fila.bloque.horaInicio} + '-' + ${fila.bloque.horaFin}"></span>
+                            <form sec:authorize="hasRole('ADMIN')" style="margin:0"
+                                  th:action="@{/horarios/bloques/eliminar/{id}(id=${fila.bloque.id},cicloId=${cicloSel.id},nivel=${nivel},area=${area})}" method="post">
+                                <button type="submit" class="hb-del" title="Eliminar bloque horario"
+                                        onclick="return confirm('¿Eliminar este bloque horario? Debe estar sin cursos asignados.')">&times;</button>
+                            </form>
+                        </td>
+                        <td th:if="${fila.bloque.receso}" colspan="6" class="htable-receso">Receso</td>
+                        <th:block th:unless="${fila.bloque.receso}">
+                            <td th:each="dia : ${dias}">
+                                <div class="hb">
+                                    <div class="hcell" th:each="h : ${fila.cursosDe(dia)}">
+                                        <form class="tform" sec:authorize="hasRole('ADMIN')"
+                                              th:action="@{/horarios/quitar-curso/{hid}(hid=${h.id},cicloId=${cicloSel.id},nivel=${nivel},area=${area})}" method="post">
+                                            <button type="submit" class="hquitar" title="Quitar curso del horario"
+                                                    onclick="return confirm('¿Quitar este curso del horario?')">&times;</button>
+                                        </form>
+                                        <div class="ht" th:text="${h.curso.nombre}"></div>
+                                        <div class="ha-row">
+                                            <span class="ha" th:if="${h.aula != null and !h.aula.isEmpty()}" th:text="'Aula ' + ${h.aula}"></span>
+                                            <span class="hp" th:if="${h.curso.profesor != null}" th:text="${h.curso.profesor.nombreCompleto}"></span>
+                                        </div>
+                                    </div>
+                                    <p class="hempty" th:if="${#lists.isEmpty(fila.cursosDe(dia))}">Sin curso</p>
+                                    <a sec:authorize="hasRole('ADMIN')"
+                                       th:href="@{/horarios/nuevo(cicloId=${cicloSel.id},dia=${dia},bloqueId=${fila.bloque.id})}"
+                                       class="hcell-add">+ Agregar</a>
+                                </div>
+                            </td>
+                        </th:block>
+                    </tr>
+                    <tr th:if="${cicloSel != null and #lists.isEmpty(grilla.get(turno))}">
+                        <td colspan="7" class="empty">Aún no hay bloques horarios definidos para este turno. Agrega el primero abajo.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <form th:if="${cicloSel != null}" sec:authorize="hasRole('ADMIN')"
+                  th:action="@{/horarios/bloques/guardar}" method="post" class="bloque-form">
+                <input type="hidden" name="cicloId" th:value="${cicloSel.id}">
+                <input type="hidden" name="nivel" th:value="${nivel}">
+                <input type="hidden" name="turno" th:value="${turno}">
+                <input type="hidden" name="area" th:value="${area}">
+                <input type="time" name="horaInicio" required>
+                <span class="sep">-</span>
+                <input type="time" name="horaFin" required>
+                <select name="tipo">
+                    <option value="CLASE">Bloque de clase</option>
+                    <option value="RECESO">Receso</option>
+                </select>
+                <button type="submit" class="ui basic small button">+ Agregar bloque horario</button>
+            </form>
+        </div>
+    </div>
+</div>
+</html>

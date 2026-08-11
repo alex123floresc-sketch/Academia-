@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head>
+    <title>Resumen</title>
+</head>
+<div layout:fragment="contenido">
+
+    <div class="note" th:if="${cicloActivo != null}">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/></svg>
+        <div>Ciclo activo: <b th:text="${cicloActivo.nombre}"></b> · estos números reflejan el estado general de la academia.</div>
+    </div>
+    <div class="note" th:unless="${cicloActivo != null}">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0ZM12 9v4M12 17h.01"/></svg>
+        <div>No hay un <b>ciclo activo</b> configurado. Actívalo desde Ciclos para ver el aforo por turno.</div>
+    </div>
+
+    <div class="metrics" style="grid-template-columns:repeat(3,1fr)">
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Alumnos</div>
+            <div class="val" th:text="${totalAlumnos}">0</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--lav)"></span>Cursos</div>
+            <div class="val" th:text="${totalCursos}">0</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sky)"></span>Matrículas activas</div>
+            <div class="val" th:text="${totalMatriculas}">0</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Cobrado</div>
+            <div class="val" th:text="${marcaMoneda} + ' ' + ${cobrado}">S/ 0</div>
+            <div class="delta" th:if="${tasaCobradoPct != null}" th:text="${tasaCobradoPct} + '% del total emitido'">0%</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--amber)"></span>Pendiente</div>
+            <div class="val" th:text="${marcaMoneda} + ' ' + ${pendiente}">S/ 0</div>
+            <div class="delta" style="color:var(--ink-faint)" th:text="${pagosPendientesCount} + ' pago' + (${pagosPendientesCount == 1} ? '' : 's')">0 pagos</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--rose)"></span>Vencidos</div>
+            <div class="val" th:text="${vencidos}" th:style="${vencidos > 0} ? 'color:var(--rose-strong)' : ''">0</div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+        <div class="card-head">
+            <div>
+                <h2>Ingresos por mes</h2>
+                <p>Total cobrado, agrupado por mes de pago</p>
+            </div>
+            <div style="text-align:right">
+                <div class="mono" style="font-size:15px;color:var(--ink)" th:text="${marcaMoneda} + ' ' + ${ingresoMesActual}">S/ 0</div>
+                <div th:if="${deltaIngresoPct != null}"
+                     class="pill"
+                     th:classappend="${deltaIngresoPct >= 0} ? 'pill-sage' : 'pill-rose'"
+                     th:text="(${deltaIngresoPct >= 0} ? '+' : '') + ${deltaIngresoPct} + '% vs mes anterior'">+0%</div>
+            </div>
+        </div>
+        <div style="padding:18px 20px">
+            <canvas id="chartIngresos" height="90"></canvas>
+        </div>
+    </div>
+
+    <div class="ui stackable two column grid">
+        <div class="column">
+            <div class="card" style="padding:0">
+                <div class="card-head">
+                    <div><h2>Últimas matrículas</h2><p th:text="${cicloActivo != null} ? ${cicloActivo.nombre} : 'Sin ciclo activo'"></p></div>
+                </div>
+                <table>
+                    <thead><tr><th>Alumno</th><th>Ciclo</th><th>Turno</th><th>Estado</th></tr></thead>
+                    <tbody>
+                    <tr th:each="m : ${ultimas}">
+                        <td class="strong">
+                            <a th:href="@{/alumnos/{id}/expediente(id=${m.estudiante.id})}" style="color:inherit;text-decoration:none"
+                               th:text="${m.estudiante.nombre + ' ' + m.estudiante.apellido}"></a>
+                        </td>
+                        <td th:text="${m.semestre.nombre}"></td>
+                        <td th:text="${m.turno != null} ? ${m.turno.etiqueta} : '-'"></td>
+                        <td>
+                            <span th:if="${m.estado == 'ACTIVA'}" class="pill pill-sage">Activa</span>
+                            <span th:unless="${m.estado == 'ACTIVA'}" class="pill pill-gray" th:text="${m.estado}"></span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <p th:if="${#lists.isEmpty(ultimas)}" class="empty">No hay matrículas aún.</p>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="card">
+                <div class="card-head">
+                    <div><h2>Aforo por turno</h2><p th:text="${cicloActivo != null} ? ${cicloActivo.nombre} : ''"></p></div>
+                </div>
+                <div style="padding:18px 20px">
+                    <div th:each="e : ${aforo}" style="margin-bottom:16px">
+                        <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px">
+                            <span class="strong" th:text="${e.key}"></span>
+                            <span style="color:var(--ink-faint)" th:text="${e.value} + ' / ' + ${cupoPorTurno}"></span>
+                        </div>
+                        <div class="ui tiny progress">
+                            <div class="bar" th:style="'width:' + ${T(java.lang.Math).min(100, ((e.value * 100) / cupoPorTurno).intValue())} + '%'"></div>
+                        </div>
+                    </div>
+                    <p th:if="${#maps.isEmpty(aforo)}" class="empty">Sin datos de aforo.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ui stackable two column grid" style="margin-bottom:16px">
+        <div class="column">
+            <div class="card">
+                <div class="card-head">
+                    <div><h2 th:text="'Alumnos por área - ' + ${nivel.etiqueta}"></h2><p>Distribución de alumnos según su área/grado declarado</p></div>
+                    <a th:href="@{/areas}" class="ui basic tiny button">Ver áreas</a>
+                </div>
+                <div class="filter-row" style="padding-bottom:14px">
+                    <span class="filter-row-label">Nivel</span>
+                    <div class="area-tabs">
+                        <a class="area-tab" th:each="n : ${niveles}" th:classappend="${n == nivel} ? ' active'"
+                           th:href="@{/resumen(nivel=${n})}" th:text="${n.etiqueta}"></a>
+                    </div>
+                </div>
+                <div style="padding:18px 20px">
+                    <div th:each="e : ${alumnosPorArea}" style="margin-bottom:16px">
+                        <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px">
+                            <span class="strong" th:text="${e.key}"></span>
+                            <span style="color:var(--ink-faint)" th:text="${e.value} + ' alumno' + (${e.value == 1} ? '' : 's')"></span>
+                        </div>
+                        <div class="ui tiny progress">
+                            <div class="bar" th:style="'width:' + (${totalAlumnos > 0} ? ${T(java.lang.Math).min(100, ((e.value * 100) / totalAlumnos).intValue())} : 0) + '%'"></div>
+                        </div>
+                    </div>
+                    <p th:if="${#maps.isEmpty(alumnosPorArea)}" class="empty">Sin alumnos registrados.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="card" style="padding:0">
+                <div class="card-head">
+                    <div><h2>Cursos más demandados</h2><p>Por matrículas activas</p></div>
+                    <a th:href="@{/cursos}" class="ui basic tiny button">Ver cursos</a>
+                </div>
+                <table>
+                    <thead><tr><th>Curso</th><th>Profesor</th><th>Alumnos</th></tr></thead>
+                    <tbody>
+                    <tr th:each="c : ${cursosMasDemandados}">
+                        <td class="strong" th:text="${c.nombre}"></td>
+                        <td th:text="${c.profesor}"></td>
+                        <td><span class="pill pill-sage" th:text="${c.alumnos}"></span></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <p th:if="${#lists.isEmpty(cursosMasDemandados)}" class="empty">Sin matrículas activas aún.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="ui stackable two column grid">
+        <div class="column">
+            <div class="card" style="padding:0">
+                <div class="card-head">
+                    <div><h2>Alumnos morosos</h2><p>Con pagos vencidos, ordenados por deuda</p></div>
+                    <a th:href="@{/reportes}" class="ui basic tiny button">Ver reporte</a>
+                </div>
+                <table>
+                    <thead><tr><th>Alumno</th><th>Pagos vencidos</th><th>Adeudado</th></tr></thead>
+                    <tbody>
+                    <tr th:each="m : ${morosos}">
+                        <td class="strong" th:text="${m.nombre + ' ' + m.apellido}"></td>
+                        <td th:text="${m.pagosVencidos}"></td>
+                        <td><span class="pill pill-rose" th:text="${marcaMoneda} + ' ' + ${m.montoAdeudado}"></span></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <p th:if="${#lists.isEmpty(morosos)}" class="empty">No hay alumnos morosos. </p>
+            </div>
+        </div>
+
+        <div class="column">
+            <div class="card" style="padding:0">
+                <div class="card-head">
+                    <div><h2>Próximos vencimientos</h2><p>Pendientes en los próximos 15 días</p></div>
+                    <a th:href="@{/pagos}" class="ui basic tiny button">Ver pagos</a>
+                </div>
+                <table>
+                    <thead><tr><th>Alumno</th><th>Concepto</th><th>Vence</th><th>Saldo</th></tr></thead>
+                    <tbody>
+                    <tr th:each="p : ${proximosVencimientos}">
+                        <td class="strong" th:text="${p.matricula.estudiante.nombre + ' ' + p.matricula.estudiante.apellido}"></td>
+                        <td th:text="${p.concepto}"></td>
+                        <td>
+                            <span class="pill" th:classappend="${p.fechaVencimiento.isBefore(hoy)} ? 'pill-rose' : 'pill-amber'"
+                                  th:text="${p.fechaVencimiento}"></span>
+                        </td>
+                        <td th:text="${marcaMoneda} + ' ' + ${p.saldo}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <p th:if="${#lists.isEmpty(proximosVencimientos)}" class="empty">No hay vencimientos próximos.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" sec:authorize="hasRole('ADMIN')" style="margin-top:16px">
+        <div class="card-head">
+            <div><h2>Actividad reciente</h2><p>Últimas acciones registradas en todo el sistema</p></div>
+            <a th:href="@{/actividad}" class="ui basic tiny button">Ver historial completo</a>
+        </div>
+        <div class="timeline">
+            <div class="timeline-item" th:each="r : ${actividadReciente}">
+                <div class="timeline-dot" th:classappend="'tl-' + ${#strings.toLowerCase(r.accion.name())}">
+                    <svg th:if="${r.accion.name() == 'CREAR'}" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                    <svg th:if="${r.accion.name() == 'EDITAR'}" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg>
+                    <svg th:if="${r.accion.name() == 'ELIMINAR'}" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+                    <svg th:if="${r.accion.name() == 'LOGIN'}" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+                    <svg th:if="${r.accion.name() == 'LOGOUT'}" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                    <svg th:if="${r.accion.name() == 'LOGIN_FALLIDO'}" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+                </div>
+                <div class="timeline-body">
+                    <div class="timeline-top">
+                        <span class="timeline-user" th:text="${r.username}"></span>
+                        <span class="timeline-accion" th:text="${r.accion.etiqueta}"></span>
+                        <span class="pill pill-gray timeline-modulo" th:text="${r.modulo}"></span>
+                    </div>
+                    <div class="timeline-desc" th:text="${r.descripcion}"></div>
+                    <div class="timeline-time" th:text="${#temporals.format(r.fecha, 'dd/MM/yyyy HH:mm')}"></div>
+                </div>
+            </div>
+            <p th:if="${#lists.isEmpty(actividadReciente)}" class="empty">Todavía no hay actividad registrada.</p>
+        </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:src="@{/js/chart.min.js}"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var etiquetas = /*[[${mesesLabels}]]*/ [];
+        var valores = /*[[${mesesValores}]]*/ [];
+        var moneda = /*[[${marcaMoneda}]]*/ 'S/';
+        /*]]>*/
+        var ctx = document.getElementById('chartIngresos');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: etiquetas,
+                    datasets: [{
+                        label: 'Ingresos (' + moneda + ')',
+                        data: valores,
+                        backgroundColor: '#2563EB',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+    </script>
+</th:block>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Testimonios</title></head>
+<div layout:fragment="contenido">
+    <div class="card">
+        <div class="card-head">
+            <div><h2>Testimonios</h2><p>Opiniones de alumnos o padres que se muestran en la página web pública</p></div>
+            <a th:href="@{/testimonios/nuevo}" class="ui small primary button">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo testimonio</a>
+        </div>
+        <table>
+            <thead><tr><th></th><th>Nombre</th><th>Rol</th><th>Comentario</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="t : ${testimonios}">
+                <td style="width:52px">
+                    <img th:if="${t.fotoPresente}" th:src="@{/testimonios/{id}/foto(id=${t.id})}" alt=""
+                         class="alumno-avatar" style="object-fit:cover">
+                    <div th:unless="${t.fotoPresente}" class="alumno-avatar" th:text="${#strings.substring(t.nombre,0,1)}"></div>
+                </td>
+                <td class="strong" th:text="${t.nombre}"></td>
+                <td th:text="${t.rol} ?: '-'"></td>
+                <td th:text="${#strings.abbreviate(t.comentario, 60)}"></td>
+                <td>
+                    <span th:if="${t.activo}" class="pill pill-sage">Activo</span>
+                    <span th:unless="${t.activo}" class="pill pill-gray">Inactivo</span>
+                </td>
+                <td>
+                    <div class="rowact">
+                        <a th:href="@{/testimonios/editar/{id}(id=${t.id})}" class="ui small basic button">Editar</a>
+                        <form class="tform" th:action="@{/testimonios/eliminar/{id}(id=${t.id})}" method="post">
+                            <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar este testimonio?')">Eliminar</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(testimonios)}"><td colspan="6" class="empty">No hay testimonios registrados aún.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Historial de actividad</title></head>
+<div layout:fragment="contenido">
+
+    <h2 class="page-title">Historial de actividad</h2>
+
+    <div class="metrics" style="grid-template-columns:repeat(3,1fr)">
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Acciones hoy</div>
+            <div class="val" th:text="${totalHoy}">0</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sky)"></span>Últimos 7 días</div>
+            <div class="val" th:text="${totalSemana}">0</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--lav)"></span>Total en el historial</div>
+            <div class="val" th:text="${pagina.totalElements}">0</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-head">
+            <div><h2>Registro de acciones</h2><p>Quién hizo qué y cuándo, en todo el sistema</p></div>
+        </div>
+        <div class="searchbar">
+            <form method="get" th:action="@{/actividad}" style="display:flex;gap:8px;flex:1;flex-wrap:wrap">
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar por descripción o usuario..." aria-label="Buscar en el historial" style="flex:1;min-width:180px">
+                <input type="hidden" name="modulo" th:value="${modulo}">
+                <input type="hidden" name="accion" th:value="${accion}">
+                <input type="hidden" name="username" th:value="${username}">
+                <button type="submit" class="ui small basic button">Buscar</button>
+            </form>
+        </div>
+        <div class="actividad-filters">
+            <span class="filter-row-label">Filtros</span>
+            <form method="get" th:action="@{/actividad}" style="display:contents">
+                <input type="hidden" name="q" th:value="${q}">
+                <input type="hidden" name="username" th:value="${username}">
+                <select name="modulo" onchange="this.form.submit()">
+                    <option value="">Todos los módulos</option>
+                    <option th:each="m : ${modulos}" th:value="${m}" th:text="${m}" th:selected="${m == modulo}"></option>
+                </select>
+                <select name="accion" onchange="this.form.submit()">
+                    <option value="">Cualquier acción</option>
+                    <option th:each="a : ${acciones}" th:value="${a}" th:text="${a.etiqueta}" th:selected="${a == accion}"></option>
+                </select>
+            </form>
+            <span th:if="${username != null and !username.isEmpty()}" class="pill pill-sage">
+                Usuario: <b th:text="${username}"></b>
+            </span>
+            <a th:if="${q != null or modulo != null or accion != null or username != null}"
+               th:href="@{/actividad}" class="clear">Quitar filtros</a>
+        </div>
+
+        <div class="timeline">
+            <div class="timeline-item" th:each="r : ${registros}">
+                <div class="timeline-dot" th:classappend="'tl-' + ${#strings.toLowerCase(r.accion.name())}">
+                    <svg th:if="${r.accion.name() == 'CREAR'}" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                    <svg th:if="${r.accion.name() == 'EDITAR'}" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg>
+                    <svg th:if="${r.accion.name() == 'ELIMINAR'}" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+                    <svg th:if="${r.accion.name() == 'LOGIN'}" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+                    <svg th:if="${r.accion.name() == 'LOGOUT'}" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                    <svg th:if="${r.accion.name() == 'LOGIN_FALLIDO'}" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+                </div>
+                <div class="timeline-body">
+                    <div class="timeline-top">
+                        <a th:href="@{/actividad(username=${r.username})}" class="timeline-user" th:text="${r.username}"></a>
+                        <span class="timeline-accion" th:text="${r.accion.etiqueta}"></span>
+                        <span class="pill pill-gray timeline-modulo" th:text="${r.modulo}"></span>
+                    </div>
+                    <div class="timeline-desc" th:text="${r.descripcion}"></div>
+                    <div class="timeline-time" th:text="${#temporals.format(r.fecha, 'dd/MM/yyyy HH:mm')}"></div>
+                </div>
+            </div>
+            <p th:if="${#lists.isEmpty(registros)}" class="empty">No hay actividad registrada con estos filtros.</p>
+        </div>
+
+        <div th:if="${pagina.totalPages > 1}" class="paginacion">
+            <a th:if="${pagina.hasPrevious()}"
+               th:href="@{/actividad(page=${pagina.number - 1}, q=${q}, username=${username}, modulo=${modulo}, accion=${accion})}"
+               class="ui small basic button">&laquo; Anterior</a>
+            <span th:text="'Página ' + ${pagina.number + 1} + ' de ' + ${pagina.totalPages}"></span>
+            <a th:if="${pagina.hasNext()}"
+               th:href="@{/actividad(page=${pagina.number + 1}, q=${q}, username=${username}, modulo=${modulo}, accion=${accion})}"
+               class="ui small basic button">Siguiente &raquo;</a>
+        </div>
+    </div>
+</div>
+</html>

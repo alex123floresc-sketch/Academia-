@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Resultados de ingreso</title></head>
+<div layout:fragment="contenido">
+    <div class="card">
+        <div class="card-head">
+            <div><h2>Resultados de ingreso</h2><p>Alumnos que ingresaron a la universidad, se muestran en la página web pública</p></div>
+            <a th:href="@{/logros-ingreso/nuevo}" class="ui small primary button">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo resultado</a>
+        </div>
+        <table>
+            <thead><tr><th></th><th>Alumno</th><th>Universidad</th><th>Carrera</th><th>Año</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="l : ${logros}">
+                <td style="width:52px">
+                    <img th:if="${l.fotoPresente}" th:src="@{/logros-ingreso/{id}/foto(id=${l.id})}" alt=""
+                         class="alumno-avatar" style="object-fit:cover">
+                    <div th:unless="${l.fotoPresente}" class="alumno-avatar" th:text="${#strings.substring(l.nombreAlumno,0,1)}"></div>
+                </td>
+                <td class="strong" th:text="${l.nombreAlumno}"></td>
+                <td th:text="${l.universidad}"></td>
+                <td th:text="${l.carrera} ?: '-'"></td>
+                <td th:text="${l.anioIngreso} ?: '-'"></td>
+                <td>
+                    <span th:if="${l.activo}" class="pill pill-sage">Activo</span>
+                    <span th:unless="${l.activo}" class="pill pill-gray">Inactivo</span>
+                </td>
+                <td>
+                    <div class="rowact">
+                        <a th:href="@{/logros-ingreso/editar/{id}(id=${l.id})}" class="ui small basic button">Editar</a>
+                        <form class="tform" th:action="@{/logros-ingreso/eliminar/{id}(id=${l.id})}" method="post">
+                            <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar este resultado?')">Eliminar</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(logros)}"><td colspan="7" class="empty">No hay resultados de ingreso registrados aún.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</html>

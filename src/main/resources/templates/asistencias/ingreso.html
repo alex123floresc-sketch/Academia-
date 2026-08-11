@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head>
+    <title>Registro de ingreso</title>
+    <th:block layout:fragment="estilos">
+        <meta name="_csrf" th:content="${_csrf.token}">
+        <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    </th:block>
+</head>
+<div layout:fragment="contenido">
+    <div class="card-head" style="border:none;padding:0 0 6px">
+        <div><h2 style="font-family:'Fraunces',serif;font-weight:500;font-size:20px">Registro de ingreso</h2>
+            <p style="font-size:12px;color:var(--ink-faint)">Marca la hora de entrada del alumno a la institución, escaneando su carnet o escribiendo su DNI</p></div>
+    </div>
+
+    <div class="note">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 8v8m-3-5h6M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"/></svg>
+        <div>Este es el ingreso general al local, no está ligado a ningún curso. Es solo de <b>entrada</b>; no hay registro de salida, y cada alumno puede marcar una sola vez al día.</div>
+    </div>
+
+    <div class="metrics" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Ingresos de hoy</div>
+            <div class="val" id="total-hoy-val" th:text="${totalHoy}">0</div>
+            <div class="delta" th:text="${#temporals.format(hoy, 'EEEE d MMMM')}"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-head">
+            <div>
+                <h2>Escanear carnet</h2>
+                <p>Apunta la cámara al código QR del carnet del alumno</p>
+            </div>
+        </div>
+        <div style="padding:24px">
+            <div id="reader" style="width:100%;max-width:420px;margin:0 auto"></div>
+            <div id="scan-status" style="display:none;margin-top:16px"></div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+        <div class="card-head">
+            <div>
+                <h2>¿No trajo su carnet?</h2>
+                <p>Registra su ingreso escribiendo su DNI</p>
+            </div>
+        </div>
+        <div style="padding:20px 24px;display:flex;gap:10px;flex-wrap:wrap">
+            <input type="text" id="dni-manual" inputmode="numeric" maxlength="8" placeholder="DNI (8 dígitos)"
+                   style="flex:1;min-width:180px;padding:10px 13px;border:1px solid var(--line);border-radius:var(--radius-sm);font-family:inherit;font-size:13.5px">
+            <button type="button" id="btn-dni-manual" class="ui primary button">Registrar ingreso</button>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+        <div class="card-head"><div><h2>Ingresos de hoy</h2></div></div>
+        <table>
+            <thead><tr><th>Alumno</th><th>Hora de ingreso</th></tr></thead>
+            <tbody id="lista-registrados">
+            <tr th:each="r : ${registrosHoy}">
+                <td th:text="${r.alumno.nombreCompleto}">-</td>
+                <td th:text="${#temporals.format(r.horaIngreso, 'HH:mm')}">-</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(registrosHoy)}" id="empty-row">
+                <td colspan="2" class="empty">Aún no hay ingresos registrados hoy.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p style="margin-top:18px">
+        <a th:href="@{/asistencias/cursos}" class="page-back">Ver asistencia por curso &rarr;</a>
+    </p>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script th:src="@{/js/ingreso-scanner.js}"></script>
+</th:block>
+</html>

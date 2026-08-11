@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Evento académico</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/calendario}" class="page-back">← Volver al calendario</a>
+    <h2 class="page-title" th:text="${eventoForm.id} ? 'Editar evento' : 'Nuevo evento'"></h2>
+
+    <div class="form-card">
+        <form th:action="@{/calendario/guardar}" th:object="${eventoForm}" method="post">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="field">
+                <label for="titulo">Título</label>
+                <input type="text" th:field="*{titulo}" placeholder="Ej. Inicio de ciclo 2026-II">
+                <span class="field-error" th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}"></span>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="fecha">Fecha</label>
+                    <input type="date" th:field="*{fecha}">
+                    <span class="field-error" th:if="${#fields.hasErrors('fecha')}" th:errors="*{fecha}"></span>
+                </div>
+                <div class="field">
+                    <label for="tipo">Tipo <span class="hint">opcional</span></label>
+                    <input type="text" th:field="*{tipo}" placeholder="Ej. Inicio de ciclo / Examen de admisión">
+                    <span class="field-error" th:if="${#fields.hasErrors('tipo')}" th:errors="*{tipo}"></span>
+                </div>
+            </div>
+            <div class="field">
+                <label for="descripcion">Descripción <span class="hint">opcional</span></label>
+                <textarea th:field="*{descripcion}" rows="3"></textarea>
+                <span class="field-error" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></span>
+            </div>
+            <label class="check-inline" style="margin-bottom:19px">
+                <input type="checkbox" th:field="*{activo}">
+                <span>Activo (se muestra en la página pública)</span>
+            </label>
+
+            <div class="form-foot">
+                <button type="submit" class="ui primary button">Guardar</button>
+                <a th:href="@{/calendario}" class="ui basic button">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</html>

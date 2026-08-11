@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Profesor</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/profesores}" class="page-back">← Volver a la lista</a>
+    <h2 class="page-title" th:text="${profesorForm.id} ? 'Editar profesor' : 'Nuevo profesor'"></h2>
+
+    <div class="ui stackable grid">
+      <div class="row">
+        <div class="ten wide column">
+            <div class="form-card" style="max-width:100%">
+                <form class="ui form" th:action="@{/profesores/guardar}" th:object="${profesorForm}" method="post" id="profesorForm" enctype="multipart/form-data">
+                    <input type="hidden" th:field="*{id}">
+
+                    <div class="form-divider">Datos personales</div>
+                    <div class="field">
+                        <label for="campoFoto">Fotografía <span class="hint">opcional</span></label>
+                        <div style="display:flex;align-items:center;gap:14px">
+                            <img th:if="${tieneFoto}" id="fotoActual" th:src="@{/profesores/{id}/foto(id=${profesorForm.id})}" alt="Foto actual"
+                                 style="width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)">
+                            <div th:unless="${tieneFoto}" id="sinFoto" style="width:64px;height:64px;border-radius:10px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-size:10px;text-align:center">Sin foto</div>
+                            <input type="file" th:field="*{foto}" id="campoFoto" accept="image/*" style="flex:1">
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="field">
+                            <label for="campoNombre">Nombre</label>
+                            <input type="text" th:field="*{nombre}" placeholder="Nombre" autocomplete="given-name" id="campoNombre">
+                            <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+                        </div>
+                        <div class="field">
+                            <label for="campoApellido">Apellido</label>
+                            <input type="text" th:field="*{apellido}" placeholder="Apellido" autocomplete="family-name" id="campoApellido">
+                            <span class="field-error" th:if="${#fields.hasErrors('apellido')}" th:errors="*{apellido}"></span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="campoCorreo">Correo</label>
+                        <input type="email" th:field="*{email}" placeholder="profesor@lapreplus.edu.pe" autocomplete="email" id="campoCorreo">
+                        <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                    </div>
+
+                    <div class="form-divider">Datos profesionales</div>
+                    <div class="grid-2">
+                        <div class="field">
+                            <label for="campoEspecialidad">Especialidad <span class="hint">opcional</span></label>
+                            <input type="text" th:field="*{especialidad}" placeholder="Ej. Matemática, Comunicación..." id="campoEspecialidad">
+                        </div>
+                        <div class="field">
+                            <label for="campoTarifa"><span th:text="'Tarifa por hora (' + ${marcaMoneda} + ')'">Tarifa por hora</span> <span class="hint">opcional</span></label>
+                            <input type="number" step="0.01" min="0" th:field="*{tarifaHora}" placeholder="Ej. 35.00" id="campoTarifa">
+                            <span class="field-error" th:if="${#fields.hasErrors('tarifaHora')}" th:errors="*{tarifaHora}"></span>
+                        </div>
+                    </div>
+                    <p class="hint" style="margin:-6px 0 0">Se usa para calcular el monto esperado en el registro de horas dictadas.</p>
+
+                    <div class="form-divider">Niveles</div>
+                    <p class="hint" style="margin:-6px 0 12px">En qué niveles puede dictar este profesor. Puede marcar varios si enseña en más de uno.</p>
+                    <div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:19px">
+                        <label class="check-inline" th:each="n : ${niveles}">
+                            <input type="checkbox" th:field="*{niveles}" th:value="${n}">
+                            <span th:text="${n.etiqueta}"></span>
+                        </label>
+                    </div>
+
+                    <div class="form-divider">Página web pública</div>
+                    <label class="check-inline" style="margin-bottom:19px">
+                        <input type="checkbox" th:field="*{destacadoWeb}">
+                        <span>Destacar en la página web (aparece con foto y especialidad en la sección de docentes)</span>
+                    </label>
+
+                    <div class="form-foot">
+                        <button type="submit" class="ui primary button">
+                            <svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+                            Guardar
+                        </button>
+                        <a th:href="@{/profesores}" class="ui basic button">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="six wide column">
+            <div class="card" style="padding:24px">
+                <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px">
+                    <div class="profile-avatar" id="previewAvatar"
+                         th:style="${tieneFoto} ? ('background-image:url(' + @{/profesores/{id}/foto(id=${profesorForm.id})} + ');background-size:cover;background-position:center')">--</div>
+                    <div>
+                        <div class="strong" style="font-size:16px;color:var(--ink)" id="previewNombre">Nuevo profesor</div>
+                        <div class="hint" id="previewCorreo">Sin correo registrado</div>
+                    </div>
+                    <span class="pill pill-sage" id="previewEspecialidad" style="display:none"></span>
+                </div>
+
+                <div class="form-divider" style="margin-top:24px">Vista previa</div>
+                <div class="cons-grid">
+                    <div class="cons-cell full">
+                        <div class="k">Tarifa por hora</div>
+                        <div class="v" id="previewTarifa">No configurada</div>
+                    </div>
+                </div>
+                <p class="hint" style="margin-top:2px">Este resumen se actualiza mientras completas el formulario y es lo que verán el resto de módulos (horas dictadas, pagos).</p>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <script th:inline="javascript">
+        (function () {
+            var moneda = /*[[${marcaMoneda}]]*/ 'S/';
+            var nombre = document.getElementById('campoNombre');
+            var apellido = document.getElementById('campoApellido');
+            var correo = document.getElementById('campoCorreo');
+            var especialidad = document.getElementById('campoEspecialidad');
+            var tarifa = document.getElementById('campoTarifa');
+
+            var avatar = document.getElementById('previewAvatar');
+            var pNombre = document.getElementById('previewNombre');
+            var pCorreo = document.getElementById('previewCorreo');
+            var pEspecialidad = document.getElementById('previewEspecialidad');
+            var pTarifa = document.getElementById('previewTarifa');
+            var campoFoto = document.getElementById('campoFoto');
+            var avatarTieneFoto = avatar.style.backgroundImage !== '';
+
+            if (campoFoto) {
+                campoFoto.addEventListener('change', function () {
+                    var archivo = campoFoto.files && campoFoto.files[0];
+                    if (!archivo) return;
+                    var lector = new FileReader();
+                    lector.onload = function (e) {
+                        avatar.style.backgroundImage = 'url(' + e.target.result + ')';
+                        avatar.style.backgroundSize = 'cover';
+                        avatar.style.backgroundPosition = 'center';
+                        avatarTieneFoto = true;
+                        avatar.textContent = '';
+                    };
+                    lector.readAsDataURL(archivo);
+                });
+            }
+
+            function actualizar() {
+                var n = (nombre.value || '').trim();
+                var a = (apellido.value || '').trim();
+                var completo = (n + ' ' + a).trim();
+                pNombre.textContent = completo || 'Nuevo profesor';
+                if (!avatarTieneFoto) {
+                    avatar.textContent = (completo || 'NP').split(/\s+/).slice(0, 2).map(function (p) { return p.charAt(0); }).join('').toUpperCase() || '--';
+                }
+                pCorreo.textContent = correo.value || 'Sin correo registrado';
+
+                if (especialidad.value) {
+                    pEspecialidad.style.display = '';
+                    pEspecialidad.textContent = especialidad.value;
+                } else {
+                    pEspecialidad.style.display = 'none';
+                }
+
+                pTarifa.textContent = tarifa.value ? (moneda + ' ' + parseFloat(tarifa.value).toFixed(2) + ' / hora') : 'No configurada';
+            }
+
+            [nombre, apellido, correo, especialidad, tarifa].forEach(function (campo) {
+                campo.addEventListener('input', actualizar);
+            });
+            actualizar();
+        })();
+    </script>
+</div>
+</html>

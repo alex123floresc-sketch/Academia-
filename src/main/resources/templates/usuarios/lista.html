@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Usuarios</title></head>
+<div layout:fragment="contenido">
+    <div class="card">
+        <div class="card-head">
+            <div><h2>Usuarios</h2><p>Cuentas de acceso al sistema</p></div>
+            <a th:href="@{/usuarios/nuevo}" class="ui small primary button">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo usuario</a>
+        </div>
+        <div class="searchbar">
+            <form method="get" th:action="@{/usuarios}" style="display:flex;gap:8px;flex:1">
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar por usuario o nombre..." aria-label="Buscar usuario">
+                <button type="submit" class="ui small basic button">Buscar</button>
+            </form>
+        </div>
+        <p class="hint" style="padding:0 20px 14px" th:unless="${esDesarrollador}">
+            Crear, editar o eliminar una cuenta de <b>Administrador</b> solo lo puede hacer la cuenta de desarrollador.
+        </p>
+        <table>
+            <thead><tr><th>Usuario</th><th>Roles</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="u : ${usuarios}"
+                th:with="esAdmin=${#lists.contains(u.roles.![nombre], 'ROLE_ADMIN')}">
+                <td>
+                    <div class="alumno-row">
+                        <img th:if="${u.fotoPresente}" th:src="@{/usuarios/{id}/foto(id=${u.id})}" alt=""
+                             class="alumno-avatar" style="object-fit:cover">
+                        <div th:unless="${u.fotoPresente}" class="alumno-avatar" th:text="${#strings.substring(u.nombre, 0, 1)}"></div>
+                        <div>
+                            <div class="strong" th:text="${u.nombre}"></div>
+                            <div style="font-size:11.5px;color:var(--ink-faint)" th:text="'@' + ${u.username}"></div>
+                        </div>
+                    </div>
+                </td>
+                <td><span class="pill pill-sage" th:each="r : ${u.roles}" style="margin-right:4px"
+                          th:text="${r.nombre == 'ROLE_ADMIN'} ? 'Administrador' : (${r.nombre == 'ROLE_CAJERO'} ? 'Secretaria' : (${r.nombre == 'ROLE_AUXILIAR'} ? 'Auxiliar' : ${r.nombre}))"></span></td>
+                <td>
+                    <span th:if="${u.activo}" class="pill pill-sage">Activo</span>
+                    <span th:unless="${u.activo}" class="pill pill-gray">Inactivo</span>
+                </td>
+                <td>
+                    <div class="rowact" th:if="${u.username == 'desarrollador'}">
+                        <a th:href="@{/usuarios/editar/{id}(id=${u.id})}" class="ui small basic button">Editar</a>
+                        <a th:href="@{/actividad(username=${u.username})}" class="ui small basic button">Historial</a>
+                        <span class="pill pill-gray" title="Cuenta protegida: no se puede eliminar">Protegida</span>
+                    </div>
+                    <div class="rowact" th:if="${u.username != 'desarrollador' and esAdmin and !esDesarrollador}">
+                        <a th:href="@{/actividad(username=${u.username})}" class="ui small basic button">Historial</a>
+                        <span class="pill pill-gray" title="Solo la cuenta de desarrollador puede administrar cuentas de Administrador">Protegida</span>
+                    </div>
+                    <div class="rowact" th:if="${u.username != 'desarrollador' and (!esAdmin or esDesarrollador)}">
+                        <a th:href="@{/usuarios/editar/{id}(id=${u.id})}" class="ui small basic button">Editar</a>
+                        <a th:href="@{/actividad(username=${u.username})}" class="ui small basic button">Historial</a>
+                        <form class="tform" th:action="@{/usuarios/eliminar/{id}(id=${u.id})}" method="post">
+                            <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar usuario?')">Eliminar</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(usuarios)}"><td colspan="4" class="empty">No hay usuarios registrados aún.</td></tr>
+            </tbody>
+        </table>
+        <div th:replace="~{fragments/paginacion :: paginacion(${pagina}, '/usuarios', ${q})}"></div>
+    </div>
+</div>
+</html>

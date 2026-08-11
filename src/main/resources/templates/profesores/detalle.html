@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head>
+    <title>Profesor</title>
+</head>
+<div layout:fragment="contenido">
+    <a th:href="@{/profesores}" class="page-back">&laquo; Volver a la lista</a>
+    <h2 class="page-title" th:text="${profesor.nombreCompleto}"></h2>
+
+    <div class="card" style="margin-bottom:16px">
+        <div class="card-head">
+            <div style="display:flex;align-items:center;gap:14px">
+                <img th:if="${tieneFoto}" th:src="@{/profesores/{id}/foto(id=${profesor.id})}" alt="Foto del profesor"
+                     style="width:52px;height:52px;object-fit:cover;border-radius:12px;border:1px solid var(--line)">
+                <div th:unless="${tieneFoto}" class="entity-avatar" style="width:52px;height:52px"
+                     th:text="${#strings.substring(profesor.nombre,0,1) + #strings.substring(profesor.apellido,0,1)}"></div>
+                <div>
+                    <h2>Datos del profesor</h2>
+                    <p th:text="${profesor.especialidad} ?: 'Sin especialidad registrada'"></p>
+                </div>
+            </div>
+            <div class="rowact">
+                <a th:href="@{/horas-docentes(profesorId=${profesor.id})}" class="ui small primary button">Registrar / ver horas</a>
+                <a sec:authorize="hasRole('ADMIN')" th:href="@{/profesores/editar/{id}(id=${profesor.id})}" class="ui small basic button">Editar</a>
+            </div>
+        </div>
+        <div class="cons-grid" style="margin:20px">
+            <div class="cons-cell"><div class="k">Correo</div><div class="v" th:text="${profesor.email}"></div></div>
+            <div class="cons-cell"><div class="k">Tarifa por hora</div>
+                <div class="v" th:text="${profesor.tarifaHora != null} ? (${marcaMoneda} + ' ' + ${profesor.tarifaHora}) : 'No configurada'"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="padding:0;margin-bottom:16px">
+        <div class="card-head"><div><h2>Cursos y horario</h2><p>Cursos que dicta actualmente</p></div></div>
+        <table>
+            <thead><tr><th>Curso</th><th>Código</th><th>Día</th><th>Turno</th><th>Hora</th></tr></thead>
+            <tbody>
+            <tr th:each="h : ${horarios}">
+                <td class="strong" th:text="${h.curso.nombre}"></td>
+                <td th:text="${h.curso.codigo}"></td>
+                <td th:text="${h.diaSemana.etiqueta}"></td>
+                <td th:text="${h.turno.etiqueta}"></td>
+                <td th:text="${h.horaInicio} + ' - ' + ${h.horaFin}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${#lists.isEmpty(horarios)}" class="empty">Este profesor no tiene cursos con horario asignado todavía.</p>
+    </div>
+
+    <div class="metrics" style="grid-template-columns:repeat(3,1fr)">
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Horas esta quincena</div>
+            <div class="val" th:text="${horasQuincena}">0</div>
+            <div class="delta" style="color:var(--ink-faint)" th:text="${rangoQuincena.inicio()} + ' - ' + ${rangoQuincena.fin()}"></div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--amber)"></span>Monto esperado</div>
+            <div class="val" th:text="${marcaMoneda} + ' ' + ${montoEsperadoQuincena}">S/ 0</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" th:style="${pendienteQuincena > 0} ? 'background:var(--rose)' : 'background:var(--sage)'"></span>Pendiente</div>
+            <div class="val" th:text="${marcaMoneda} + ' ' + ${pendienteQuincena}">S/ 0</div>
+            <div class="delta" style="color:var(--ink-faint)" th:text="'Pagado: ' + ${marcaMoneda} + ' ' + ${montoPagadoQuincena}"></div>
+        </div>
+    </div>
+
+    <div class="ui stackable two column grid">
+        <div class="column">
+            <div class="card" style="padding:0">
+                <div class="card-head"><div><h2>Últimos registros de horas</h2></div></div>
+                <table>
+                    <thead><tr><th>Fecha</th><th>Curso</th><th>Horas</th></tr></thead>
+                    <tbody>
+                    <tr th:each="r : ${ultimosRegistros}">
+                        <td th:text="${r.fecha}"></td>
+                        <td class="strong" th:text="${r.horario.curso.nombre}"></td>
+                        <td th:text="${r.horas}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <p th:if="${#lists.isEmpty(ultimosRegistros)}" class="empty">Aún no hay horas registradas.</p>
+            </div>
+        </div>
+        <div class="column">
+            <div class="card" style="padding:0">
+                <div class="card-head"><div><h2>Últimos pagos</h2></div></div>
+                <table>
+                    <thead><tr><th>Período</th><th>Monto</th><th>Fecha</th></tr></thead>
+                    <tbody>
+                    <tr th:each="p : ${ultimosPagos}">
+                        <td><span class="pill pill-sky" th:text="${p.tipoPeriodo}"></span></td>
+                        <td class="strong" th:text="${marcaMoneda} + ' ' + ${p.monto}"></td>
+                        <td th:text="${p.fechaPago}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <p th:if="${#lists.isEmpty(ultimosPagos)}" class="empty">Aún no se han registrado pagos.</p>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

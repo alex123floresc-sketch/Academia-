@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Mi perfil</title></head>
+<div layout:fragment="contenido">
+    <h2 class="page-title">Mi perfil</h2>
+
+    <div class="ui stackable grid">
+      <div class="row">
+        <div class="ten wide column">
+            <div class="form-card" style="max-width:100%">
+                <form th:action="@{/perfil/guardar}" th:object="${perfilForm}" method="post" enctype="multipart/form-data">
+
+                    <div class="form-divider">Datos personales</div>
+                    <div class="field">
+                        <label for="campoFoto">Fotografía <span class="hint">opcional</span></label>
+                        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                            <img th:if="${usuario.fotoPresente}" id="fotoActual" th:src="@{/perfil/foto}" alt="Foto actual"
+                                 style="width:64px;height:64px;object-fit:cover;border-radius:50%;border:1px solid var(--line)">
+                            <div th:unless="${usuario.fotoPresente}" id="sinFoto" style="width:64px;height:64px;border-radius:50%;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-size:10px;text-align:center">Sin foto</div>
+                            <input type="file" th:field="*{foto}" id="campoFoto" accept="image/*" style="flex:1;min-width:200px">
+                            <label class="check-inline" th:if="${usuario.fotoPresente}" style="margin:0">
+                                <input type="checkbox" th:field="*{quitarFoto}" id="quitarFoto">
+                                <span style="font-weight:400;font-size:12px;color:var(--ink-soft)">Quitar foto actual</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="field">
+                            <label for="campoNombre">Nombre</label>
+                            <input type="text" th:field="*{nombre}" placeholder="Nombre completo" id="campoNombre">
+                            <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+                        </div>
+                        <div class="field">
+                            <label>Usuario</label>
+                            <input type="text" th:value="${usuario.username}" disabled style="color:var(--ink-faint)">
+                            <span class="hint">El nombre de usuario lo cambia un administrador desde Usuarios</span>
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="field">
+                            <label for="campoCargo">Cargo <span class="hint">opcional</span></label>
+                            <input type="text" th:field="*{cargo}" placeholder="Ej. Director académico" id="campoCargo">
+                            <span class="field-error" th:if="${#fields.hasErrors('cargo')}" th:errors="*{cargo}"></span>
+                        </div>
+                        <div class="field">
+                            <label for="campoTelefono">Teléfono <span class="hint">opcional</span></label>
+                            <input type="text" th:field="*{telefono}" placeholder="9XXXXXXXX" id="campoTelefono">
+                            <span class="field-error" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></span>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="campoEmail">Correo electrónico <span class="hint">opcional</span></label>
+                        <input type="email" th:field="*{email}" placeholder="tu@correo.com" id="campoEmail">
+                        <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                    </div>
+
+                    <div class="form-divider">Firma digital</div>
+                    <p class="hint" style="margin:-4px 0 18px 0">Se muestra como "Atendido por" en los recibos de matrícula que generes.</p>
+                    <div class="field">
+                        <label for="campoFirma">Imagen de firma <span class="hint">opcional</span></label>
+                        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                            <img th:if="${usuario.firmaPresente}" th:src="@{/perfil/firma}" alt="Firma actual"
+                                 style="width:100px;height:48px;object-fit:contain;border-radius:8px;border:1px solid var(--line);background:#fff;padding:4px">
+                            <div th:unless="${usuario.firmaPresente}"
+                                 style="width:100px;height:48px;border-radius:8px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-faint);font-size:9px;text-align:center">Sin firma</div>
+                            <input type="file" th:field="*{firma}" id="campoFirma" accept="image/*" style="flex:1;min-width:200px">
+                            <label class="check-inline" th:if="${usuario.firmaPresente}" style="margin:0">
+                                <input type="checkbox" th:field="*{quitarFirma}">
+                                <span style="font-weight:400;font-size:12px;color:var(--ink-soft)">Quitar firma actual</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-divider">Cambiar contraseña</div>
+                    <p class="hint" style="margin:-4px 0 18px 0">Deja estos campos vacíos si no quieres cambiar tu contraseña.</p>
+                    <div class="field">
+                        <label for="campoPasswordActual">Contraseña actual</label>
+                        <input type="password" th:field="*{passwordActual}" id="campoPasswordActual" autocomplete="current-password" placeholder="••••••••">
+                    </div>
+                    <div class="grid-2">
+                        <div class="field">
+                            <label for="campoPasswordNueva">Contraseña nueva</label>
+                            <input type="password" th:field="*{passwordNueva}" id="campoPasswordNueva" autocomplete="new-password" placeholder="Mínimo 6 caracteres">
+                        </div>
+                        <div class="field">
+                            <label for="campoPasswordConfirmar">Confirmar contraseña nueva</label>
+                            <input type="password" th:field="*{passwordNuevaConfirmar}" id="campoPasswordConfirmar" autocomplete="new-password" placeholder="Repite la contraseña nueva">
+                        </div>
+                    </div>
+
+                    <div class="form-foot">
+                        <button type="submit" class="ui primary button">
+                            <svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+                            Guardar cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="six wide column">
+            <div class="card" style="padding:24px">
+                <div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px">
+                    <div class="profile-avatar" id="previewAvatar"
+                         th:style="${usuario.fotoPresente} ? ('background-image:url(' + @{/perfil/foto} + ');background-size:cover;background-position:center')"
+                         th:text="${usuario.fotoPresente} ? '' : ${#strings.substring(usuario.nombre, 0, 1)}"></div>
+                    <div>
+                        <div class="strong" style="font-size:16px;color:var(--ink)" id="previewNombre" th:text="${usuario.nombre}">Nombre</div>
+                        <div class="hint" th:if="${usuario.cargo != null and !usuario.cargo.isEmpty()}" th:text="${usuario.cargo}"></div>
+                        <div class="hint" th:text="'@' + ${usuario.username}">@usuario</div>
+                    </div>
+                    <span class="pill pill-sage" th:each="r : ${usuario.roles}"
+                          th:text="${r.nombre == 'ROLE_ADMIN'} ? 'Administrador' : (${r.nombre == 'ROLE_CAJERO'} ? 'Secretaria' : (${r.nombre == 'ROLE_AUXILIAR'} ? 'Auxiliar' : ${r.nombre}))"></span>
+                </div>
+                <p class="hint" style="margin-top:18px;text-align:center">Esta foto y nombre son los que ven los demás en el historial de actividad y en el menú.</p>
+            </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:inline="javascript">
+        (function () {
+            var nombre = document.getElementById('campoNombre');
+            var previewNombre = document.getElementById('previewNombre');
+            nombre.addEventListener('input', function () {
+                previewNombre.textContent = nombre.value || 'Nombre';
+            });
+
+            var fotoInput = document.getElementById('campoFoto');
+            var previewAvatar = document.getElementById('previewAvatar');
+            fotoInput.addEventListener('change', function () {
+                var archivo = fotoInput.files && fotoInput.files[0];
+                if (!archivo) return;
+                var lector = new FileReader();
+                lector.onload = function (e) {
+                    previewAvatar.style.backgroundImage = 'url(' + e.target.result + ')';
+                    previewAvatar.style.backgroundSize = 'cover';
+                    previewAvatar.style.backgroundPosition = 'center';
+                    previewAvatar.textContent = '';
+                };
+                lector.readAsDataURL(archivo);
+            });
+        })();
+    </script>
+</th:block>
+</html>

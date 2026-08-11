@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Áreas</title>
+</head>
+<div layout:fragment="contenido">
+    <a th:href="@{/areas(nivel=${nivel})}" class="page-back">&laquo; Volver a áreas de <span th:text="${nivel.etiqueta}"></span></a>
+
+    <h2 class="page-title" th:text="${areaSeleccionada} + ' · ' + ${nivel.etiqueta}"></h2>
+
+    <div class="card" style="padding:0">
+        <div class="card-head">
+            <div>
+                <h2>Cursos asignados a esta área</h2>
+                <p th:text="'Solo se listan cursos de ' + ${nivel.etiqueta} + ' · un curso puede pertenecer a más de un área, los ya asignados aparecen primero'">Un curso puede pertenecer a más de un área · los ya asignados aparecen primero</p>
+            </div>
+        </div>
+
+        <form th:action="@{/areas/guardar}" method="post">
+            <input type="hidden" name="nivel" th:value="${nivel}">
+            <input type="hidden" name="area" th:value="${areaSeleccionada}">
+
+            <div class="searchbar">
+                <input type="search" id="buscarCursoArea" placeholder="Buscar curso por nombre o código..." aria-label="Buscar curso" autocomplete="off">
+                <button type="button" id="selAllArea" class="ui small basic button">Seleccionar todos</button>
+                <button type="button" id="selNoneArea" class="ui small basic button">Ninguno</button>
+            </div>
+
+            <div style="padding:0 20px 20px">
+                <div class="courselist" id="courseListArea">
+                    <label class="courserow" th:each="curso : ${cursos}"
+                           th:attr="data-buscar=${#strings.toLowerCase(curso.nombre + ' ' + curso.codigo)}">
+                        <input type="checkbox" name="cursoIds" th:value="${curso.id}" class="js-curso-area"
+                               th:checked="${curso.areas.contains(areaSeleccionada)}">
+                        <div>
+                            <div class="cn" th:text="${curso.nombre}"></div>
+                            <div class="cm" th:text="${curso.codigo} + ' · ' + (${curso.profesor != null} ? ${curso.profesor.nombreCompleto} : 'Sin asignar')"></div>
+                        </div>
+                        <span class="ch">
+                            <span th:if="${curso.areas.isEmpty()}" class="pill pill-amber">Sin área</span>
+                            <span th:each="a : ${curso.areas}" class="pill pill-sage" th:text="${a}"></span>
+                        </span>
+                    </label>
+                    <p class="empty" id="courseEmptyArea" style="display:none">Ningún curso coincide con tu búsqueda.</p>
+                </div>
+
+                <div class="form-foot">
+                    <p class="hint" id="cursosSelCountArea" style="margin:0;flex:1;align-self:center">Ningún curso seleccionado.</p>
+                    <button type="submit" class="ui primary button">
+                        <svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+                        Guardar cambios
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script th:src="@{/js/buscador-select.js}"></script>
+    <script>
+        var filtroArea = initFiltroLista('buscarCursoArea', 'courseListArea', '.courserow', 'courseEmptyArea', 'js-curso-area', 'cursosSelCountArea');
+        document.getElementById('selAllArea').addEventListener('click', function () {
+            filtroArea.checks.forEach(function (c) { if (c.closest('.courserow').style.display !== 'none') c.checked = true; });
+            filtroArea.actualizarContador();
+        });
+        document.getElementById('selNoneArea').addEventListener('click', function () {
+            filtroArea.checks.forEach(function (c) { if (c.closest('.courserow').style.display !== 'none') c.checked = false; });
+            filtroArea.actualizarContador();
+        });
+    </script>
+</div>
+</html>

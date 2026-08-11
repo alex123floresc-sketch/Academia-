@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Buscar</title>
+</head>
+<div layout:fragment="contenido">
+    <h2 class="page-title" th:text="${q != null and !#strings.isEmpty(q)} ? 'Resultados para &quot;' + ${q} + '&quot;' : 'Buscar'"></h2>
+
+    <div class="card" th:if="${q == null or #strings.isEmpty(q)}">
+        <div class="empty">Escribe un nombre, correo, código o DNI en el buscador de arriba.</div>
+    </div>
+
+    <th:block th:if="${q != null and !#strings.isEmpty(q)}">
+        <div class="card" style="padding:0;margin-bottom:16px">
+            <div class="card-head"><div><h2>Alumnos</h2></div></div>
+            <table>
+                <thead><tr><th>Alumno</th><th>DNI</th><th>Correo</th><th></th></tr></thead>
+                <tbody>
+                <tr th:each="a : ${alumnos}">
+                    <td class="strong" th:text="${a.nombre + ' ' + a.apellido}"></td>
+                    <td th:text="${a.dni} ?: '-'"></td>
+                    <td th:text="${a.email} ?: '-'"></td>
+                    <td><a th:href="@{/alumnos/{id}/expediente(id=${a.id})}" class="ui small basic button">Expediente</a></td>
+                </tr>
+                </tbody>
+            </table>
+            <p th:if="${#lists.isEmpty(alumnos)}" class="empty">Sin resultados en alumnos.</p>
+        </div>
+
+        <div class="card" style="padding:0;margin-bottom:16px">
+            <div class="card-head"><div><h2>Profesores</h2></div></div>
+            <table>
+                <thead><tr><th>Profesor</th><th>Especialidad</th><th>Correo</th><th></th></tr></thead>
+                <tbody>
+                <tr th:each="p : ${profesores}">
+                    <td class="strong" th:text="${p.nombre + ' ' + p.apellido}"></td>
+                    <td th:text="${p.especialidad} ?: '-'"></td>
+                    <td th:text="${p.email}"></td>
+                    <td><a th:href="@{/profesores/{id}(id=${p.id})}" class="ui small basic button">Ver detalle</a></td>
+                </tr>
+                </tbody>
+            </table>
+            <p th:if="${#lists.isEmpty(profesores)}" class="empty">Sin resultados en profesores.</p>
+        </div>
+
+        <div class="card" style="padding:0">
+            <div class="card-head"><div><h2>Cursos</h2></div></div>
+            <table>
+                <thead><tr><th>Curso</th><th>Código</th><th>Profesor</th><th></th></tr></thead>
+                <tbody>
+                <tr th:each="c : ${cursos}">
+                    <td class="strong" th:text="${c.nombre}"></td>
+                    <td th:text="${c.codigo}"></td>
+                    <td th:text="${c.profesor != null} ? ${c.profesor.nombreCompleto} : 'Sin asignar'"></td>
+                    <td><a th:href="@{/cursos/editar/{id}(id=${c.id})}" class="ui small basic button">Ver / editar</a></td>
+                </tr>
+                </tbody>
+            </table>
+            <p th:if="${#lists.isEmpty(cursos)}" class="empty">Sin resultados en cursos.</p>
+        </div>
+    </th:block>
+</div>
+</html>

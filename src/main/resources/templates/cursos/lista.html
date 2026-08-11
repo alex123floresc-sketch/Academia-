@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head><title>Cursos</title></head>
+<div layout:fragment="contenido">
+    <a th:if="${nivel != null and area != null}" th:href="@{/cursos(nivel=${nivel})}" class="page-back">&laquo; Volver a áreas</a>
+    <a th:if="${nivel != null and area == null}" th:href="@{/cursos}" class="page-back">&laquo; Volver a niveles</a>
+
+    <div class="note">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+        <div>Los cursos se miden en <b>horas semanales</b>, no en créditos.</div>
+    </div>
+    <div class="card">
+        <div class="card-head">
+            <div>
+                <h2 th:text="${area != null} ? ('Cursos de ' + ${area}) : (${nivel != null} ? ('Cursos de ' + ${nivel.etiqueta}) : 'Resultados de búsqueda')"></h2>
+                <p th:text="${area != null} ? ('Catálogo de cursos y profesores asignados · ' + ${nivel.etiqueta}) : (${nivel != null} ? 'En todas las áreas de este nivel' : 'Cursos que coinciden con tu búsqueda, en todos los niveles')"></p>
+            </div>
+            <div class="rowact" style="align-items:center">
+                <div th:replace="~{fragments/vista-switch :: switch('cursos')}"></div>
+                <a th:href="@{/cursos/nuevo(nivel=${nivel},area=${area})}" sec:authorize="hasRole('ADMIN')" class="ui small primary button">
+                    <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo curso</a>
+            </div>
+        </div>
+        <div class="searchbar">
+            <form method="get" th:action="@{/cursos}" style="display:flex;gap:8px;flex:1">
+                <input type="hidden" name="nivel" th:value="${nivel}">
+                <input type="hidden" name="area" th:value="${area}">
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre, código o profesor..." aria-label="Buscar curso">
+                <button type="submit" class="ui small basic button">Buscar</button>
+            </form>
+        </div>
+        <div data-view-panel="list" data-view-group="cursos">
+            <table>
+                <thead><tr><th>Código</th><th>Curso</th><th th:if="${nivel == null}">Nivel</th><th>Horas / sem.</th><th>Profesor</th><th></th></tr></thead>
+                <tbody>
+                <tr th:each="curso : ${cursos}">
+                    <td><span class="pill pill-gray" th:text="${curso.codigo}"></span></td>
+                    <td class="strong" th:text="${curso.nombre}"></td>
+                    <td th:if="${nivel == null}"><span class="pill pill-sky" th:text="${curso.nivel != null} ? ${curso.nivel.etiqueta} : '-'"></span></td>
+                    <td th:text="${curso.horas} + ' h'"></td>
+                    <td th:text="${curso.profesor != null} ? ${curso.profesor.nombreCompleto} : 'Sin asignar'"></td>
+                    <td sec:authorize="hasRole('ADMIN')">
+                        <div class="rowact">
+                            <a th:href="@{/cursos/editar/{id}(id=${curso.id},area=${area})}" class="ui small basic button">Editar</a>
+                            <form class="tform" th:action="@{/cursos/eliminar/{id}(id=${curso.id})}" method="post">
+                                <input type="hidden" name="nivel" th:value="${nivel}">
+                                <input type="hidden" name="area" th:value="${area}">
+                                <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar curso?')">Eliminar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(cursos)}"><td th:attr="colspan=${nivel == null} ? 6 : 5" class="empty">No hay cursos que coincidan.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div data-view-panel="grid" data-view-group="cursos" hidden>
+            <div class="entity-grid stagger-cards" th:if="${not #lists.isEmpty(cursos)}">
+                <div class="entity-card" th:each="curso : ${cursos}">
+                    <div class="entity-card-top">
+                        <div class="entity-avatar" th:text="${#strings.substring(curso.nombre,0,1)}"></div>
+                        <div style="min-width:0">
+                            <div class="entity-card-name" th:text="${curso.nombre}"></div>
+                            <div class="entity-card-sub"><span class="pill pill-gray" th:text="${curso.codigo}"></span></div>
+                        </div>
+                    </div>
+                    <div class="entity-card-meta">
+                        <div class="entity-card-meta-row" th:if="${nivel == null}"><span class="k">Nivel</span><span class="pill pill-sky" th:text="${curso.nivel != null} ? ${curso.nivel.etiqueta} : '-'"></span></div>
+                        <div class="entity-card-meta-row"><span class="k">Horas / sem.</span><span class="v" th:text="${curso.horas} + ' h'"></span></div>
+                        <div class="entity-card-meta-row"><span class="k">Profesor</span><span class="v" th:text="${curso.profesor != null} ? ${curso.profesor.nombreCompleto} : 'Sin asignar'"></span></div>
+                    </div>
+                    <div class="entity-card-foot" sec:authorize="hasRole('ADMIN')">
+                        <a th:href="@{/cursos/editar/{id}(id=${curso.id},area=${area})}" class="ui small basic button">Editar</a>
+                        <form class="tform" th:action="@{/cursos/eliminar/{id}(id=${curso.id})}" method="post">
+                            <input type="hidden" name="nivel" th:value="${nivel}">
+                            <input type="hidden" name="area" th:value="${area}">
+                            <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar curso?')">Eliminar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <p th:if="${#lists.isEmpty(cursos)}" class="empty">No hay cursos que coincidan.</p>
+        </div>
+
+        <div th:replace="~{fragments/paginacion :: paginacionNivelArea(${pagina}, '/cursos', ${q}, ${nivel}, ${area})}"></div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:src="@{/js/vista-toggle.js}"></script>
+</th:block>
+</html>

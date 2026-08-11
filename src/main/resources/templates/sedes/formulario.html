@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Sede</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/sedes}" class="page-back">← Volver a sedes</a>
+    <h2 class="page-title" th:text="${sedeForm.id} ? 'Editar sede' : 'Nueva sede'"></h2>
+
+    <div class="form-card">
+        <form th:action="@{/sedes/guardar}" th:object="${sedeForm}" method="post" enctype="multipart/form-data">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="field">
+                <label for="foto">Fotografía <span class="hint">opcional</span></label>
+                <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                    <img th:if="${sedeForm.id != null and (sedeForm.foto == null or sedeForm.foto.empty)}" th:src="@{/sedes/{id}/foto(id=${sedeForm.id})}" alt="Foto actual"
+                         id="fotoPreview" style="width:64px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line)">
+                    <input type="file" th:field="*{foto}" accept="image/*" style="flex:1;min-width:200px" id="fotoInput">
+                    <label class="check-inline" th:if="${sedeForm.id != null}" style="margin:0">
+                        <input type="checkbox" th:field="*{quitarFoto}">
+                        <span style="font-weight:400;font-size:12px;color:var(--ink-soft)">Quitar foto actual</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="field">
+                    <label for="nombre">Nombre</label>
+                    <input type="text" th:field="*{nombre}" placeholder="Ej. Sede San Isidro">
+                    <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+                </div>
+                <div class="field">
+                    <label for="telefono">Teléfono <span class="hint">opcional</span></label>
+                    <input type="text" th:field="*{telefono}" placeholder="9XXXXXXXX">
+                    <span class="field-error" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></span>
+                </div>
+            </div>
+            <div class="field">
+                <label for="direccion">Dirección</label>
+                <input type="text" th:field="*{direccion}" placeholder="Av. Ejemplo 123">
+                <span class="field-error" th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></span>
+            </div>
+            <div class="field">
+                <label for="horario">Horario de atención <span class="hint">opcional</span></label>
+                <input type="text" th:field="*{horario}" placeholder="Ej. Lun a Vie 8:00am - 7:00pm">
+                <span class="field-error" th:if="${#fields.hasErrors('horario')}" th:errors="*{horario}"></span>
+            </div>
+            <label class="check-inline" style="margin-bottom:19px">
+                <input type="checkbox" th:field="*{activa}">
+                <span>Sede activa (se muestra en la página web pública)</span>
+            </label>
+
+            <div class="form-foot">
+                <button type="submit" class="ui primary button">Guardar</button>
+                <a th:href="@{/sedes}" class="ui basic button">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</html>

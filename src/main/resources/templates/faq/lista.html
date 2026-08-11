@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Preguntas frecuentes</title></head>
+<div layout:fragment="contenido">
+    <div class="card">
+        <div class="card-head">
+            <div><h2>Preguntas frecuentes</h2><p>Se muestran en la página web pública, en el orden indicado</p></div>
+            <a th:href="@{/faq/nuevo}" class="ui small primary button">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nueva pregunta</a>
+        </div>
+        <table>
+            <thead><tr><th>Orden</th><th>Pregunta</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="p : ${preguntas}">
+                <td th:text="${p.orden}"></td>
+                <td class="strong" th:text="${p.pregunta}"></td>
+                <td>
+                    <span th:if="${p.activa}" class="pill pill-sage">Activa</span>
+                    <span th:unless="${p.activa}" class="pill pill-gray">Inactiva</span>
+                </td>
+                <td>
+                    <div class="rowact">
+                        <a th:href="@{/faq/editar/{id}(id=${p.id})}" class="ui small basic button">Editar</a>
+                        <form class="tform" th:action="@{/faq/eliminar/{id}(id=${p.id})}" method="post">
+                            <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar esta pregunta?')">Eliminar</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(preguntas)}"><td colspan="4" class="empty">No hay preguntas frecuentes registradas aún.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</html>

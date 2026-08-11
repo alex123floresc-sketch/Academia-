@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head><title>Expediente del alumno</title></head>
+<div layout:fragment="contenido">
+
+    <a th:href="@{/alumnos}" class="page-back">&laquo; Volver a alumnos</a>
+
+    <div class="card" style="margin-top:14px">
+        <div class="exp-header">
+            <div class="exp-avatar" th:text="${#strings.substring(alumno.nombre,0,1) + #strings.substring(alumno.apellido,0,1)}"></div>
+            <div style="flex:1">
+                <h2 style="font-family:'Fraunces',serif;font-weight:600;font-size:19px" th:text="${alumno.nombre + ' ' + alumno.apellido}">Alumno</h2>
+                <p style="font-size:12.5px;color:var(--ink-faint);margin-top:3px" th:text="'DNI ' + (${alumno.dni} ?: '-') + ' · ' + (${alumno.email} ?: 'sin correo') + ' · ' + ${alumno.area}">-</p>
+                <p th:if="${alumno.nombrePadre != null and !alumno.nombrePadre.isBlank()}" style="font-size:12px;color:var(--ink-faint);margin-top:2px"
+                   th:text="'Padre/apoderado: ' + ${alumno.nombrePadre} + (${alumno.telefonoPadre != null and !alumno.telefonoPadre.isBlank()} ? ' · ' + ${alumno.telefonoPadre} : '')"></p>
+            </div>
+            <div class="rowact">
+                <a th:href="@{/alumnos/{id}/asistencia(id=${alumno.id})}" class="ui small basic button">Ver asistencia</a>
+                <a sec:authorize="hasAnyRole('ADMIN','CAJERO')" th:href="@{/alumnos/{id}/matricular(id=${alumno.id})}" class="ui small primary button">Matricular en nuevo ciclo</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="exp-metrics">
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sky)"></span>Matrículas activas</div>
+            <div class="val" th:text="${matriculasActivas}">0</div>
+            <div class="delta" th:text="${#lists.size(matriculas)} + ' en total'">0 en total</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Total pagado</div>
+            <div class="val" th:text="${marcaMoneda} + ' ' + ${totalPagado}">S/ 0</div>
+            <div class="delta">suma de todos los abonos</div>
+        </div>
+        <div class="metric">
+            <div class="lbl"><span class="dot" style="background:var(--amber)"></span>Saldo pendiente</div>
+            <div class="val" th:text="${marcaMoneda} + ' ' + ${totalPendiente}">S/ 0</div>
+            <div class="delta" th:classappend="${totalPendiente.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? 'down' : ''">por cobrar en todas las matrículas</div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:20px" th:each="m : ${matriculas}">
+        <div class="card-head">
+            <div>
+                <h2 th:text="${m.semestre.nombre}">Ciclo</h2>
+                <p style="display:flex;align-items:center;gap:8px;margin-top:4px">
+                    <span th:text="'Turno: ' + (${m.turno != null} ? ${m.turno.etiqueta} : '-')">-</span>
+                    <span th:if="${m.estado == 'ACTIVA'}" class="pill pill-sage">Activa</span>
+                    <span th:unless="${m.estado == 'ACTIVA'}" class="pill pill-gray" th:text="${m.estado}"></span>
+                </p>
+            </div>
+            <div class="rowact">
+                <a th:href="@{/matriculas/ficha/{id}(id=${m.id})}" class="ui small basic button">Ver ficha</a>
+                <form th:if="${m.estado == 'ACTIVA'}" sec:authorize="hasRole('ADMIN')" style="margin:0"
+                      th:action="@{/matriculas/anular/{id}(id=${m.id})}" method="post">
+                    <button type="submit" class="ui small basic button"
+                            onclick="return confirm('¿Anular esta matrícula?')">Anular</button>
+                </form>
+            </div>
+        </div>
+
+        <table>
+            <thead><tr><th>Curso</th><th>Horas</th></tr></thead>
+            <tbody>
+            <tr th:each="d : ${m.detalles}">
+                <td th:text="${d.curso.nombre}">-</td>
+                <td th:text="${d.curso.horas}">0</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(m.detalles)}"><td colspan="2" class="empty">Sin cursos.</td></tr>
+            </tbody>
+        </table>
+
+        <table>
+            <thead><tr><th>Concepto</th><th>Vence</th><th>Monto</th><th>Estado</th></tr></thead>
+            <tbody>
+            <tr th:each="p : ${pagosPorMatricula.get(m.id)}">
+                <td>
+                    <a th:href="@{/pagos/{id}(id=${p.id})}" style="text-decoration:none;color:inherit" th:text="${p.concepto}">-</a>
+                </td>
+                <td th:text="${p.fechaVencimiento}">-</td>
+                <td>
+                    <div th:text="${marcaMoneda} + ' ' + ${p.monto}">0</div>
+                    <div th:if="${p.estado == 'PARCIAL'}" class="hint" th:text="'Saldo: ' + ${marcaMoneda} + ' ' + ${p.saldo}"></div>
+                </td>
+                <td>
+                    <span th:if="${p.estado == 'PAGADO'}" class="pill pill-sage">Pagado</span>
+                    <span th:if="${p.estado == 'PENDIENTE'}" class="pill pill-amber">Pendiente</span>
+                    <span th:if="${p.estado == 'PARCIAL'}" class="pill pill-sky">Parcial</span>
+                    <span th:if="${p.estado == 'VENCIDO'}" class="pill pill-rose">Vencido</span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(pagosPorMatricula.get(m.id))}"><td colspan="4" class="empty">Sin pagos registrados.</td></tr>
+            </tbody>
+        </table>
+
+        <details sec:authorize="hasAnyRole('ADMIN','CAJERO')" style="margin:14px 20px 20px">
+            <summary style="cursor:pointer;font-size:12.5px;font-weight:600;color:var(--sage-strong)">+ Agregar cuota</summary>
+            <form th:action="@{/pagos/nueva-cuota}" method="post" class="grid-3" style="margin-top:12px;align-items:end">
+                <input type="hidden" name="matriculaId" th:value="${m.id}">
+                <input type="hidden" name="alumnoId" th:value="${alumno.id}">
+                <div class="field" style="margin-bottom:0">
+                    <label th:for="${'concepto-' + m.id}">Concepto</label>
+                    <input type="text" name="concepto" th:id="${'concepto-' + m.id}" placeholder="Ej. Pensión marzo" required>
+                </div>
+                <div class="field" style="margin-bottom:0">
+                    <label th:for="${'monto-' + m.id}" th:text="'Monto (' + ${marcaMoneda} + ')'">Monto</label>
+                    <input type="number" name="monto" th:id="${'monto-' + m.id}" step="0.01" min="0.01" placeholder="180.00" required>
+                </div>
+                <div class="field" style="margin-bottom:0">
+                    <label th:for="${'fechaVencimiento-' + m.id}">Vence</label>
+                    <input type="date" name="fechaVencimiento" th:id="${'fechaVencimiento-' + m.id}" required>
+                </div>
+                <div style="grid-column:1/-1;margin-top:4px">
+                    <button type="submit" class="ui small primary button">Agregar cuota</button>
+                </div>
+            </form>
+        </details>
+    </div>
+
+    <div class="card" th:if="${#lists.isEmpty(matriculas)}" style="margin-top:20px">
+        <div class="empty">Este alumno no tiene matrículas registradas.</div>
+    </div>
+</div>
+</html>

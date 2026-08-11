@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Alumnos por nivel</title>
+    <style type="text/css">@page { size: A4; margin: 1.8cm; }</style>
+    <th:block th:replace="~{fragments/pdf :: estilos}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/pdf :: encabezado('Alumnos por nivel')}"></div>
+
+<div class="pdf-section">Resumen general</div>
+<table class="pdf-info">
+    <tr>
+        <td class="k">Niveles reportados</td>
+        <td class="v" th:text="${#lists.size(filas)}">0</td>
+        <td class="k">Total de alumnos</td>
+        <td class="v" th:text="${totalAlumnos}">0</td>
+    </tr>
+</table>
+
+<div class="pdf-chart" th:if="${chartDataUri != null}">
+    <img th:src="${chartDataUri}" alt="Gráfico de alumnos por nivel"/>
+</div>
+
+<div class="pdf-section">Distribución por nivel</div>
+<table class="pdf-table">
+    <thead>
+    <tr><th>Nivel</th><th>Alumnos</th><th>% del total</th></tr>
+    </thead>
+    <tbody>
+    <tr th:each="fila : ${filas}">
+        <td th:text="${fila.nivel}">-</td>
+        <td class="center" th:text="${fila.cantidad}">0</td>
+        <td class="num"
+            th:text="${totalAlumnos > 0} ? (${#numbers.formatDecimal(fila.cantidad * 100.0 / totalAlumnos, 1, 1)} + '%') : '0%'">0%</td>
+    </tr>
+    </tbody>
+</table>
+<p class="pdf-empty" th:if="${#lists.isEmpty(filas)}">Sin datos disponibles.</p>
+<p class="pdf-total" th:unless="${#lists.isEmpty(filas)}">Total general: <span th:text="${totalAlumnos}">0</span> alumnos</p>
+
+<div th:replace="~{fragments/pdf :: pie}"></div>
+</body>
+</html>

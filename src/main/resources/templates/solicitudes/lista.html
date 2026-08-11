@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Solicitudes de información</title></head>
+<div layout:fragment="contenido">
+    <div class="card">
+        <div class="card-head">
+            <div><h2>Solicitudes de información</h2><p>Personas interesadas que dejaron sus datos en la página web pública</p></div>
+        </div>
+        <table>
+            <thead><tr><th>Fecha</th><th>Nombre</th><th>Teléfono</th><th>Correo</th><th>Nivel de interés</th><th>Mensaje</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="s : ${solicitudes}">
+                <td th:text="${#temporals.format(s.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+                <td class="strong" th:text="${s.nombre}"></td>
+                <td th:text="${s.telefono}"></td>
+                <td th:text="${s.correo} ?: '-'"></td>
+                <td th:text="${s.nivelInteres} ? ${s.nivelInteres.etiqueta} : '-'"></td>
+                <td th:text="${s.mensaje} ?: '-'"></td>
+                <td>
+                    <span th:if="${s.atendida}" class="pill pill-sage">Atendida</span>
+                    <span th:unless="${s.atendida}" class="pill pill-amber">Pendiente</span>
+                </td>
+                <td>
+                    <form class="tform" th:if="${!s.atendida}" th:action="@{/solicitudes/{id}/atender(id=${s.id})}" method="post">
+                        <input type="hidden" name="atendida" value="true">
+                        <button type="submit" class="ui small basic button">Marcar atendida</button>
+                    </form>
+                    <form class="tform" th:if="${s.atendida}" th:action="@{/solicitudes/{id}/atender(id=${s.id})}" method="post">
+                        <input type="hidden" name="atendida" value="false">
+                        <button type="submit" class="ui small basic button">Marcar pendiente</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(solicitudes)}"><td colspan="8" class="empty">No hay solicitudes de información aún.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</html>

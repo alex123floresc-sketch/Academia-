@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Asistencia del alumno</title>
+    <style type="text/css">
+        @page { size: A4; margin: 1.8cm; }
+        table.pdf-cal { border-collapse: collapse; margin: 0 0 16px 0; }
+        table.pdf-cal caption { font-size: 10px; font-weight: bold; color: #1B2A3D; text-align: left;
+                                  padding-bottom: 4px; caption-side: top; }
+        table.pdf-cal th { font-size: 7.5px; color: #8FA0B5; padding: 2px 4px; }
+        table.pdf-cal td { width: 20px; height: 18px; text-align: center; font-size: 8.5px; color: #57687D;
+                            border: 1px solid #EAF1F9; }
+        table.pdf-cal td.presente { background: #E4EDFC; color: #1E40AF; }
+        table.pdf-cal td.tardanza { background: #FDECD1; color: #92400E; }
+        table.pdf-cal td.falta { background: #FDE8E7; color: #991B1B; }
+        table.pdf-cal td.sin_clase { background: #F7FAFD; color: #8FA0B5; }
+        table.pdf-cal td.vacio, table.pdf-cal td.fuera { background: #fff; border-color: #fff; }
+        .pdf-legend { margin: 6px 0 16px; font-size: 8.5px; color: #57687D; }
+        .pdf-legend span { display: inline-block; margin-right: 14px; }
+        .pdf-legend i { display: inline-block; width: 8px; height: 8px; margin-right: 4px; vertical-align: middle; }
+    </style>
+    <th:block th:replace="~{fragments/pdf :: estilos}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/pdf :: encabezado('Reporte de asistencia - ' + ${alumno.nombre} + ' ' + ${alumno.apellido})}"></div>
+
+<div class="pdf-section">Resumen general</div>
+<table class="pdf-info">
+    <tr>
+        <td class="k">Ciclo</td>
+        <td class="v" th:text="${resumen.cicloNombre} ?: '-'">-</td>
+        <td class="k">Periodo</td>
+        <td class="v"
+            th:text="${resumen.desde != null} ? (${#temporals.format(resumen.desde, 'dd/MM/yyyy')} + ' al ' + ${#temporals.format(resumen.hasta, 'dd/MM/yyyy')}) : '-'">-</td>
+    </tr>
+    <tr>
+        <td class="k">Sesiones totales</td>
+        <td class="v" th:text="${resumen.totalSesiones}">0</td>
+        <td class="k">% de asistencia</td>
+        <td class="v" th:text="${#numbers.formatDecimal(resumen.porcentajeAsistencia(), 1, 1)} + '%'">0%</td>
+    </tr>
+    <tr>
+        <td class="k">Asistencias</td>
+        <td class="v" th:text="${resumen.totalAsistencias}">0</td>
+        <td class="k">Tardanzas</td>
+        <td class="v" th:text="${resumen.totalTardanzas}">0</td>
+    </tr>
+    <tr>
+        <td class="k">Faltas</td>
+        <td class="v" th:text="${resumen.totalFaltas}">0</td>
+        <td class="k"></td>
+        <td class="v"></td>
+    </tr>
+</table>
+
+<div class="pdf-section" th:if="${not #lists.isEmpty(resumen.porCurso)}">Por curso</div>
+<table class="pdf-table" th:if="${not #lists.isEmpty(resumen.porCurso)}">
+    <thead>
+    <tr><th>Curso</th><th>Sesiones</th><th>Asistencias</th><th>Tardanzas</th><th>Faltas</th></tr>
+    </thead>
+    <tbody>
+    <tr th:each="c : ${resumen.porCurso}">
+        <td th:text="${c.cursoNombre}">-</td>
+        <td class="center" th:text="${c.totalSesiones}">0</td>
+        <td class="center" th:text="${c.asistencias}">0</td>
+        <td class="center" th:text="${c.tardanzas}">0</td>
+        <td class="center" th:text="${c.faltas}">0</td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="pdf-section" th:if="${not #lists.isEmpty(resumen.meses)}">Calendario de asistencia</div>
+<p class="pdf-legend" th:if="${not #lists.isEmpty(resumen.meses)}">
+    <span><i style="background:#E4EDFC"></i>Asistió</span>
+    <span><i style="background:#FDECD1"></i>Tardanza</span>
+    <span><i style="background:#FDE8E7"></i>Falta</span>
+    <span><i style="background:#F7FAFD;border:1px solid #DCE6F2"></i>Sin clase</span>
+</p>
+    <table class="pdf-cal" th:each="mes : ${resumen.meses}">
+        <caption th:text="${mes.etiqueta}">Mes</caption>
+        <thead><tr><th>L</th><th>M</th><th>M</th><th>J</th><th>V</th><th>S</th><th>D</th></tr></thead>
+        <tbody>
+        <tr th:each="semana : ${mes.semanas}">
+            <td th:each="dia : ${semana}"
+                th:class="${dia.fecha == null} ? 'vacio' : (${dia.estado == null} ? 'fuera' : ${#strings.toLowerCase(dia.estado.name())})"
+                th:text="${dia.fecha != null} ? ${dia.fecha.dayOfMonth} : ''"></td>
+        </tr>
+        </tbody>
+    </table>
+
+<p class="pdf-empty" th:if="${resumen.cicloId == null or resumen.totalSesiones == 0}">
+    No hay información de asistencia disponible para este alumno.
+</p>
+
+<div th:replace="~{fragments/pdf :: pie}"></div>
+</body>
+</html>

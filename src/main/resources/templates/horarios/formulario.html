@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Horario</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/horarios(cicloId=${cicloId},nivel=${bloque.nivel},area=${bloque.area})}" class="page-back">&larr; Volver a la grilla</a>
+    <h2 class="page-title">Agregar curso al horario</h2>
+
+    <div class="form-card">
+        <div th:if="${error}" class="ui negative message" th:text="${error}"></div>
+
+        <div class="note">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M12 8v8m-3-5h6M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"/></svg>
+            <div th:text="${ciclo.nombre} + ' · ' + ${bloque.nivel.etiqueta} + ' · ' + ${bloque.area} + ' · ' + ${dia.etiqueta} + ' · ' + ${bloque.turno.etiqueta} + ' · ' + ${bloque.horaInicio} + '-' + ${bloque.horaFin}"></div>
+        </div>
+        <p class="hint" style="margin:-8px 0 14px">Solo se muestran los cursos de <b th:text="${bloque.nivel.etiqueta}"></b> que pertenecen al área <b th:text="${bloque.area}"></b>.</p>
+
+        <form th:action="@{/horarios/guardar}" method="post">
+            <input type="hidden" name="cicloId" th:value="${cicloId}">
+            <input type="hidden" name="dia" th:value="${dia}">
+            <input type="hidden" name="bloqueId" th:value="${bloque.id}">
+
+            <div class="field" th:if="${!#lists.isEmpty(cursosAgregados)}">
+                <label>Cursos ya agregados en esta casilla</label>
+                <div class="courselist">
+                    <div class="courserow" th:each="h : ${cursosAgregados}" style="cursor:default">
+                        <div>
+                            <div class="cn" th:text="${h.curso.nombre}"></div>
+                            <div class="cm" th:text="${h.curso.codigo}"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Agregar curso(s)</label>
+                <input type="search" id="buscarCurso" placeholder="Buscar curso por nombre o código..." autocomplete="off" style="margin-bottom:8px">
+                <div class="courselist" id="courseList">
+                    <label class="courserow" th:each="curso : ${cursos}"
+                           th:if="${!cursoIdsAgregados.contains(curso.id)}"
+                           th:attr="data-buscar=${#strings.toLowerCase(curso.nombre + ' ' + curso.codigo)}">
+                        <input type="checkbox" name="cursoIds" th:value="${curso.id}" class="js-curso">
+                        <div>
+                            <div class="cn" th:text="${curso.nombre}"></div>
+                            <div class="cm" th:text="${curso.codigo} + ' · ' + (${curso.profesor != null} ? ${curso.profesor.nombreCompleto} : 'Sin asignar')"></div>
+                        </div>
+                        <span class="ch" th:text="${curso.horas} + ' h'"></span>
+                    </label>
+                    <p class="empty" id="courseEmpty" style="display:none">Ningún curso coincide con tu búsqueda.</p>
+                </div>
+                <p class="hint" id="cursosSelCount" style="margin-top:8px">Ningún curso seleccionado.</p>
+            </div>
+
+            <div class="form-foot">
+                <button type="submit" class="ui primary button">Agregar cursos</button>
+                <a th:href="@{/horarios(cicloId=${cicloId},nivel=${bloque.nivel},area=${bloque.area})}" class="ui basic button">Cancelar</a>
+            </div>
+        </form>
+    </div>
+
+    <script th:src="@{/js/buscador-select.js}"></script>
+    <script>
+        initFiltroLista('buscarCurso', 'courseList', '.courserow', 'courseEmpty', 'js-curso', 'cursosSelCount');
+    </script>
+</div>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Foto de galería</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/galeria}" class="page-back">← Volver a la galería</a>
+    <h2 class="page-title" th:text="${fotoForm.id} ? 'Editar foto' : 'Nueva foto'"></h2>
+
+    <div class="form-card">
+        <form th:action="@{/galeria/guardar}" th:object="${fotoForm}" method="post" enctype="multipart/form-data">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="field">
+                <label for="imagen">Imagen <span class="hint" th:unless="${fotoForm.id}">obligatoria</span><span class="hint" th:if="${fotoForm.id}">deja vacío para no cambiarla</span></label>
+                <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+                    <img th:if="${fotoForm.id != null}" th:src="@{/galeria/{id}/imagen(id=${fotoForm.id})}" alt="Imagen actual"
+                         style="width:100px;height:70px;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--line)">
+                    <input type="file" th:field="*{imagen}" accept="image/*" style="flex:1;min-width:200px">
+                </div>
+            </div>
+            <div class="field">
+                <label for="descripcion">Descripción <span class="hint">opcional</span></label>
+                <input type="text" th:field="*{descripcion}" placeholder="Ej. Laboratorio de ciencias">
+                <span class="field-error" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></span>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="orden">Orden <span class="hint">menor número aparece primero</span></label>
+                    <input type="number" step="1" min="0" th:field="*{orden}">
+                    <span class="field-error" th:if="${#fields.hasErrors('orden')}" th:errors="*{orden}"></span>
+                </div>
+                <div class="field">
+                    <label class="check-inline" style="margin-top:30px">
+                        <input type="checkbox" th:field="*{activa}">
+                        <span>Activa (se muestra en la página pública)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-foot">
+                <button type="submit" class="ui primary button">Guardar</button>
+                <a th:href="@{/galeria}" class="ui basic button">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Asistencia del alumno</title></head>
+<div layout:fragment="contenido">
+
+    <a th:href="@{/alumnos/{id}/expediente(id=${alumno.id})}" class="page-back">&laquo; Volver al expediente</a>
+
+    <div class="card" style="margin-top:14px">
+        <div class="card-head">
+            <div>
+                <h2 th:text="${alumno.nombre + ' ' + alumno.apellido}">Alumno</h2>
+                <p th:if="${resumen.cicloNombre != null}" th:text="'Ciclo: ' + ${resumen.cicloNombre}">Ciclo</p>
+                <p th:unless="${resumen.cicloNombre != null}">Sin matrículas registradas.</p>
+            </div>
+            <div class="rowact">
+                <form method="get" th:action="@{/alumnos/{id}/asistencia(id=${alumno.id})}" th:if="${#lists.size(matriculas) > 1}">
+                    <select name="cicloId" onchange="this.form.submit()">
+                        <option th:each="m : ${matriculas}" th:value="${m.semestre.id}"
+                                th:selected="${m.semestre.id == resumen.cicloId}"
+                                th:text="${m.semestre.nombre}"></option>
+                    </select>
+                </form>
+                <a th:if="${resumen.cicloId != null}"
+                   th:href="@{/alumnos/{id}/asistencia/pdf(id=${alumno.id}, cicloId=${resumen.cicloId})}"
+                   class="ui small primary button">Descargar PDF</a>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${resumen.cicloId == null}" class="card" style="margin-top:16px">
+        <div class="empty">Este alumno no tiene matrículas registradas.</div>
+    </div>
+
+    <th:block th:if="${resumen.cicloId != null}">
+        <div th:if="${resumen.totalSesiones == 0}" class="card" style="margin-top:16px">
+            <div class="empty">No hay sesiones de clase registradas todavía para este ciclo.</div>
+        </div>
+
+        <th:block th:if="${resumen.totalSesiones > 0}">
+            <div class="exp-metrics" style="margin-top:16px">
+                <div class="metric">
+                    <div class="lbl"><span class="dot" style="background:var(--sky)"></span>Sesiones totales</div>
+                    <div class="val" th:text="${resumen.totalSesiones}">0</div>
+                    <div class="delta" th:text="${#temporals.format(resumen.desde, 'dd/MM/yyyy')} + ' – ' + ${#temporals.format(resumen.hasta, 'dd/MM/yyyy')}"></div>
+                </div>
+                <div class="metric">
+                    <div class="lbl"><span class="dot" style="background:var(--sage)"></span>Asistencias</div>
+                    <div class="val" th:text="${resumen.totalAsistencias}">0</div>
+                    <div class="delta" th:text="${#numbers.formatDecimal(resumen.porcentajeAsistencia(), 1, 1)} + '% de asistencia'"></div>
+                </div>
+                <div class="metric">
+                    <div class="lbl"><span class="dot" style="background:var(--amber)"></span>Tardanzas</div>
+                    <div class="val" th:text="${resumen.totalTardanzas}">0</div>
+                </div>
+                <div class="metric">
+                    <div class="lbl"><span class="dot" style="background:var(--rose)"></span>Faltas</div>
+                    <div class="val" th:text="${resumen.totalFaltas}">0</div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:16px">
+                <div class="card-head"><div><h2>Por curso</h2></div></div>
+                <table>
+                    <thead><tr><th>Curso</th><th>Sesiones</th><th>Asistencias</th><th>Tardanzas</th><th>Faltas</th></tr></thead>
+                    <tbody>
+                    <tr th:each="c : ${resumen.porCurso}">
+                        <td class="strong" th:text="${c.cursoNombre}"></td>
+                        <td th:text="${c.totalSesiones}"></td>
+                        <td th:text="${c.asistencias}"></td>
+                        <td th:text="${c.tardanzas}"></td>
+                        <td th:text="${c.faltas}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card" style="margin-top:16px;padding:20px">
+                <div class="card-head" style="padding:0 0 14px"><div><h2>Calendario de asistencia</h2></div></div>
+                <div class="asis-legend">
+                    <span class="asis-legend-item"><span class="asis-swatch asis-presente"></span>Asistió</span>
+                    <span class="asis-legend-item"><span class="asis-swatch asis-tardanza"></span>Tardanza</span>
+                    <span class="asis-legend-item"><span class="asis-swatch asis-falta"></span>Falta</span>
+                    <span class="asis-legend-item"><span class="asis-swatch asis-sin_clase"></span>Sin clase</span>
+                </div>
+                <div class="asis-meses">
+                    <div class="asis-mes" th:each="mes : ${resumen.meses}">
+                        <div class="asis-mes-titulo" th:text="${mes.etiqueta}"></div>
+                        <table class="asis-calendario">
+                            <thead>
+                            <tr><th>L</th><th>M</th><th>M</th><th>J</th><th>V</th><th>S</th><th>D</th></tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="semana : ${mes.semanas}">
+                                <td th:each="dia : ${semana}"
+                                    th:class="${dia.fecha == null} ? 'asis-vacio' : (${dia.estado == null} ? 'asis-fuera' : 'asis-' + ${#strings.toLowerCase(dia.estado.name())})"
+                                    th:text="${dia.fecha != null} ? ${dia.fecha.dayOfMonth} : ''"
+                                    th:title="${dia.estado != null} ? ${dia.estado.etiqueta} : ''"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </th:block>
+    </th:block>
+</div>
+
+<th:block layout:fragment="estilos">
+    <style>
+        .asis-legend { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 18px; font-size: 12.5px; color: var(--ink-soft); }
+        .asis-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+        .asis-swatch { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+        .asis-meses { display: flex; flex-wrap: wrap; gap: 26px; }
+        .asis-mes { min-width: 220px; }
+        .asis-mes-titulo { font-weight: 600; font-size: 13px; color: var(--ink); margin-bottom: 10px; }
+        table.asis-calendario { border-collapse: separate; border-spacing: 3px; }
+        table.asis-calendario th { font-size: 10px; color: var(--ink-faint); font-weight: 500; padding: 2px 0; }
+        table.asis-calendario td { width: 28px; height: 28px; text-align: center; font-size: 11.5px;
+                                    border-radius: 7px; color: var(--ink-soft); vertical-align: middle; }
+        table.asis-calendario td.asis-vacio { background: transparent; }
+        table.asis-calendario td.asis-fuera { background: transparent; color: var(--ink-faint); opacity: .4; }
+
+        .asis-presente, table.asis-calendario td.asis-presente { background: var(--sage-soft); color: var(--sage-strong); }
+        .asis-tardanza, table.asis-calendario td.asis-tardanza { background: var(--amber-soft); color: var(--amber-strong); }
+        .asis-falta, table.asis-calendario td.asis-falta { background: var(--rose-soft); color: var(--rose-strong); }
+        .asis-sin_clase, table.asis-calendario td.asis-sin_clase { background: var(--surface-2); color: var(--ink-faint); }
+    </style>
+</th:block>
+</html>

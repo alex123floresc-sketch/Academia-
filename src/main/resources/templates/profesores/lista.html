@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout}">
+<head><title>Profesores</title></head>
+<div layout:fragment="contenido">
+    <div class="card">
+        <div class="card-head">
+            <div><h2>Profesores</h2><p>Plana docente de la academia</p></div>
+            <div class="rowact" style="align-items:center">
+                <div th:replace="~{fragments/vista-switch :: switch('profesores')}"></div>
+                <a th:href="@{/profesores/nuevo}" sec:authorize="hasRole('ADMIN')" class="ui small primary button">
+                    <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo profesor</a>
+            </div>
+        </div>
+        <div class="searchbar">
+            <form class="ui form" method="get" th:action="@{/profesores}" style="display:flex;gap:8px;flex:1">
+                <input type="text" name="q" th:value="${q}" placeholder="Buscar por nombre, correo o especialidad..." aria-label="Buscar profesor">
+                <button type="submit" class="ui small basic button">Buscar</button>
+            </form>
+        </div>
+        <div data-view-panel="list" data-view-group="profesores">
+            <table>
+                <thead><tr><th>Profesor</th><th>Correo</th><th>Especialidad</th><th>Niveles</th><th></th></tr></thead>
+                <tbody>
+                <tr th:each="profesor : ${profesores}">
+                    <td><a class="strong" th:href="@{/profesores/{id}(id=${profesor.id})}" th:text="${profesor.nombre + ' ' + profesor.apellido}"></a></td>
+                    <td th:text="${profesor.email}"></td>
+                    <td><span class="pill pill-sage" th:text="${profesor.especialidad}"></span></td>
+                    <td>
+                        <span class="pill pill-sky" th:each="n : ${profesor.niveles}" th:text="${n.etiqueta}" style="margin-right:4px"></span>
+                        <span th:if="${profesor.niveles.isEmpty()}" class="hint">Sin asignar</span>
+                    </td>
+                    <td>
+                        <div class="rowact">
+                            <a th:href="@{/profesores/{id}(id=${profesor.id})}" class="ui small basic button">Ver detalle</a>
+                            <a th:href="@{/profesores/editar/{id}(id=${profesor.id})}" sec:authorize="hasRole('ADMIN')" class="ui small basic button">Editar</a>
+                            <form class="tform" sec:authorize="hasRole('ADMIN')" th:action="@{/profesores/eliminar/{id}(id=${profesor.id})}" method="post">
+                                <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar profesor?')">Eliminar</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(profesores)}"><td colspan="5" class="empty">No hay profesores registrados aún.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div data-view-panel="grid" data-view-group="profesores" hidden>
+            <div class="entity-grid stagger-cards" th:if="${not #lists.isEmpty(profesores)}">
+                <div class="entity-card" th:each="profesor : ${profesores}">
+                    <div class="entity-card-top">
+                        <div class="entity-avatar" th:text="${#strings.substring(profesor.nombre,0,1) + #strings.substring(profesor.apellido,0,1)}"></div>
+                        <div style="min-width:0">
+                            <div class="entity-card-name" th:text="${profesor.nombre + ' ' + profesor.apellido}"></div>
+                            <div class="entity-card-sub" th:text="${profesor.email}"></div>
+                        </div>
+                    </div>
+                    <div class="entity-card-meta">
+                        <div class="entity-card-meta-row"><span class="k">Especialidad</span><span class="pill pill-sage" th:text="${profesor.especialidad}"></span></div>
+                        <div class="entity-card-meta-row">
+                            <span class="k">Niveles</span>
+                            <span class="v">
+                                <span class="pill pill-sky" th:each="n : ${profesor.niveles}" th:text="${n.etiqueta}" style="margin-left:4px"></span>
+                                <span th:if="${profesor.niveles.isEmpty()}">Sin asignar</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="entity-card-foot">
+                        <a th:href="@{/profesores/{id}(id=${profesor.id})}" class="ui small basic button">Ver detalle</a>
+                        <a th:href="@{/profesores/editar/{id}(id=${profesor.id})}" sec:authorize="hasRole('ADMIN')" class="ui small basic button">Editar</a>
+                        <form class="tform" sec:authorize="hasRole('ADMIN')" th:action="@{/profesores/eliminar/{id}(id=${profesor.id})}" method="post">
+                            <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar profesor?')">Eliminar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <p th:if="${#lists.isEmpty(profesores)}" class="empty">No hay profesores registrados aún.</p>
+        </div>
+
+        <div th:replace="~{fragments/paginacion :: paginacion(${pagina}, '/profesores', ${q})}"></div>
+    </div>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:src="@{/js/vista-toggle.js}"></script>
+</th:block>
+</html>
