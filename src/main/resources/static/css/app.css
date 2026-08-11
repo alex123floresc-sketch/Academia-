@@ -30,7 +30,11 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:
     background-attachment:fixed;color:var(--ink);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
 .app{display:flex;min-height:100vh}
 
-.sidebar{width:236px;flex-shrink:0;background:linear-gradient(180deg,var(--surface),var(--surface-2) 340%);border-right:1px solid var(--line);box-shadow:1px 0 0 rgba(255,255,255,.6) inset,6px 0 24px -18px rgba(27,42,61,.35);padding:22px 16px;display:flex;flex-direction:column;gap:26px;position:sticky;top:0;height:100vh;z-index:6}
+.sidebar{width:236px;flex-shrink:0;background:linear-gradient(180deg,var(--surface),var(--surface-2) 340%);border-right:1px solid var(--line);box-shadow:1px 0 0 rgba(255,255,255,.6) inset,6px 0 24px -18px rgba(27,42,61,.35);padding:22px 16px;display:flex;flex-direction:column;gap:26px;position:sticky;top:0;height:100vh;z-index:6;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.sidebar::-webkit-scrollbar{width:6px}
+.sidebar::-webkit-scrollbar-track{background:transparent}
+.sidebar::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+.sidebar::-webkit-scrollbar-thumb:hover{background:var(--ink-faint)}
 .sidebar::before{content:'';position:absolute;top:0;right:-1px;width:2px;height:100%;background:linear-gradient(180deg,var(--sage) 0%,var(--navy) 45%,var(--navy-deep) 100%);opacity:.55}
 .brand{display:flex;align-items:center;gap:11px;padding:0 6px;text-decoration:none}
 .brand .seal{width:40px;height:40px;border-radius:11px;flex-shrink:0;background:linear-gradient(150deg,var(--sage),var(--navy));color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:20px;border:1px solid var(--navy-soft);box-shadow:0 1px 0 rgba(255,255,255,.25) inset,0 4px 12px -4px rgba(15,30,61,.55)}
