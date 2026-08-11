@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
                 "/horarios", "/matriculas", "/pagos", "/usuarios",
                 "/reportes", "/asistencias", "/areas", "/horas-docentes", "/resumen",
                 "/configuracion", "/actividad", "/sedes", "/faq", "/testimonios",
-                "/logros-ingreso", "/galeria", "/calendario", "/solicitudes", "/pasos-admision"};
+                "/logros-ingreso", "/galeria", "/calendario", "/solicitudes", "/pasos-admision", "/salones"};
         for (String m : modulos) {
             if (uri.startsWith(m)) {
                 return m + contextoDeNavegacion(m, request);

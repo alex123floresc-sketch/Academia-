@@ -41,6 +41,9 @@ public class AlumnoForm {
     @NotNull(message = "El nivel es obligatorio")
     private Nivel nivel;
 
+    /** Solo aplica cuando nivel = PREUNIVERSITARIO. */
+    private Long salonId;
+
     private MultipartFile foto;
 
     public AlumnoForm() {}
@@ -74,6 +77,9 @@ public class AlumnoForm {
 
     public Nivel getNivel() { return nivel; }
     public void setNivel(Nivel nivel) { this.nivel = nivel; }
+
+    public Long getSalonId() { return salonId; }
+    public void setSalonId(Long salonId) { this.salonId = salonId; }
 
     public MultipartFile getFoto() { return foto; }
     public void setFoto(MultipartFile foto) { this.foto = foto; }

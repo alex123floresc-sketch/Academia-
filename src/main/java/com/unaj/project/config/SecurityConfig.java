@@ -71,7 +71,7 @@ public class SecurityConfig {
                         .permitAll()
 
                         .requestMatchers("/perfil/**").authenticated()
-                        .requestMatchers("/ciclos/**", "/reportes/**", "/configuracion/**", "/sedes/**",
+                        .requestMatchers("/ciclos/**", "/reportes/**", "/configuracion/**", "/sedes/**", "/salones/**",
                                 "/faq/**", "/testimonios/**", "/logros-ingreso/**", "/galeria/**", "/calendario/**",
                                 "/pasos-admision/**")
                         .hasRole("ADMIN")

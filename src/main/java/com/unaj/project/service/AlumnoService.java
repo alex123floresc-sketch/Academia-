@@ -12,6 +12,7 @@ public interface AlumnoService {
     List<Alumno> listarTodos();
     Page<Alumno> buscarPagina(String q, Pageable pageable);
     Page<Alumno> buscarPagina(String q, Nivel nivel, String area, Pageable pageable);
+    Page<Alumno> buscarPagina(String q, Nivel nivel, String area, Long salonId, Pageable pageable);
     Alumno buscarPorId(Long id);
     AlumnoForm buscarFormPorId(Long id);
     Alumno guardar(AlumnoForm form);

@@ -17,6 +17,7 @@ import com.unaj.project.service.ConfiguracionService;
 import com.unaj.project.service.MatriculaService;
 import com.unaj.project.service.PdfGeneradorService;
 import com.unaj.project.service.QrCodeService;
+import com.unaj.project.service.SalonService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,13 +50,15 @@ public class AlumnoController {
     private final CicloService cicloService;
     private final ConfiguracionService configuracionService;
     private final AsistenciaService asistenciaService;
+    private final SalonService salonService;
 
     public AlumnoController(AlumnoService alumnoService, PagoRepository pagoRepository,
                             MatriculaRepository matriculaRepository, QrCodeService qrCodeService,
                             PdfGeneradorService pdfGeneradorService, MatriculaService matriculaService,
                             CicloService cicloService,
                             ConfiguracionService configuracionService,
-                            AsistenciaService asistenciaService) {
+                            AsistenciaService asistenciaService,
+                            SalonService salonService) {
         this.alumnoService = alumnoService;
         this.pagoRepository = pagoRepository;
         this.matriculaRepository = matriculaRepository;
@@ -65,23 +68,27 @@ public class AlumnoController {
         this.cicloService = cicloService;
         this.configuracionService = configuracionService;
         this.asistenciaService = asistenciaService;
+        this.salonService = salonService;
     }
 
     @GetMapping
     public String listar(@RequestParam(required = false) String q,
                          @RequestParam(required = false) Nivel nivel,
                          @RequestParam(required = false) String area,
+                         @RequestParam(required = false) Long salonId,
                          @PageableDefault(size = 15, sort = "apellido") Pageable pageable,
                          Model model) {
         Nivel nivelSel = (nivel != null) ? nivel : Nivel.PREUNIVERSITARIO;
         List<String> areasDelNivel = Areas.paraNivel(nivelSel);
         String areaSel = (area != null && areasDelNivel.contains(area)) ? area : null;
+        boolean esPreuniversitario = (nivelSel == Nivel.PREUNIVERSITARIO);
+        Long salonSel = esPreuniversitario ? salonId : null;
 
         java.util.Map<Long, Long> deuda = new java.util.HashMap<>();
         for (Object[] fila : pagoRepository.contarDeudaPorAlumno()) {
             deuda.put((Long) fila[0], (Long) fila[1]);
         }
-        Page<Alumno> pagina = alumnoService.buscarPagina(q, nivelSel, areaSel, pageable);
+        Page<Alumno> pagina = alumnoService.buscarPagina(q, nivelSel, areaSel, salonSel, pageable);
         long totalAlumnos = alumnoService.listarTodos().stream()
                 .filter(a -> a.getNivel() == nivelSel).count();
         long totalConDeuda = alumnoService.listarTodos().stream()
@@ -96,6 +103,9 @@ public class AlumnoController {
         model.addAttribute("nivel", nivelSel);
         model.addAttribute("area", areaSel);
         model.addAttribute("areas", areasDelNivel);
+        model.addAttribute("esPreuniversitario", esPreuniversitario);
+        model.addAttribute("salones", esPreuniversitario ? salonService.listarActivos() : List.of());
+        model.addAttribute("salonId", salonSel);
         model.addAttribute("totalAlumnos", totalAlumnos);
         model.addAttribute("totalConDeuda", totalConDeuda);
         model.addAttribute("totalAlDia", totalAlumnos - totalConDeuda);
@@ -108,6 +118,7 @@ public class AlumnoController {
         cargarDatosMatricula(model);
         model.addAttribute("niveles", Nivel.values());
         model.addAttribute("areasPorNivel", areasPorNivelJson());
+        model.addAttribute("salones", salonService.listarActivos());
         return "alumnos/formulario";
     }
 
@@ -130,6 +141,7 @@ public class AlumnoController {
             }
             model.addAttribute("niveles", Nivel.values());
             model.addAttribute("areasPorNivel", areasPorNivelJson());
+            model.addAttribute("salones", salonService.listarActivos());
             return "alumnos/formulario";
         }
         Alumno alumno = alumnoService.guardar(alumnoForm);
@@ -153,6 +165,7 @@ public class AlumnoController {
         model.addAttribute("tieneFoto", alumnoService.buscarPorId(id).isFotoPresente());
         model.addAttribute("niveles", Nivel.values());
         model.addAttribute("areasPorNivel", areasPorNivelJson());
+        model.addAttribute("salones", salonService.listarActivos());
         return "alumnos/formulario";
     }
 

@@ -38,6 +38,11 @@ public class Alumno {
     @Column(name = "nivel")
     private Nivel nivel;
 
+    /** Solo tiene sentido cuando nivel = PREUNIVERSITARIO; en los demás niveles queda null. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "salon_id")
+    private Salon salon;
+
     @Lob
     @Column(name = "foto", columnDefinition = "LONGBLOB")
     private byte[] foto;
@@ -79,6 +84,9 @@ public class Alumno {
 
     public Nivel getNivel() { return nivel; }
     public void setNivel(Nivel nivel) { this.nivel = nivel; }
+
+    public Salon getSalon() { return salon; }
+    public void setSalon(Salon salon) { this.salon = salon; }
 
     public byte[] getFoto() { return foto; }
     public void setFoto(byte[] foto) { this.foto = foto; }

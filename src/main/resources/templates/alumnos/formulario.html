@@ -79,6 +79,15 @@
                 </div>
             </div>
 
+            <div class="field" id="salonField" style="display:none">
+                <label for="salonId">Salón <span class="hint">solo en Preuniversitario, para organizar mejor a los alumnos</span></label>
+                <select th:field="*{salonId}" id="salonId">
+                    <option value="">-- Sin salón asignado --</option>
+                    <option th:each="s : ${salones}" th:value="${s.id}" th:text="${s.nombre}"></option>
+                </select>
+                <span class="field-error" th:if="${#fields.hasErrors('salonId')}" th:errors="*{salonId}"></span>
+            </div>
+
             <div th:if="${alumnoForm.id == null}" id="matriculaBox">
                 <div class="form-divider">Matrícula</div>
                 <p class="hint" style="margin:-6px 0 14px">
@@ -161,6 +170,8 @@
             /*]]>*/
             var nivelSelect = document.getElementById('nivel');
             var areaSelect = document.getElementById('area');
+            var salonField = document.getElementById('salonField');
+            var salonSelect = document.getElementById('salonId');
 
             function actualizarAreas() {
                 var opciones = areasPorNivel[nivelSelect.value] || [];
@@ -172,8 +183,14 @@
                 areaSelect.innerHTML = html;
             }
 
-            nivelSelect.addEventListener('change', actualizarAreas);
-            if (nivelSelect.value) actualizarAreas();
+            function actualizarSalon() {
+                var esPreu = nivelSelect.value === 'PREUNIVERSITARIO';
+                salonField.style.display = esPreu ? '' : 'none';
+                if (!esPreu) salonSelect.value = '';
+            }
+
+            nivelSelect.addEventListener('change', function () { actualizarAreas(); actualizarSalon(); });
+            if (nivelSelect.value) { actualizarAreas(); actualizarSalon(); }
         })();
     </script>
     <th:block th:if="${alumnoForm.id == null}">

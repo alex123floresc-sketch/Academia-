@@ -5,8 +5,10 @@ import com.unaj.project.exception.RecursoNoEncontradoException;
 import com.unaj.project.model.Alumno;
 import com.unaj.project.model.Areas;
 import com.unaj.project.model.Nivel;
+import com.unaj.project.model.Salon;
 import com.unaj.project.model.TipoAccion;
 import com.unaj.project.repository.AlumnoRepository;
+import com.unaj.project.repository.SalonRepository;
 import com.unaj.project.service.AlumnoService;
 import com.unaj.project.service.RegistroActividadService;
 import org.springframework.data.domain.Page;
@@ -27,10 +29,13 @@ public class AlumnoServiceImpl implements AlumnoService {
     private static final String SIN_AREA = "Sin área";
 
     private final AlumnoRepository alumnoRepository;
+    private final SalonRepository salonRepository;
     private final RegistroActividadService registroActividadService;
 
-    public AlumnoServiceImpl(AlumnoRepository alumnoRepository, RegistroActividadService registroActividadService) {
+    public AlumnoServiceImpl(AlumnoRepository alumnoRepository, SalonRepository salonRepository,
+                             RegistroActividadService registroActividadService) {
         this.alumnoRepository = alumnoRepository;
+        this.salonRepository = salonRepository;
         this.registroActividadService = registroActividadService;
     }
 
@@ -73,12 +78,17 @@ public class AlumnoServiceImpl implements AlumnoService {
 
     @Override
     public Page<Alumno> buscarPagina(String q, Pageable pageable) {
-        return alumnoRepository.buscar(q, null, null, pageable);
+        return alumnoRepository.buscar(q, null, null, null, pageable);
     }
 
     @Override
     public Page<Alumno> buscarPagina(String q, Nivel nivel, String area, Pageable pageable) {
-        return alumnoRepository.buscar(q, nivel, area, pageable);
+        return alumnoRepository.buscar(q, nivel, area, null, pageable);
+    }
+
+    @Override
+    public Page<Alumno> buscarPagina(String q, Nivel nivel, String area, Long salonId, Pageable pageable) {
+        return alumnoRepository.buscar(q, nivel, area, salonId, pageable);
     }
 
     @Override
@@ -131,6 +141,14 @@ public class AlumnoServiceImpl implements AlumnoService {
         alumno.setArea(form.getArea());
         alumno.setNivel(form.getNivel());
 
+        if (form.getNivel() == Nivel.PREUNIVERSITARIO && form.getSalonId() != null) {
+            Salon salon = salonRepository.findById(form.getSalonId())
+                    .orElseThrow(() -> new IllegalArgumentException("El salón seleccionado no existe."));
+            alumno.setSalon(salon);
+        } else {
+            alumno.setSalon(null);
+        }
+
         MultipartFile foto = form.getFoto();
         if (foto != null && !foto.isEmpty()) {
             try {
@@ -171,6 +189,7 @@ public class AlumnoServiceImpl implements AlumnoService {
         form.setTelefonoPadre(alumno.getTelefonoPadre());
         form.setArea(alumno.getArea());
         form.setNivel(alumno.getNivel());
+        form.setSalonId(alumno.getSalon() != null ? alumno.getSalon().getId() : null);
         return form;
     }
 }

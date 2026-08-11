@@ -213,14 +213,6 @@
         }
         .pub-stat span { font-size: 12px; color: var(--ink-faint); }
 
-        /* Formas decorativas (manchas difuminadas frías) detrás de algunas secciones */
-        .pub-blob-host { position: relative; }
-        .pub-blob { position: absolute; border-radius: 50%; filter: blur(70px); z-index: 0; pointer-events: none; }
-        .pub-blob-navy { background: color-mix(in srgb, var(--navy) 55%, transparent); }
-        .pub-blob-sage { background: color-mix(in srgb, var(--sage) 45%, transparent); }
-        .pub-blob-lav { background: color-mix(in srgb, var(--lav) 42%, transparent); }
-        .pub-blob-host > *:not(.pub-blob) { position: relative; z-index: 1; }
-
         /* Entrada al hacer scroll */
         .pub-reveal { opacity: 0; transform: translateY(18px); transition: opacity .55s cubic-bezier(.22,.8,.36,1), transform .55s cubic-bezier(.22,.8,.36,1); }
         .pub-reveal.pub-reveal-in { opacity: 1; transform: none; }
@@ -241,8 +233,16 @@
 
         /* Sections */
         .pub-section { max-width: 1220px; margin: 0 auto; padding: 56px 32px; scroll-margin-top: 76px; }
-        .pub-section-head { text-align: center; max-width: 640px; margin: 0 auto 36px; }
-        .pub-section-head h2 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 27px; color: var(--ink); margin: 0 0 10px; }
+        .pub-section-head { text-align: center; max-width: 640px; margin: 0 auto 40px; }
+        .pub-section-head h2 {
+            font-family: 'Fraunces', serif; font-weight: 600; font-size: 30px; letter-spacing: -.01em; line-height: 1.2;
+            margin: 0 0 14px; background: linear-gradient(120deg, var(--ink) 25%, var(--sage-strong) 70%, var(--navy) 100%);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .pub-section-head h2::after {
+            content: ''; display: block; width: 56px; height: 3px; margin: 14px auto 0; border-radius: 3px;
+            background: linear-gradient(90deg, var(--sage), var(--navy));
+        }
         .pub-section-head p { color: var(--ink-faint); font-size: 14.5px; margin: 0; line-height: 1.6; }
 
         .pub-niveles { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
@@ -636,9 +636,7 @@
     </div>
 </section>
 
-<section class="pub-section pub-blob-host" id="nosotros" th:if="${tieneNosotros}">
-    <div class="pub-blob pub-blob-navy" aria-hidden="true" style="width:340px;height:340px;top:-120px;left:-140px;"></div>
-    <div class="pub-blob pub-blob-sage" aria-hidden="true" style="width:260px;height:260px;bottom:-100px;right:-100px;"></div>
+<section class="pub-section" id="nosotros" th:if="${tieneNosotros}">
     <div class="pub-section-head">
         <h2>Sobre nosotros</h2>
     </div>
@@ -672,8 +670,7 @@
     </div>
 </section>
 
-<section class="pub-section pub-blob-host" id="resultados" th:if="${tieneLogros}">
-    <div class="pub-blob pub-blob-lav" aria-hidden="true" style="width:300px;height:300px;top:-80px;right:-120px;"></div>
+<section class="pub-section" id="resultados" th:if="${tieneLogros}">
     <div class="pub-section-head">
         <h2>Resultados de ingreso</h2>
         <p>Alumnos que lograron ingresar a la universidad de su elección.</p>
@@ -861,8 +858,7 @@
     </div>
 </section>
 
-<section class="pub-section pub-blob-host" id="contacto" th:if="${tieneContactoInfo or tieneFormContacto}">
-    <div class="pub-blob pub-blob-navy" aria-hidden="true" style="width:380px;height:380px;top:-140px;left:50%;transform:translateX(-50%);"></div>
+<section class="pub-section" id="contacto" th:if="${tieneContactoInfo or tieneFormContacto}">
     <div class="pub-section-head">
         <h2>Contáctanos</h2>
         <p>Escríbenos o visítanos para más información sobre matrículas y horarios.</p>

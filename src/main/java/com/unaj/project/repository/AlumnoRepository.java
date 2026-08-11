@@ -31,9 +31,11 @@ public interface AlumnoRepository extends JpaRepository<Alumno, Long> {
 
     Optional<Alumno> findByDni(String dni);
 
+    /** salonId: null = sin filtrar por salón, -1 = solo alumnos sin salón asignado, cualquier otro id = ese salón. */
     @Query(value = "SELECT a FROM Alumno a WHERE a.eliminado = false " +
             "AND (:nivel IS NULL OR a.nivel = :nivel) " +
             "AND (:area IS NULL OR :area = '' OR LOWER(a.area) = LOWER(:area)) " +
+            "AND (:salonId IS NULL OR (:salonId = -1 AND a.salon IS NULL) OR a.salon.id = :salonId) " +
             "AND (:q IS NULL OR :q = '' " +
             "OR LOWER(a.nombre) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(a.apellido) LIKE LOWER(CONCAT('%', :q, '%')) " +
@@ -42,10 +44,14 @@ public interface AlumnoRepository extends JpaRepository<Alumno, Long> {
             countQuery = "SELECT COUNT(a) FROM Alumno a WHERE a.eliminado = false " +
             "AND (:nivel IS NULL OR a.nivel = :nivel) " +
             "AND (:area IS NULL OR :area = '' OR LOWER(a.area) = LOWER(:area)) " +
+            "AND (:salonId IS NULL OR (:salonId = -1 AND a.salon IS NULL) OR a.salon.id = :salonId) " +
             "AND (:q IS NULL OR :q = '' " +
             "OR LOWER(a.nombre) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(a.apellido) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(a.email) LIKE LOWER(CONCAT('%', :q, '%')) " +
             "OR LOWER(a.dni) LIKE LOWER(CONCAT('%', :q, '%')))")
-    Page<Alumno> buscar(@Param("q") String q, @Param("nivel") Nivel nivel, @Param("area") String area, Pageable pageable);
+    Page<Alumno> buscar(@Param("q") String q, @Param("nivel") Nivel nivel, @Param("area") String area,
+                        @Param("salonId") Long salonId, Pageable pageable);
+
+    long countBySalonIdAndEliminadoFalse(Long salonId);
 }

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Salones</title></head>
+<div layout:fragment="contenido">
+    <div class="card">
+        <div class="card-head">
+            <div><h2>Salones</h2><p>Salones físicos de Preuniversitario, para agrupar alumnos y organizar mejor los datos</p></div>
+            <a th:href="@{/salones/nuevo}" class="ui small primary button">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nuevo salón</a>
+        </div>
+        <table>
+            <thead><tr><th>Nombre</th><th>Capacidad</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="s : ${salones}">
+                <td class="strong" th:text="${s.nombre}"></td>
+                <td th:text="${s.capacidad} ?: '-'"></td>
+                <td>
+                    <span th:if="${s.activo}" class="pill pill-sage">Activo</span>
+                    <span th:unless="${s.activo}" class="pill pill-gray">Inactivo</span>
+                </td>
+                <td>
+                    <div class="rowact">
+                        <a th:href="@{/salones/editar/{id}(id=${s.id})}" class="ui small basic button">Editar</a>
+                        <form class="tform" th:action="@{/salones/eliminar/{id}(id=${s.id})}" method="post">
+                            <button type="submit" class="ui small basic red button" onclick="return confirm('¿Eliminar este salón?')">Eliminar</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(salones)}"><td colspan="4" class="empty">No hay salones registrados aún.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</html>

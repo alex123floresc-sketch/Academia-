@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head><title>Salón</title></head>
+<div layout:fragment="contenido">
+    <a th:href="@{/salones}" class="page-back">← Volver a salones</a>
+    <h2 class="page-title" th:text="${salonForm.id} ? 'Editar salón' : 'Nuevo salón'"></h2>
+
+    <div class="form-card">
+        <form th:action="@{/salones/guardar}" th:object="${salonForm}" method="post">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="field">
+                <label for="nombre">Nombre</label>
+                <input type="text" th:field="*{nombre}" placeholder="Ej. Salón A">
+                <span class="field-error" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></span>
+            </div>
+            <div class="grid-2">
+                <div class="field">
+                    <label for="capacidad">Capacidad <span class="hint">opcional</span></label>
+                    <input type="number" step="1" min="1" th:field="*{capacidad}">
+                    <span class="field-error" th:if="${#fields.hasErrors('capacidad')}" th:errors="*{capacidad}"></span>
+                </div>
+                <div class="field">
+                    <label class="check-inline" style="margin-top:30px">
+                        <input type="checkbox" th:field="*{activo}">
+                        <span>Activo (disponible para asignar alumnos)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-foot">
+                <button type="submit" class="ui primary button">Guardar</button>
+                <a th:href="@{/salones}" class="ui basic button">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+</html>
