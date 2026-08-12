@@ -51,4 +51,5 @@ public class Horario {
     public Ciclo getCiclo() { return bloque != null ? bloque.getCiclo() : null; }
     public String getArea() { return bloque != null ? bloque.getArea() : null; }
     public Nivel getNivel() { return bloque != null ? bloque.getNivel() : null; }
+    public Salon getSalon() { return bloque != null ? bloque.getSalon() : null; }
 }

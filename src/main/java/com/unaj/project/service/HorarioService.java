@@ -18,12 +18,13 @@ public interface HorarioService {
 
     BloqueHorario buscarBloque(Long id);
 
-    void crearBloque(Long cicloId, Nivel nivel, Turno turno, LocalTime horaInicio, LocalTime horaFin, TipoBloque tipo, String area);
+    void crearBloque(Long cicloId, Nivel nivel, Turno turno, LocalTime horaInicio, LocalTime horaFin, TipoBloque tipo, String area, Long salonId);
 
     void eliminarBloque(Long bloqueId);
 
-    /** Bloques y cursos de un ciclo, nivel y area, agrupados por turno y ordenados por hora. Cada nivel+area tiene su propia grilla, independiente de las demas, aunque el ciclo se comparta entre niveles. */
-    Map<Turno, List<FilaHorarioDTO>> agruparParaGrilla(Long cicloId, Nivel nivel, String area);
+    /** Bloques y cursos de un ciclo, nivel y area, agrupados por turno y ordenados por hora. Cada nivel+area tiene su propia grilla, independiente de las demas, aunque el ciclo se comparta entre niveles.
+     * salonId permite además separar la grilla por salón (solo relevante en Preuniversitario cuando hay más de uno); null = bloques sin salón asignado. */
+    Map<Turno, List<FilaHorarioDTO>> agruparParaGrilla(Long cicloId, Nivel nivel, String area, Long salonId);
 
     /** Bloques horarios definidos por nivel, para el selector de nivel de /horarios (mismo patron que CursoService.contarPorNivel). */
     Map<Nivel, Long> contarBloquesPorNivel(Long cicloId);

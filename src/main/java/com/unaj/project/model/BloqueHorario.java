@@ -6,8 +6,8 @@ import java.time.LocalTime;
 
 @Entity
 @Table(name = "bloques_horario", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_bloque_ciclo_nivel_turno_hora_area",
-                columnNames = {"ciclo_id", "nivel", "turno", "hora_inicio", "area"})
+        @UniqueConstraint(name = "uk_bloque_ciclo_nivel_turno_hora_area_salon",
+                columnNames = {"ciclo_id", "nivel", "turno", "hora_inicio", "area", "salon_id"})
 })
 public class BloqueHorario {
 
@@ -18,6 +18,12 @@ public class BloqueHorario {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ciclo_id", nullable = false)
     private Ciclo ciclo;
+
+    /** Solo se usa en Preuniversitario cuando hay más de un salón dictando la misma área en paralelo;
+     * cada salón tiene así su propio horario, totalmente independiente de los demás. Null en el resto de casos. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "salon_id")
+    private Salon salon;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -47,6 +53,9 @@ public class BloqueHorario {
 
     public Ciclo getCiclo() { return ciclo; }
     public void setCiclo(Ciclo ciclo) { this.ciclo = ciclo; }
+
+    public Salon getSalon() { return salon; }
+    public void setSalon(Salon salon) { this.salon = salon; }
 
     public Turno getTurno() { return turno; }
     public void setTurno(Turno turno) { this.turno = turno; }

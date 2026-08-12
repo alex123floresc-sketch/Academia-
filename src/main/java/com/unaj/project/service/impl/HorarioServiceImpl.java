@@ -7,6 +7,7 @@ import com.unaj.project.repository.BloqueHorarioRepository;
 import com.unaj.project.repository.CicloRepository;
 import com.unaj.project.repository.CursoRepository;
 import com.unaj.project.repository.HorarioRepository;
+import com.unaj.project.repository.SalonRepository;
 import com.unaj.project.service.HorarioService;
 import com.unaj.project.service.RegistroActividadService;
 import org.springframework.stereotype.Service;
@@ -26,15 +27,18 @@ public class HorarioServiceImpl implements HorarioService {
     private final BloqueHorarioRepository bloqueHorarioRepository;
     private final CicloRepository cicloRepository;
     private final CursoRepository cursoRepository;
+    private final SalonRepository salonRepository;
     private final RegistroActividadService registroActividadService;
 
     public HorarioServiceImpl(HorarioRepository horarioRepository, BloqueHorarioRepository bloqueHorarioRepository,
                               CicloRepository cicloRepository, CursoRepository cursoRepository,
+                              SalonRepository salonRepository,
                               RegistroActividadService registroActividadService) {
         this.horarioRepository = horarioRepository;
         this.bloqueHorarioRepository = bloqueHorarioRepository;
         this.cicloRepository = cicloRepository;
         this.cursoRepository = cursoRepository;
+        this.salonRepository = salonRepository;
         this.registroActividadService = registroActividadService;
     }
 
@@ -52,7 +56,7 @@ public class HorarioServiceImpl implements HorarioService {
 
     @Override
     @Transactional
-    public void crearBloque(Long cicloId, Nivel nivel, Turno turno, LocalTime horaInicio, LocalTime horaFin, TipoBloque tipo, String area) {
+    public void crearBloque(Long cicloId, Nivel nivel, Turno turno, LocalTime horaInicio, LocalTime horaFin, TipoBloque tipo, String area, Long salonId) {
         if (horaInicio == null || horaFin == null || !horaFin.isAfter(horaInicio)) {
             throw new IllegalArgumentException("La hora de fin debe ser posterior a la de inicio.");
         }
@@ -62,11 +66,19 @@ public class HorarioServiceImpl implements HorarioService {
         if (area == null || area.isBlank()) {
             throw new IllegalArgumentException("Debe seleccionar un área.");
         }
-        if (bloqueHorarioRepository.existsByCicloIdAndNivelAndTurnoAndHoraInicioAndArea(cicloId, nivel, turno, horaInicio, area)) {
-            throw new IllegalArgumentException("Ya existe un bloque que inicia a esa hora en este turno para esta área.");
+        Long salonIdEfectivo = (nivel == Nivel.PREUNIVERSITARIO) ? salonId : null;
+        if (bloqueHorarioRepository.existsByCicloIdAndNivelAndTurnoAndHoraInicioAndAreaAndSalon(
+                cicloId, nivel, turno, horaInicio, area, salonIdEfectivo)) {
+            throw new IllegalArgumentException("Ya existe un bloque que inicia a esa hora en este turno para esta área"
+                    + (salonIdEfectivo != null ? " y salón" : "") + ".");
         }
         Ciclo ciclo = cicloRepository.findById(cicloId)
                 .orElseThrow(() -> new IllegalArgumentException("Ciclo no encontrado: " + cicloId));
+        Salon salon = null;
+        if (salonIdEfectivo != null) {
+            salon = salonRepository.findById(salonIdEfectivo)
+                    .orElseThrow(() -> new IllegalArgumentException("Salón no encontrado: " + salonIdEfectivo));
+        }
 
         BloqueHorario bloque = new BloqueHorario();
         bloque.setCiclo(ciclo);
@@ -76,10 +88,11 @@ public class HorarioServiceImpl implements HorarioService {
         bloque.setHoraFin(horaFin);
         bloque.setTipo(tipo != null ? tipo : TipoBloque.CLASE);
         bloque.setArea(area);
+        bloque.setSalon(salon);
         BloqueHorario guardado = bloqueHorarioRepository.save(bloque);
         registroActividadService.registrar(TipoAccion.CREAR, "Horarios", guardado.getId(),
                 "Creó un bloque horario de " + ciclo.getNombre() + " (" + nivel.getEtiqueta() + ", " + area
-                        + ", " + horaInicio + "-" + horaFin + ")");
+                        + (salon != null ? ", " + salon.getNombre() : "") + ", " + horaInicio + "-" + horaFin + ")");
     }
 
     @Override
@@ -93,15 +106,16 @@ public class HorarioServiceImpl implements HorarioService {
     }
 
     @Override
-    public Map<Turno, List<FilaHorarioDTO>> agruparParaGrilla(Long cicloId, Nivel nivel, String area) {
+    public Map<Turno, List<FilaHorarioDTO>> agruparParaGrilla(Long cicloId, Nivel nivel, String area, Long salonId) {
         Map<Turno, List<FilaHorarioDTO>> resultado = new LinkedHashMap<>();
         for (Turno t : Turno.values()) {
             resultado.put(t, new ArrayList<>());
         }
         if (cicloId == null || nivel == null || area == null || area.isBlank()) return resultado;
 
+        Long salonIdEfectivo = (nivel == Nivel.PREUNIVERSITARIO) ? salonId : null;
         List<BloqueHorario> bloques =
-                bloqueHorarioRepository.findByCicloIdAndNivelAndAreaOrderByHoraInicioAsc(cicloId, nivel, area);
+                bloqueHorarioRepository.findByCicloIdAndNivelAndAreaAndSalonOrderByHoraInicioAsc(cicloId, nivel, area, salonIdEfectivo);
         List<Horario> horarios = horarioRepository.findByCicloId(cicloId);
 
         Map<Long, Map<DiaSemana, List<Horario>>> porBloque = new LinkedHashMap<>();

@@ -7,6 +7,7 @@ import com.unaj.project.service.CicloService;
 import com.unaj.project.service.CursoService;
 import com.unaj.project.service.HorarioService;
 import com.unaj.project.service.PdfGeneradorService;
+import com.unaj.project.service.SalonService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,23 +34,27 @@ public class HorarioController {
     private final CursoService cursoService;
     private final HorarioRepository horarioRepository;
     private final PdfGeneradorService pdfGeneradorService;
+    private final SalonService salonService;
 
     public HorarioController(HorarioService horarioService,
                              CicloService cicloService,
                              CursoService cursoService,
                              HorarioRepository horarioRepository,
-                             PdfGeneradorService pdfGeneradorService) {
+                             PdfGeneradorService pdfGeneradorService,
+                             SalonService salonService) {
         this.horarioService = horarioService;
         this.cicloService = cicloService;
         this.cursoService = cursoService;
         this.horarioRepository = horarioRepository;
         this.pdfGeneradorService = pdfGeneradorService;
+        this.salonService = salonService;
     }
 
     @GetMapping
     public String listar(@RequestParam(required = false) Long cicloId,
                          @RequestParam(required = false) Nivel nivel,
                          @RequestParam(required = false) String area,
+                         @RequestParam(required = false) Long salonId,
                          Model model) {
         Ciclo cicloSel = (cicloId != null) ? cicloService.buscarPorId(cicloId) : cicloService.obtenerActivo();
         model.addAttribute("ciclos", cicloService.listarTodos());
@@ -68,14 +73,25 @@ public class HorarioController {
             return "horarios/areas";
         }
 
+        boolean esPreuniversitario = (nivel == Nivel.PREUNIVERSITARIO);
+        List<Salon> salones = esPreuniversitario ? salonService.listarActivos() : List.of();
+        Long salonSel = esPreuniversitario ? salonId : null;
+        String salonSelNombre = (salonSel != null)
+                ? salones.stream().filter(s -> s.getId().equals(salonSel)).map(Salon::getNombre).findFirst().orElse(null)
+                : null;
+
         model.addAttribute("turnos", Turno.values());
         model.addAttribute("dias", DiaSemana.values());
         model.addAttribute("diaHoy", DiaSemana.desde(LocalDate.now().getDayOfWeek()));
         model.addAttribute("nivel", nivel);
         model.addAttribute("area", areaSel);
+        model.addAttribute("esPreuniversitario", esPreuniversitario);
+        model.addAttribute("salones", salones);
+        model.addAttribute("salonId", salonSel);
+        model.addAttribute("salonSelNombre", salonSelNombre);
 
         if (cicloSel != null) {
-            Map<Turno, List<FilaHorarioDTO>> grilla = horarioService.agruparParaGrilla(cicloSel.getId(), nivel, areaSel);
+            Map<Turno, List<FilaHorarioDTO>> grilla = horarioService.agruparParaGrilla(cicloSel.getId(), nivel, areaSel, salonSel);
             model.addAttribute("grilla", grilla);
             long totalBloques = grilla.values().stream().mapToLong(List::size).sum();
             long totalAsignaciones = grilla.values().stream()
@@ -89,20 +105,23 @@ public class HorarioController {
     }
 
     @GetMapping("/pdf")
-    public ResponseEntity<byte[]> pdf(@RequestParam Long cicloId, @RequestParam Nivel nivel, @RequestParam String area) {
+    public ResponseEntity<byte[]> pdf(@RequestParam Long cicloId, @RequestParam Nivel nivel, @RequestParam String area,
+                                      @RequestParam(required = false) Long salonId) {
         Ciclo ciclo = cicloService.buscarPorId(cicloId);
-        String titulo = "Horario de clases · " + ciclo.getNombre() + " · " + nivel.getEtiqueta() + " · " + area;
+        String tituloSalon = salonId != null ? " · " + salonService.buscarPorId(salonId).getNombre() : "";
+        String titulo = "Horario de clases · " + ciclo.getNombre() + " · " + nivel.getEtiqueta() + " · " + area + tituloSalon;
         Context context = new Context();
         context.setVariable("titulo", titulo);
         context.setVariable("turnos", Turno.values());
         context.setVariable("dias", DiaSemana.values());
-        context.setVariable("grilla", horarioService.agruparParaGrilla(cicloId, nivel, area));
+        context.setVariable("grilla", horarioService.agruparParaGrilla(cicloId, nivel, area, salonId));
 
         byte[] pdfBytes = pdfGeneradorService.renderizar("horarios/horario-pdf", context);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData("attachment",
-                "horario_" + ciclo.getNombre() + "_" + nivel.name() + "_" + area + ".pdf");
+                "horario_" + ciclo.getNombre() + "_" + nivel.name() + "_" + area
+                        + (salonId != null ? "_" + salonId : "") + ".pdf");
         return ResponseEntity.ok().headers(headers).contentLength(pdfBytes.length).body(pdfBytes);
     }
 
@@ -129,15 +148,16 @@ public class HorarioController {
             return "horarios/formulario";
         }
         ra.addFlashAttribute("mensajeExito", "Curso agregado al horario correctamente.");
-        return redirectAGrilla(cicloId, bloque.getNivel(), bloque.getArea());
+        return redirectAGrilla(cicloId, bloque.getNivel(), bloque.getArea(), bloque.getSalon() != null ? bloque.getSalon().getId() : null);
     }
 
     @PostMapping("/quitar-curso/{horarioId}")
     public String quitarCurso(@PathVariable Long horarioId, @RequestParam Long cicloId,
-                              @RequestParam Nivel nivel, @RequestParam String area, RedirectAttributes ra) {
+                              @RequestParam Nivel nivel, @RequestParam String area,
+                              @RequestParam(required = false) Long salonId, RedirectAttributes ra) {
         horarioService.quitarCurso(horarioId);
         ra.addFlashAttribute("mensajeExito", "Curso quitado del horario.");
-        return redirectAGrilla(cicloId, nivel, area);
+        return redirectAGrilla(cicloId, nivel, area, salonId);
     }
 
     @PostMapping("/bloques/guardar")
@@ -148,24 +168,27 @@ public class HorarioController {
                                 @RequestParam String horaFin,
                                 @RequestParam(defaultValue = "CLASE") TipoBloque tipo,
                                 @RequestParam String area,
+                                @RequestParam(required = false) Long salonId,
                                 RedirectAttributes ra) {
-        horarioService.crearBloque(cicloId, nivel, turno, LocalTime.parse(horaInicio), LocalTime.parse(horaFin), tipo, area);
+        horarioService.crearBloque(cicloId, nivel, turno, LocalTime.parse(horaInicio), LocalTime.parse(horaFin), tipo, area, salonId);
         ra.addFlashAttribute("mensajeExito", "Bloque horario agregado correctamente.");
-        return redirectAGrilla(cicloId, nivel, area);
+        return redirectAGrilla(cicloId, nivel, area, salonId);
     }
 
     @PostMapping("/bloques/eliminar/{bloqueId}")
     public String eliminarBloque(@PathVariable Long bloqueId, @RequestParam Long cicloId,
-                                 @RequestParam Nivel nivel, @RequestParam String area, RedirectAttributes ra) {
+                                 @RequestParam Nivel nivel, @RequestParam String area,
+                                 @RequestParam(required = false) Long salonId, RedirectAttributes ra) {
         horarioService.eliminarBloque(bloqueId);
         ra.addFlashAttribute("mensajeExito", "Bloque horario eliminado correctamente.");
-        return redirectAGrilla(cicloId, nivel, area);
+        return redirectAGrilla(cicloId, nivel, area, salonId);
     }
 
-    private String redirectAGrilla(Long cicloId, Nivel nivel, String area) {
+    private String redirectAGrilla(Long cicloId, Nivel nivel, String area, Long salonId) {
         return "redirect:/horarios?cicloId=" + cicloId
                 + "&nivel=" + nivel.name()
-                + "&area=" + URLEncoder.encode(area, StandardCharsets.UTF_8);
+                + "&area=" + URLEncoder.encode(area, StandardCharsets.UTF_8)
+                + (salonId != null ? "&salonId=" + salonId : "");
     }
 
     private void prepararForm(Model model, Long cicloId, DiaSemana dia, Long bloqueId) {

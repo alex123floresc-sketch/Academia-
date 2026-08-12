@@ -302,6 +302,22 @@ details[open]>.hd-toggle::after{transform:rotate(-135deg);margin-top:2px}
 [data-view-panel]{padding:0}
 [data-view-panel][hidden]{display:none}
 
+/* Selector de nivel (Cursos/Horarios/Áreas/Reportes): la etiqueta "ribbon" de Semantic UI
+   por defecto (rectángulo azul sólido asomando del borde) desentona con el resto del sistema
+   de diseño — se reemplaza por una insignia redondeada a juego con .pill-sage, y las tarjetas
+   ganan el mismo acento superior y elevación al pasar el mouse que .card en el resto de la app. */
+.nivel-picker .ribbon.label,.area-picker .ribbon.label,.select-picker .ribbon.label{
+    position:static!important;left:auto!important;margin:0 0 6px!important;min-width:0!important;
+    padding:5px 14px!important;border:none!important;border-radius:999px!important;
+    background:var(--sage-soft)!important;color:var(--sage-strong)!important;
+    font-size:11px!important;font-weight:700!important;text-transform:uppercase;letter-spacing:.05em;
+    box-shadow:none!important;z-index:auto!important;
+}
+.nivel-picker .ui.card,.area-picker .ui.card,.select-picker .ui.card{position:relative;overflow:hidden;transition:box-shadow .18s ease,transform .18s ease,border-color .18s ease}
+.nivel-picker .ui.card::before,.area-picker .ui.card::before,.select-picker .ui.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--sage),var(--navy));opacity:.4;transition:opacity .2s ease}
+.nivel-picker .ui.card:hover::before,.area-picker .ui.card:hover::before,.select-picker .ui.card:hover::before{opacity:.9}
+.nivel-picker .ui.card:hover,.area-picker .ui.card:hover,.select-picker .ui.card:hover{border-color:var(--sage)}
+
 .entity-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(252px,1fr));gap:14px;padding:20px}
 .entity-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:17px 18px;display:flex;flex-direction:column;gap:13px;transition:.16s;box-shadow:var(--shadow-layer-1)}
 .entity-card:hover{border-color:var(--sage);box-shadow:var(--shadow-layer-hover);transform:translateY(-2px)}
