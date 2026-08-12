@@ -14,11 +14,9 @@ import org.springframework.transaction.support.TransactionTemplate;
  * propio bloque en el mismo ciclo+turno+hora+área. ddl-auto=update agrega la restricción nueva pero
  * NO borra la vieja (mismo patrón ya documentado en NivelBackfillRunner para bloques_horario), así
  * que sin este runner la restricción vieja seguiría bloqueando exactamente el caso que esta funcionalidad
- * necesita permitir. DROP INDEX falla si el índice no existe (por ejemplo, la primera vez que este
- * runner corre exitosamente, o en una base de datos nueva que nunca tuvo la restricción vieja) — cada
- * intento corre en su propia transacción (TransactionTemplate, no el EntityManager compartido
- * directamente, porque Spring no permite manejar transacciones a mano sobre un EntityManager
- * inyectado) para que ese fallo esperado no arrastre ni bloquee al otro intento.
+ * necesita permitir. Primero se consulta information_schema para saber si el índice existe todavía —
+ * así el DROP INDEX solo se intenta (y solo aparece en el log) la primera vez que hace falta, en vez
+ * de fallar ruidosamente en cada arranque una vez que ya se aplicó la migración.
  * No hay Flyway/Liquibase en este proyecto (ver CLAUDE.md); este es el mecanismo de migración de datos.
  */
 @Component
@@ -36,16 +34,26 @@ public class BloqueHorarioConstraintFixRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        intentarDropIndex("uk_bloque_ciclo_nivel_turno_hora_area");
-        intentarDropIndex("uk_bloque_ciclo_turno_hora_area");
+        dropIndiceSiExiste("uk_bloque_ciclo_nivel_turno_hora_area");
+        dropIndiceSiExiste("uk_bloque_ciclo_turno_hora_area");
     }
 
-    private void intentarDropIndex(String nombreIndice) {
+    @SuppressWarnings("unchecked")
+    private void dropIndiceSiExiste(String nombreIndice) {
         try {
-            new TransactionTemplate(transactionManager).executeWithoutResult(status ->
-                    entityManager.createNativeQuery("ALTER TABLE bloques_horario DROP INDEX " + nombreIndice).executeUpdate());
+            new TransactionTemplate(transactionManager).executeWithoutResult(status -> {
+                Number existe = (Number) entityManager.createNativeQuery(
+                        "SELECT COUNT(*) FROM information_schema.STATISTICS " +
+                        "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'bloques_horario' AND INDEX_NAME = :nombre")
+                        .setParameter("nombre", nombreIndice)
+                        .getSingleResult();
+                if (existe.longValue() > 0) {
+                    entityManager.createNativeQuery("ALTER TABLE bloques_horario DROP INDEX " + nombreIndice).executeUpdate();
+                }
+            });
         } catch (Exception e) {
-            // El índice ya no existe (ya se corrió antes, o nunca existió en esta base de datos) — esperado.
+            // No debería pasar ya que se verifica existencia antes, pero si la tabla/BD todavía no
+            // existe en este arranque (primera vez, ddl-auto aún no la creó) no es un error real.
         }
     }
 }
