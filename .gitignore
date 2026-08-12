@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Migración a Angular (proyecto exploratorio aparte, nunca se sube) ###
+migracion-angular/
