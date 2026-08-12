@@ -3,6 +3,10 @@ server:
   servlet:
     session:
       timeout: 60m
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 spring:
   datasource:

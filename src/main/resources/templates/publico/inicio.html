@@ -812,8 +812,8 @@
     <div class="pub-eventos">
         <div class="pub-evento" th:each="e : ${eventos}">
             <div class="pub-evento-fecha">
-                <span class="d" th:text="${#temporals.dayOfMonth(e.fecha)}"></span>
-                <span class="m" th:text="${#temporals.formatMonth(e.fecha, 'es')}"></span>
+                <span class="d" th:text="${#temporals.day(e.fecha)}"></span>
+                <span class="m" th:text="${#temporals.format(e.fecha, 'MMM', new java.util.Locale('es'))}"></span>
             </div>
             <div class="pub-evento-body">
                 <h3 th:text="${e.titulo}"></h3>
